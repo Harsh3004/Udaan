@@ -27,7 +27,7 @@ async function sendVerificationEmail(email,otp) {
             `Verification Otp: ${otp}. It will expire in 5 minutes.`
         )
 
-        console.log(`Verification mail send successfully: ${response}`);
+        console.log(`Verification mail send successfully`);
     }catch(err){
         console.log(`Verification mail not send: ${err.message}`);
         throw err;

@@ -1,7 +1,7 @@
 const user = require('../models/userModel.js');
 const {auth,isStudent,isAdmin,isInstructor} = require('../middlewares/Auth.js');
 const {sendOtp,signUp,login,changePassword} = require('../controllers/authController.js');
-const {createCourse} = require('../controllers/courseController.js');
+const {createCourse,showAllCourses,deleteCourse,updateCourse} = require('../controllers/courseController.js');
 
 const express = require('express');
 const router = express.Router();
@@ -29,7 +29,10 @@ router.get('/signUp', signUp);
 router.get('/login', login);
 router.put('/changePassword', changePassword);
 
+router.get('/course',auth,isInstructor,showAllCourses);
 router.post('/course/create',auth,isInstructor,createCourse);
+router.delete('/course/delete/:courseId',auth,isInstructor,deleteCourse);
+router.put('/course/update/:courseId',auth,isInstructor,updateCourse);
 
 router.get('/auth', auth, async(req,res)=>{
     res.json({

@@ -1,10 +1,12 @@
 const express = require("express");
 const fileUpload = require('express-fileupload');
+const cookieParser = require("cookie-parser");
 
 const app = express();
 require('dotenv').config();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(fileUpload({
     useTempFiles : true,
@@ -23,5 +25,5 @@ app.listen(PORT, ()=>{
 const cloudinaryConnect = require('./config/cloudinary');
 cloudinaryConnect();
 
-const connectDB = require('./config/db')
+const connectDB = require('./config/db');
 connectDB();

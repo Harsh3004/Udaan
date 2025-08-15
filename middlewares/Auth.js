@@ -5,10 +5,7 @@ exports.auth = (req,res,next) => {
     try{
         console.log(`In auth function`);
 
-        //Check why when running cookies code showing error
-        // const token = req.cookies.token;
-
-        const token = req.body.token || req.header("Authorization").replace("Bearer ","");
+        const token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ","");
 
         console.log(`token fetched`);
         if(!token || token === undefined){
@@ -21,7 +18,6 @@ exports.auth = (req,res,next) => {
         try{
             const payload = jwt.verify(token,process.env.SECRET_KEY);
             req.user = payload;
-            console.log(payload);
         }catch(err){
             return res.status(401).json({
                 success: false,
@@ -77,7 +73,6 @@ exports.isAdmin = (req,res,next) => {
     }
 }
 
-// to be tested
 exports.isInstructor = (req,res,next) => {
     try{
         if(req.user.role !== "Instructor"){

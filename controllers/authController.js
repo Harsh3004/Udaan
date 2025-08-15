@@ -10,13 +10,17 @@ require('dotenv').config();
 
 exports.sendOtp = async (req,res) => {
     try{
-        console.log("In auth sendotp..");
-        
         // generate otp
         const otp = crypto.randomInt(100000,999999).toString();
-        console.log(otp);
         
         const {email} = req.body;
+        if(!email || email.split('@')[1] != 'gmail.com'){
+            return res.status(404).json({
+                success: false,
+                message: `Invalid information`
+            })
+        }
+
         const otp_payload = await otpModel.create({
             email,otp
         });
@@ -44,7 +48,7 @@ exports.signUp = async (req,res) => {
             })
         }
 
-        const existingUser = await userModel.findOne({email});
+        const existingUser = await userModel.findOne({email: email,role: role});
         if(existingUser){
             return res.status(400).json({
                 success: false,
@@ -61,7 +65,6 @@ exports.signUp = async (req,res) => {
 
         try{
             const recentOtp = await otpModel.find({email}).sort({createdAt: -1}).limit(1);
-            console.log(`Otp in database: ${recentOtp[0].otp}`);
             if(!recentOtp){
                 return res.status(404).json({
                     success: false,
@@ -83,6 +86,7 @@ exports.signUp = async (req,res) => {
         }
 
         let hashPassword;
+        
         try{
             hashPassword = await bcrypt.hash(password,10);
         }catch(err){
@@ -99,15 +103,20 @@ exports.signUp = async (req,res) => {
             bio: null
         });
 
-        const userDetails = await userModel.create({
-            fName,
-            lName,
-            email,
-            password: hashPassword,
-            role,
-            profileImage: `https://avatar.iran.liara.run/username?username=${fName}+${lName}`,
-            additionalDetails: profile._id
-        })
+        try{
+            const userDetails = await userModel.create({
+                fName,
+                lName,
+                email,
+                password: hashPassword,
+                role,
+                profileImage: `https://avatar.iran.liara.run/username?username=${fName}+${lName}`,
+                additionalDetails: profile._id
+            })
+        }catch(error){
+            await additionalDetails.findByIdAndDelete(profile._id);
+            throw error;
+        }
 
         return res.status(200).json({
             success: true,
@@ -140,7 +149,6 @@ exports.login = async (req,res) => {
             })
         }
 
-        console.log(userDetails);
         if(await bcrypt.compare(password,userDetails.password)){
             const payload = {email: userDetails.email, id: userDetails._id, role: userDetails.role};
             const token = jwt.sign(
@@ -148,11 +156,10 @@ exports.login = async (req,res) => {
                 process.env.SECRET_KEY, 
                 { expiresIn: '2h' }
             );
-            console.log(payload);
+
             userDetails.token = token;
             userDetails.password = undefined;
 
-            //check for it
             req.user = userDetails;
 
             const options = {
@@ -174,7 +181,7 @@ exports.login = async (req,res) => {
     catch(err){
         res.status(500).json({
             success: false,
-            message: err.message
+            message: `While login: ${err.message}`
         })
     }
 }
