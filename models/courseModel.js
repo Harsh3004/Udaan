@@ -60,7 +60,7 @@ courseSchema.post("save", async function(doc,next){
                 `Your course was uploaded successfully`
             )
 
-        console.log(`Course creation mail send successfully: ${response}`);
+        console.log(`Course creation mail send successfully`);
         next();
     }catch(error){
         console.error("Error in post-save middleware:", error);
