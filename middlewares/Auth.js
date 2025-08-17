@@ -8,7 +8,7 @@ exports.auth = (req,res,next) => {
         const token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ","");
 
         console.log(`token fetched`);
-        if(!token || token === undefined){
+        if(!token){
             return res.status(401).json({
                 success: false,
                 message: `Token Missing`
@@ -37,7 +37,6 @@ exports.auth = (req,res,next) => {
 
 exports.isStudent = (req,res,next) => {
     try{
-        console.log(req.user);
         if(req.user.role !== "Student"){
             return res.status(401).json({
                 success: false,

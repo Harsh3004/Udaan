@@ -21,16 +21,13 @@ const courseSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now()
-    },
     language: {
         type: String,
         trim: true
     },
     price: {
         type: Number,
+        require: true,
         trim: true
     },
     thumbnail: {
@@ -43,7 +40,15 @@ const courseSchema = new mongoose.Schema({
     section: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'section'
-    }]
+    }],
+    ratingAndReviews: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ratingAndReview'
+    }],
+    createdAt: {
+        type: Date,
+        default: Date.now()
+    },
 })
 
 courseSchema.post("save", async function(doc,next){

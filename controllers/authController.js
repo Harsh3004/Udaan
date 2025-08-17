@@ -10,9 +10,6 @@ require('dotenv').config();
 
 exports.sendOtp = async (req,res) => {
     try{
-        // generate otp
-        const otp = crypto.randomInt(100000,999999).toString();
-        
         const {email} = req.body;
         if(!email || email.split('@')[1] != 'gmail.com'){
             return res.status(404).json({
@@ -20,6 +17,9 @@ exports.sendOtp = async (req,res) => {
                 message: `Invalid information`
             })
         }
+
+        // generate otp
+        const otp = crypto.randomInt(100000,999999).toString();
 
         const otp_payload = await otpModel.create({
             email,otp
@@ -48,18 +48,18 @@ exports.signUp = async (req,res) => {
             })
         }
 
+        if(password != confirmPassword){
+            return res.status(400).json({
+                success: false,
+                message: `password and confirm password does not match`
+            })
+        }
+
         const existingUser = await userModel.findOne({email: email,role: role});
         if(existingUser){
             return res.status(400).json({
                 success: false,
                 message: 'User already exists'
-            })
-        }
-
-        if(password != confirmPassword){
-            return res.status(400).json({
-                success: false,
-                message: `password and confirm password does not match`
             })
         }
 
@@ -72,7 +72,7 @@ exports.signUp = async (req,res) => {
                 })
             }
 
-            if(recentOtp[0].otp != otp){
+            if(recentOtp[0].otp !== otp){
                 return res.status(401).json({
                     success: false,
                     message: `Invalid Otp`
@@ -100,6 +100,7 @@ exports.signUp = async (req,res) => {
             profession: null,
             dob: null,
             gender: null,
+            mobile: null,
             bio: null
         });
 
@@ -169,7 +170,8 @@ exports.login = async (req,res) => {
 
             res.cookie('token',token,options).status(200).json({
                 success: true,
-                message: userDetails
+                message: `Login Successfully`,
+                userDetails
             })
         }else{
             return res.status(403).json({

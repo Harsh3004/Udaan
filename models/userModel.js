@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { resetPasswordToken } = require('../controllers/resetPassword');
 
 const userSchema = new mongoose.Schema({
     fName: {
@@ -26,11 +25,11 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['Student', 'Instructor', 'Admin'],
-        default: "Student"
+        required: true
     },
     profileImage: {
         type: String,
-        default: "",
+        required: true
     },
     token: {
         type: String
@@ -40,7 +39,8 @@ const userSchema = new mongoose.Schema({
     },
     additionalDetails: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'additionalDetails'
+        ref: 'additionalDetails',
+        require: true
     },
     courses: [{
         type: mongoose.Schema.Types.ObjectId,

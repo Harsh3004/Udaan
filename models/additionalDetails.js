@@ -3,17 +3,24 @@ const mongoose = require('mongoose');
 const additionalDetailsSchema = new mongoose.Schema({
         profession: {
             type: String,
-            enum: ['Teacher','Developer','Student','Freelancer','Others']
+            enum: ['Teacher','Developer','Student','Freelancer','Others'],
+            trim: true
         },
         dob: {
-            type: Date,
+            type: String,
         },
         gender: {
             type: String,
             enum: ['male', 'female', 'other']
         },
+        mobile: {
+            type: String,
+            length: 10, 
+            trim: true
+        },
         bio: {
             type: String,
+            trim: true
         }
 
 });

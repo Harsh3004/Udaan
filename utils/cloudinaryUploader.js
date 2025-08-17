@@ -4,12 +4,14 @@ exports.isFileSupported = (type,supportedTypes) => {
   return supportedTypes.includes(type);
 }
 
-exports.uploadToCloudinary = async (file,folder) => {
+exports.uploadToCloudinary = async (file,folder,height,quality) => {
   try {
-    const options = {
-      folder,
-      resource_type: "auto" 
-    };
+    const options = {folder};
+    options.resource_type = "auto";
+    if(height)
+      options.height = height;
+    if(quality)
+      options.quality = quality;
 
     console.log(`Uploading to cloudinary`);
     const cloudResponse = await cloudinary.uploader.upload(file.tempFilePath,options);
