@@ -11,8 +11,12 @@ const subsectionSchema = new mongoose.Schema({
         trim: true
     },
     file: {
-        type: String
-    }
+        url : { type: String },
+        public_id: {type: String}
+    },
+    timeDuration: {
+        type: String,
+    },
 })
 
 const subsectionModel = mongoose.model('subsection',subsectionSchema);

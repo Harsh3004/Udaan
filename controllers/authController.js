@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const userModel = require('../models/userModel')
 const otpModel = require('../models/otpModel');
 const additionalDetails = require('../models/additionalDetails');
+const sendMail = require('../utils/sendMail');
 
 require('dotenv').config();
 
@@ -188,57 +189,60 @@ exports.login = async (req,res) => {
     }
 }
 
-
-// to be tested 
 exports.changePassword = async (req,res) => {
     try{
-        const {email,password,newPassword} = req.body;
-
-        if(!email || !password || !newPassword){
+        const {password,newPassword} = req.body;
+        const userId = req.user.id;
+        
+        if(!userId || !password || !newPassword){
             return res.status(400).json({
                 success: false,
                 message: `Enter details carefully`
             })
         }
-
-        const user = userModel.findOne({email});
+        
+        const user = await userModel.findById(userId);
         if(!user){
             return res.status(400).json({
                 success: false,
                 message: `User not Found`
             })
         }
-
-        if(!bcrypt.compare(password,user.password)){
+        
+        if(!(await bcrypt.compare(password,user.password))){
             return res.status(400).json({
                 success: false,
                 message: `Invalid password`
             })
         }
-
-        if(password == newPassword){
+        
+        if(password === newPassword){
             return res.status(400).json({
                 success: false,
                 message: `New password should be different.`
             })
         }
-
+        
+        console.log(`Changing Password`);
         let hashPassword;
         try{
-            hashPassword = await bcrypt.hash(password,10);
+            hashPassword = await bcrypt.hash(newPassword,10);
         }catch(err){
             return res.status(500).json({
                 success: false,
                 message: `error in hashing`
             })
         }
-
-        const response = await userModel.findOneAndUpdate(
-            {email: email},
-            {password: hashPassword}
-        );
         
-        console.log(response);
+        const response = await userModel.findByIdAndUpdate(
+            userId,
+            {password: hashPassword},
+            {new: true}
+        );
+
+        console.log(user,response);
+        
+        sendMail(user.email,`Changed Password`,`Your password changed successfully`);
         // Check if previous password entry was stored in cookie or other parameters then remove them
         
         return res.status(200).json({
@@ -249,7 +253,7 @@ exports.changePassword = async (req,res) => {
     }catch(error){
         return res.status(404).json({
             success: false,
-            message: `error while changing password`
+            message: `error while changing password: ${error.message}`
         })
     }
 }

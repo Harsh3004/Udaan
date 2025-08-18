@@ -4,6 +4,9 @@ const courseModel = require('../models/courseModel');
 const userModel = require('../models/userModel');
 const subsectionModel = require('../models/subsectionModel');
 const sectionModel = require('../models/sectionModel');
+const sendMail = require('../utils/sendMail');
+const ratingAndReview = require('../models/ratingAndReviewModel');
+require('dotenv').config();
 
 exports.createCourse = async(req,res) => {
     try{
@@ -27,7 +30,7 @@ exports.createCourse = async(req,res) => {
             })
         }
         
-        const response = await uploadToCloudinary(thumbnail,"Udaan");
+        const response = await uploadToCloudinary(thumbnail,process.env.FOLDER_NAME);
 
         const course = await courseModel.create({
             title,desc,
@@ -44,7 +47,8 @@ exports.createCourse = async(req,res) => {
         
         return res.status(200).json({
             success: true,
-            message: `Course created successfully`
+            message: `Course created successfully`,
+            course
         })
     }catch(error){
         return res.status(400).json({
@@ -68,7 +72,9 @@ exports.deleteCourse = async (req,res) => {
             })
         }
  
-        const course = await courseModel.findById(courseId).populate({
+        const course = await courseModel.findById(courseId)
+        .populate('instructor')
+        .populate({
             path: "section",
             populate: {
                 path: "subsection"
@@ -111,6 +117,12 @@ exports.deleteCourse = async (req,res) => {
         
         temp = await courseModel.findByIdAndDelete(courseId);
         console.log(`Course deleted successfully: ${temp}`);
+
+        sendMail(
+            course.instructor.email,
+            'Course Deletion',
+            'Course Deleted Successfully..'
+        )
 
         return res.status(201).json({
             success: true,
@@ -192,6 +204,7 @@ exports.showAllCourses = async (req,res) => {
     try{
         console.log(`Fetching all course details`);
         const courses = await courseModel.find({});
+
         console.log(`Fetched all course details successfully`);
 
         return res.status(200).json({
@@ -203,6 +216,64 @@ exports.showAllCourses = async (req,res) => {
         res.status(400).json({
             success: false,
             message: `Error while fetching courses -- ${err.message}`
+        })
+    }
+}
+
+exports.getCourseDetails = async (req,res) => {
+    try{
+        const courseId = req.params.courseId;
+        if(!courseId){
+            return res.status(400).json({
+                success: false,
+                message: `Missing Information`
+            })
+        }
+
+        const courseDetails = await courseModel.findById(courseId)
+        .populate({
+            path: 'studentEnrolled',
+            populate: {
+                path: "additionalDetails"
+            }
+        })
+        .populate({
+            path: 'instructor',
+            populate: {
+                path: 'additionalDetails',
+                path: 'courses'
+            }
+        })
+        .populate({
+            path: 'section',
+            populate: {
+                path: 'subsection'
+            }
+        })
+        .populate({
+            path: 'ratingAndReviews',
+            populate: {
+                path: 'user'
+            }
+        })
+        .exec();
+
+        if(!courseDetails){
+            return res.status(404).json({
+                success: false,
+                message: `Course Not Exist`
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Fetch course details`,
+            courseDetails
+        })
+    }catch(error){
+        return res.status(500).json({
+            success: false,
+            message: `Error: ${error.message}`
         })
     }
 }

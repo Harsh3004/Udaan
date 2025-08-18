@@ -16,24 +16,24 @@ exports.createSection = async (req,res) => {
             })
         }
 
-        const course = await courseModel.findById(courseId);
-        if(!course){
-            return res.status(404).json({
-                success: false,
-                message: `Course not found`
-            })
-        }
+        // Check -- Additional validation required or not
 
-        if(course.instructor.toString() !== userId){
-            return res.status(403).json({
-                success: false,
-                message: `Unauthorized`
-            })
-        }
+        // const course = await courseModel.findById(courseId);
+        // if(!course){
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: `Course not found`
+        //     })
+        // }
 
-        const section = await sectionModel.create({
-            title
-        });
+        // if(course.instructor.toString() !== userId){
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: `Unauthorized`
+        //     })
+        // }
+
+        const section = await sectionModel.create({title});
 
         await courseModel.findByIdAndUpdate(
             courseId,
@@ -68,24 +68,24 @@ exports.updateSection = async (req,res) => {
             })
         }
 
-        const course = await courseModel.findById(courseId);
-        if(!course){
-            return res.status(404).json({
-                success: false,
-                message: `Course not found`
-            })
-        }
+        // Check -- Additional validation required or not
+        
+        // const course = await courseModel.findById(courseId);
+        // if(!course){
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: `Course not found`
+        //     })
+        // }
 
-        if(course.instructor.toString() !== userId){
-            return res.status(403).json({
-                success: false,
-                message: `Unauthorized`
-            })
-        }
+        // if(course.instructor.toString() !== userId){
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: `Unauthorized`
+        //     })
+        // }
 
-        const updatedSection = await sectionModel.findByIdAndUpdate(sectionId,{
-            title
-        });
+        const updatedSection = await sectionModel.findByIdAndUpdate(sectionId,{title},{new: true});
 
         if(!updatedSection){
             return res.status(404).json({
@@ -120,20 +120,22 @@ exports.deleteSection = async (req,res) => {
             })
         }
 
-        const course = await courseModel.findById(courseId);
-        if(!course){
-            return res.status(404).json({
-                success: false,
-                message: `Course not found`
-            })
-        }
+        // Check -- Additional validation required or not
 
-        if(course.instructor.toString() !== userId){
-            return res.status(403).json({
-                success: false,
-                message: `Unauthorized`
-            })
-        }
+        // const course = await courseModel.findById(courseId);
+        // if(!course){
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: `Course not found`
+        //     })
+        // }
+
+        // if(course.instructor.toString() !== userId){
+        //     return res.status(403).json({
+        //         success: false,
+        //         message: `Unauthorized`
+        //     })
+        // }
 
         const section = await sectionModel.findById(sectionId);
         if(!section){
@@ -153,12 +155,13 @@ exports.deleteSection = async (req,res) => {
         );
         console.log(`Remove section from course successfully`);
         
-        await sectionModel.findByIdAndDelete(sectionId);
+        const deleteSection = await sectionModel.findByIdAndDelete(sectionId);
         console.log(`Section deleted Successfully`);
 
         return res.status(200).json({
             success: true,
-            message: `Section deleted successfully`
+            message: `Section deleted successfully`,
+
         })
     }catch(err){
         return res.status(500).json({

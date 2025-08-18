@@ -7,25 +7,25 @@ const router = express.Router();
 router.post('/sendOtp', sendOtp);
 router.post('/signUp', signUp);
 router.post('/login', login);
-router.post('/changePassword', auth, changePassword);
+router.put('/changePassword', auth, changePassword);
 
 // Role check routes
-router.get('/auth', auth, (req, res) => res.json({
+router.get('/', auth, (req, res) => res.json({
     success: true,
     message: 'Authenticate' 
 }));
 
-router.get('/auth/student', auth, isStudent, (req, res) => res.json({
+router.get('/student', auth, isStudent, (req, res) => res.json({
     success: true,
     message: 'Welcome Student' 
 }));
 
-router.get('/auth/instructor', auth, isInstructor, (req, res) => res.json({
+router.get('/instructor', auth, isInstructor, (req, res) => res.json({
     success: true, 
     message: 'Welcome Instructor'
 }));
 
-router.get('/auth/admin', auth, isAdmin, (req, res) => res.json({
+router.get('/admin', auth, isAdmin, (req, res) => res.json({
     success: true,
     message: 'Welcome Admin' 
 }));

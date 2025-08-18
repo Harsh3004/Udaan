@@ -2,10 +2,10 @@ const express = require("express");
 const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
-const sectionRoutes = require('./routes/sectionRoutes');
-const subsectionRoutes = require('./routes/subsectionRoutes');
+// const paymentRoutes = require('./routes/paymentsRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 require('dotenv').config();
@@ -29,10 +29,10 @@ cloudinaryConnect();
 const connectDB = require('./config/db');
 connectDB();
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', userRoutes);
 app.use('/api/course', courseRoutes);
-app.use('/api/section', sectionRoutes);
-app.use('/api/subsection', subsectionRoutes);
+app.use('/api/profile', profileRoutes);
+// app.use('/api/payment', paymentRoutes);
 
 app.get('/',(req,res) => {
     return res.json({
