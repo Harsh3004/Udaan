@@ -1,0 +1,38 @@
+1. Using same gmail id we are not able to create different roles account
+2. Mail templates
+3. When user changing thumbnail instead of uploading change uploaded file
+
+6. Currently only able to send mail with 'gmail.com'
+7. Testing login using header for token
+
+4. Course Progress of Student -- for this we need to create additional model
+
+5. In subsection currently we are hardcoding duration by taking it from user we have to make it automatically by detecting duration of file
+
+6. Tag and category of Courses
+    -- create category (By Admin)
+    -- getAllCategory 
+    -- when course is created then push it in category
+
+7. Delete Account
+    -- Scheduling delete account (for preventing accidental delete)
+    -- what is crown job?
+
+8. Add status for course such as "Draft", "Published"
+
+9. category Page 
+    -- for showing courses of different categories such as:
+        - course of particular category user selected
+        - if that categrory course not exist then other category course
+        - top selling course
+        - most popular course
+
+10. Contact us controller:
+    -- user will fill form 
+    -- send mail of confirmation that mail was send to team to user
+    -- send form data to team
+
+11. Flaws:
+    -- currently with same otp user is able to create student as well as instructor account
+
+12. Course views and likes
