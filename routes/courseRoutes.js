@@ -3,6 +3,7 @@ const { auth, isInstructor } = require('../middlewares/Auth');
 const { createCourse, showAllCourses, deleteCourse, updateCourse , getCourseDetails} = require('../controllers/courseController');
 const { createSection, updateSection, deleteSection, showAllSection } = require('../controllers/sectionController');
 const { showAllsubsection, createsubSection, updatesubSection, deletesubSection } = require('../controllers/subsectionController');
+const {addRatingReview,averageRating,showAllRatingAndReview} = require('../controllers/ratingAndReviewController');
 const router = express.Router();
 
 // Course routes
@@ -23,5 +24,10 @@ router.get('/:courseId/section/:sectionId/subsection', auth, isInstructor, showA
 router.post('/:courseId/section/:sectionId/subsection/create', auth, isInstructor, createsubSection);
 router.put('/:courseId/section/:sectionId/subsection/update/:subsectionId', auth, isInstructor, updatesubSection);
 router.delete('/:courseId/section/:sectionId/subsection/delete/:subsectionId', auth, isInstructor, deletesubSection);
+
+// Rating routes
+router.get('/:courseId/rating',auth,showAllRatingAndReview);
+router.post('/:courseId/rating/create',auth,addRatingReview);
+router.get('/:courseId/rating/average',auth,averageRating);
 
 module.exports = router;
