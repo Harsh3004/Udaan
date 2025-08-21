@@ -3,14 +3,14 @@ import { FaArrowRight } from "react-icons/fa";
 import { TypeAnimation } from 'react-type-animation';
 import { useInView } from 'react-intersection-observer';
  
-export const CodeBlock = ({position, block1,block2}) => {
+export const CodeBlock = ({position, block1,block2,color}) => {
     const {title,desc,btn1,btn2} = block1;
     const htmlCode = block2;
     const htmlString = htmlCode.join('\n');
 
     const { ref, inView } = useInView({
-        threshold: 0.5, // Trigger when 50% of the component is visible
-        triggerOnce: true, // Only trigger the animation once
+        threshold: 0.5,
+        triggerOnce: true, 
     });
     
   return (
@@ -29,7 +29,7 @@ export const CodeBlock = ({position, block1,block2}) => {
         </div>
 
         <div className='relative w-2/5 text-gray-200 font-mono text-xs overflow-auto px-4 py-2 rounded-md backdrop-blur-68 bg-gradient-custom
-        border border-solid border-transparent  border-gradient'>
+        border border-solid border-transparent border-gradient'>
 
             <div className="flex">
                 <div className="flex flex-col text-right pr-4 text-rich-black-400 z-10">
@@ -43,9 +43,9 @@ export const CodeBlock = ({position, block1,block2}) => {
                     <TypeAnimation
                       sequence={[htmlCode.join('\n'), 2000]}
                       wrapper="span"
-                      speed={50}
+                      speed={70}
                       repeat={Infinity}
-                    />}
+                      />}
                 </div>
             </div>
         </div>

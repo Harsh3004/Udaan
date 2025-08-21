@@ -5,10 +5,13 @@ import { HighlightedText } from '../components/HighlightedText';
 import VideoComponent from '../components/VideoComponent';
 import { CodeBlock } from '../components/CodeBlock';
 import { Link } from 'react-router-dom';
-import showcase from '../assets/showcase.jpg'
+import showcase from '../assets/show1.png'
 import Footer  from '../components/Footer';
 import LightRays from '../assets/preComponents.jsx/LightRays';
-
+import featuresData from '../data/feature'
+import video2 from '../assets/production.mp4'
+import courses from '../data/course'
+import {CourseCard} from '../components/CourseCard'
  
 export const Home = () => {
   return (
@@ -57,7 +60,7 @@ export const Home = () => {
                 </div>
             </div>
 
-            <div className='bg-rich-black-900 relative w-2/3 p-4 mx-auto mt-20 mb-20 overflow-hidden'>
+            <div className='bg-rich-black-900 relative w-2/3 p-4 mx-auto mt-20 mb-20'>
                 <VideoComponent className='h-fit relative'/>
             </div>
 
@@ -121,31 +124,128 @@ export const Home = () => {
                 }
                 
                 block2={[
-                    '<!DOCTYPE html>',
-                    '<html>',
-                    '<head><title>Example</title>',
-                    '<link rel="stylesheet" href="styles.css">',
-                    '</head>',
-                    '<body>',
-                    '<h1><a href="/">Header</a></h1>',
-                    '<nav>',
-                    '<a href="one">One</a>',
-                    '<a href="two">Two</a>',
-                    '<a href="three">Three</a>',
-                    '</nav>',
-                    '</body>',
-                    '</html>',
+                    "#include <iostream>",
+                    "",
+                    "long long factorial(int n) {",
+                    "    if (n == 0 || n == 1) {",
+                    "        return 1;",
+                    "    }",
+                    "    return n * factorial(n - 1);",
+                    "}",
+                    "",
+                    "int main() {",
+                    "    int number = 10;",
+                    "    long long result = factorial(number);",
+                    "    cout << \"Factorial: << result << endl;",
+                    "    return 0;",
+                    "}",
                     ]}
                 ></CodeBlock>
             </div>
 
+            <div className='flex flex-col items-center text-white py-20'>
+                <div className='flex flex-col gap-2 items-center'>
+                    <p className='text-4xl font-semibold'>
+                        Unlock the 
+                        <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
+                            Power of Code 
+                        </HighlightedText>
+                    </p>
+                    <p className='text-rich-Black-300 font-medium'> 
+                        Learn to Build Anything You Can Imagine
+                    </p>
+                </div>
+                
+                <div className="flex flex-row justify-center gap-10 py-10 w-4/5">
+                  {courses.map((course, index) => (
+                    <CourseCard
+                      key={index}
+                      title={course.title}
+                      description={course.description}
+                      level={course.level}
+                      lessons={course.lessons}
+                      isFeatured={course.isFeatured}
+                    />
+                  ))}
+                </div>
+            </div>
+
         </section>
         
-        <section></section>
+        <section>
+            <div className='frame flex justify-center items-center'>
+                <div className='flex flex-row gap-2 absolute z-10'>  
+                    <Button active={1}>
+                        Start Teaching Today
+                        <FaArrowRight />
+                    </Button>
+
+                    <Button active={0}>
+                        Start Teaching Today
+                        <FaArrowRight />
+                    </Button>
+                </div>
+            </div>
+
+            <div className='bg-pure-greys-5 text-rich-black-800 py-12 flex flex-col gap-12'>
+                <div className='flex w-9/12 mx-auto text-left items-start justify-between gap-3'>
+                    <p className='font-semibold text-4xl'>
+                        Get the skills you need for 
+                        <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
+                            a job that is in demand.
+                        </HighlightedText>
+                    </p>
+                    <div className=''>
+                        <p className='font-semibold pb-8'>
+                            The modern Udaan is the dictates its own terms. Today, to be a competitive specialist requires more than professional skills.</p>
+
+                        <Button active={1}>Learn More</Button>
+                    </div>
+                </div>
+
+                <div className='relative w-9/12 mx-auto flex flex-row items-center justify-between'>
+                    <div className='flex flex-col gap-8 w-1/2'>
+                        {
+                            featuresData.map((feature) => {
+                                return (
+                                <div className='flex items-center gap-5'>
+                                    <div>
+                                        <img src={feature.imageUrl} width={50} className='rounded-full object-contain shadow-custom-left'/>
+                                    </div>
+                                    <div>
+                                        <p className='text-lg font-semibold text-rich-black-800'>{feature.title}</p>
+                                        <p className='text-rich-black-600'>{feature.description}</p>
+                                    </div>
+                                </div>
+                            )})
+                        }
+                    </div>
+
+                    <div className='relative w-2/3 flex justify-center mb-10'>
+                        <video width="90%" height="auto" autoPlay muted className='z-10'>
+                            <source src={video2} type="video/mp4"/>
+                        </video>
+                        <div className='absolute inset-0 w-full h-full bg-gradient-blue rounded-full blur-xl opacity-50'></div>
+                        <div className='w-3/4 bg-greenish absolute flex flex-row z-20 justify-center -bottom-12 p-6 text-white items-center'>
+                            <div className='flex flex-row gap-6 justify-center items-center w-1/2 border-r border-r-greenish-500 pr-6'>
+                                <p className='font-bold text-4xl'>10</p>
+                                <p className='text-sm text-greenish-300 tracking-wide'> YEARS EXPERIENCES</p>
+                            </div>
+                            <div className='flex flex-row gap-6 pl-6 justify-center items-center w-1/2'>
+                                <p className='font-bold text-4xl'>250</p>
+                                <p className='text-sm text-greenish-300 tracking-wide'> TYPES OF COURSES</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
         <section className='relative mx-auto bg-rich-black-900 text-white py-12'>
             <div className='bg-rich-black-900 relative p-4 mx-auto mt-20 mb-20 flex items-center'>
                 <div className='w-3/4 flex justify-center'>
-                    <img src={showcase} className='relative z-10 max-h-96 shadow-custom-left'/>
+                    <img src={showcase} className='relative z-10 max-h-96 bg-gradient-custom shadow-current border border-solid border-transparent border-gradient'/>
                 </div>
 
                 <div className='flex flex-col gap-3 w-2/3 pr-10'>

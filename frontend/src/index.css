@@ -7,3 +7,25 @@
   border-image-source: linear-gradient(121.74deg, rgba(255, 255, 255, 0.22) -7.75%, rgba(255, 255, 255, 0) 37.38%);
   border-image-slice: 1; /* This is required for border-image to work */
 }
+
+.vscode-gradient {
+  background: linear-gradient(
+    to right,
+    #ff7e5f, /* A warm orange, similar to VS Code's bracket colors */
+    #feb47b, /* A lighter orange/peach */
+    #8e9eab  /* A cool gray/blue, for contrast */
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; /* Fallback for browsers that don't support text-fill-color */
+}
+
+.frame{
+  background-image: url('./assets/Frame.png');
+  background-size: cover;   
+  background-position: center; 
+  background-repeat: no-repeat; 
+  height: 400px; 
+  width: 100%;
+}
