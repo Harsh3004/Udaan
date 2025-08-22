@@ -3,7 +3,7 @@ import CircularText from "../assets/preComponents.jsx/CircularText";
 
 export default function Footer() {
   return (
-    <footer className="bg-rich-black-800 text-gray-400 py-10 px-6 border-t border-rich-black-600">
+    <footer className="bg-rich-black-800 text-gray-400 py-10 px-6 border-t border-rich-black-600 hidden md:block">
       <div className="mx-auto flex flex-row justify-between gap-8 border-b border-gray-700 pb-8 relative overflow-hidden">
         
         <div>

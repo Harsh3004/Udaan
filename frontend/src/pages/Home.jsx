@@ -12,6 +12,9 @@ import featuresData from '../data/feature'
 import video2 from '../assets/production.mp4'
 import courses from '../data/course'
 import {CourseCard} from '../components/CourseCard'
+import card1 from '../assets/Card1.png'
+import card2 from '../assets/Card2.png'
+import card3 from '../assets/Card3.png'
  
 export const Home = () => {
   return (
@@ -32,10 +35,11 @@ export const Home = () => {
                 className="custom-rays"
               />
             </div>
+
             <div className='flex flex-col w-9/12 gap-8 mx-auto items-center justify-between text-white'>
     
                 <Link to={"/signup"}>
-                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 h-9 pt-1 pr-4 pb-1 pl-4 mt-16 rounded-3xl border transition-all duration-200 hover:scale-95 hover:bg-rich-black-900'>
+                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 h-9 pt-1 pr-4 pb-1 pl-4 mt-16 rounded-3xl border transition-all duration-200 hover:scale-95 hover:bg-rich-black-900 relative z-40'>
                         <span className='font-medium'>Become an Instructor</span>
                         <FaArrowRight />
                     </div>
@@ -66,7 +70,7 @@ export const Home = () => {
 
             <div className='w-full h-auto py-16 px-6'>
                 <CodeBlock
-                position={`md:flex-row`}
+                position={`flex-col md:flex-row`}
                  block1={
                     {
                         "title": (
@@ -106,7 +110,7 @@ export const Home = () => {
             <div className='w-full h-auto py-10'>
 
              <CodeBlock
-                 position={'md:flex-row-reverse'}
+                 position={'flex-col md:flex-row-reverse'}
                  block1={
                     {
                         "title": (
@@ -143,7 +147,7 @@ export const Home = () => {
                 ></CodeBlock>
             </div>
 
-            <div className='flex flex-col items-center text-white py-20'>
+            <div className='flex flex-col items-center md:pb-56 text-white py-20'>
                 <div className='flex flex-col gap-2 items-center'>
                     <p className='text-4xl font-semibold'>
                         Unlock the 
@@ -156,7 +160,7 @@ export const Home = () => {
                     </p>
                 </div>
                 
-                <div className="flex flex-row justify-center gap-10 py-10 w-4/5">
+                <div className="lg:absolute flex flex-col lg:flex-row justify-center gap-10 md:mt-28 py-10 w-4/5">
                   {courses.map((course, index) => (
                     <CourseCard
                       key={index}
@@ -174,28 +178,28 @@ export const Home = () => {
         
         <section>
             <div className='frame flex justify-center items-center'>
-                <div className='flex flex-row gap-2 absolute z-10'>  
+                <div className='flex flex-row gap-2 md:pt-32 absolute z-10'>  
                     <Button active={1}>
-                        Start Teaching Today
+                        Explore Full Catalog
                         <FaArrowRight />
                     </Button>
 
                     <Button active={0}>
-                        Start Teaching Today
+                        Learn More
                         <FaArrowRight />
                     </Button>
                 </div>
             </div>
 
             <div className='bg-pure-greys-5 text-rich-black-800 py-12 flex flex-col gap-12'>
-                <div className='flex w-9/12 mx-auto text-left items-start justify-between gap-3'>
+                <div className='flex flex-col md:flex-row w-9/12 mx-auto text-left items-start justify-between gap-3'>
                     <p className='font-semibold text-4xl'>
                         Get the skills you need for 
                         <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
                             a job that is in demand.
                         </HighlightedText>
                     </p>
-                    <div className=''>
+                    <div>
                         <p className='font-semibold pb-8'>
                             The modern Udaan is the dictates its own terms. Today, to be a competitive specialist requires more than professional skills.</p>
 
@@ -203,8 +207,8 @@ export const Home = () => {
                     </div>
                 </div>
 
-                <div className='relative w-9/12 mx-auto flex flex-row items-center justify-between'>
-                    <div className='flex flex-col gap-8 w-1/2'>
+                <div className='relative lg:w-9/12 mx-auto flex flex-col lg:flex-row items-center justify-between'>
+                    <div className='flex flex-col gap-8 md:w-1/2 pb-10 lg:pb-0'>
                         {
                             featuresData.map((feature) => {
                                 return (
@@ -221,7 +225,7 @@ export const Home = () => {
                         }
                     </div>
 
-                    <div className='relative w-2/3 flex justify-center mb-10'>
+                    <div className='relative md:w-2/3 flex justify-center mb-10'>
                         <video width="90%" height="auto" autoPlay muted className='z-10'>
                             <source src={video2} type="video/mp4"/>
                         </video>
@@ -240,23 +244,43 @@ export const Home = () => {
                 </div>
 
             </div>
+
+            <div className='bg-pure-greys-5 text-rich-black-800 py-12 flex flex-col items-center'>
+                <div className='flex flex-col mx-auto text-center justify-between gap-3'>
+                    <p className='font-semibold text-4xl'>
+                        Your swiss knife for
+                        <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
+                             learning any language
+                        </HighlightedText>
+                    </p>
+                    <p className='font-semibold w-2/3 mx-auto text-rich-black-700'>
+                        Using spin making learning multiple languages easy. with 20+ languages realistic voice-over, progress tracking, custom schedule and more.
+                    </p>
+                </div>
+                <div className='relative flex flex-col lg:flex-row gap-10 w-9/12 mx-auto py-2'>
+                    <img src={card3} alt="" className='object-contain aspect-square z-30'/>
+                    <img src={card2} alt="" className='lg:ml-64 object-contain aspect-square lg:absolute z-30'/>
+                    <img src={card1} alt="" className='lg:ml-20 object-contain aspect-square z-30'/>
+                </div>
+                <Button active={1}>Learn More</Button>
+            </div>
         </section>
 
         <section className='relative mx-auto bg-rich-black-900 text-white py-12'>
-            <div className='bg-rich-black-900 relative p-4 mx-auto mt-20 mb-20 flex items-center'>
-                <div className='w-3/4 flex justify-center'>
+            <div className='bg-rich-black-900 relative md:p-4 mx-auto mt-20 mb-20 flex flex-col md:flex-row items-center'>
+                <div className='md:w-3/4 flex justify-center'>
                     <img src={showcase} className='relative z-10 max-h-96 bg-gradient-custom shadow-current border border-solid border-transparent border-gradient'/>
                 </div>
 
-                <div className='flex flex-col gap-3 w-2/3 pr-10'>
-                    <p className='font-inter font-semibold text-4xl leading-[44px] tracking-[-0.02em]'>
+                <div className='flex flex-col items-center md:items-start gap-3 md:w-2/3 px-4 md:pr-10 py-8 md:py-0 '>
+                    <p className='font-inter font-semibold text-4xl md:leading-[44px] tracking-[-0.02em]'>
                         Become an 
                         <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
                             Instructor
                         </HighlightedText>
                     </p>
 
-                    <p className="text-rich-Black-300 font-inter font-medium text-base leading-6 tracking-normal pb-12">
+                    <p className="text-rich-Black-300 font-inter font-medium text-base leading-6 tracking-normal pb-12 text-center md:text-left">
                         Instructors from around the world teach millions of students on StudyNotion. We provide the tools and skills to teach what you love.
                     </p>
 
@@ -267,6 +291,7 @@ export const Home = () => {
                 </div>
             </div>
         </section>
+
         <Footer/>
     </div>
   )

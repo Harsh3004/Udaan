@@ -15,7 +15,7 @@ export const CodeBlock = ({position, block1,block2,color}) => {
     
   return (
     <div className={`flex ${position} gap-16 justify-center items-center text-white`} ref={ref}>
-        <div className="w-2/5 flex flex-col gap-3">
+        <div className="w-5/6 md:w-2/5 flex flex-col gap-3">
             {title}
             <p className="text-rich-Black-300 font-inter font-medium text-base leading-6 tracking-normal">{desc}</p>
 
@@ -28,7 +28,7 @@ export const CodeBlock = ({position, block1,block2,color}) => {
             </div>
         </div>
 
-        <div className='relative w-2/5 text-gray-200 font-mono text-xs overflow-auto px-4 py-2 rounded-md backdrop-blur-68 bg-gradient-custom
+        <div className='relative md:w-2/5 text-gray-200 font-mono text-xs overflow-auto px-4 py-2 rounded-md backdrop-blur-68 bg-gradient-custom
         border border-solid border-transparent border-gradient'>
 
             <div className="flex">
