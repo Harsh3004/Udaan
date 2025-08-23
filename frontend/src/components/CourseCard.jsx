@@ -4,7 +4,7 @@ import { FaUserGraduate, FaBookOpen } from 'react-icons/fa'
 export const CourseCard = ({ title, description, level, lessons, isFeatured }) => {
   return (
     <article
-      className={`relative flex flex-col overflow-hidden rounded-lg bg-rich-black-800 text-white shadow-lg transition-all duration-500 hover:translate-y-[-5px] hover:bg-white hover:text-rich-black-800  hover:shadow-card-shadow`}
+      className={`relative md:w-[300px] lg:min-h-[300px] flex flex-col overflow-hidden rounded-lg bg-rich-black-800 text-white shadow-lg transition-all duration-500 hover:translate-y-[-5px] hover:bg-white hover:text-rich-black-800  hover:shadow-card-shadow`}
     >
       <div className="flex-grow p-5 pb-10">
         <h3 className="mb-2 text-xl font-semibold">{title}</h3>

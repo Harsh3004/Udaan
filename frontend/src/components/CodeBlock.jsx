@@ -38,7 +38,7 @@ export const CodeBlock = ({position, block1,block2,color}) => {
                     ))}
                 </div>
 
-                <div className="flex flex-col whitespace-pre z-10">
+                <div className={`flex flex-col whitespace-pre z-10 ${color}`}>
                     {inView &&
                     <TypeAnimation
                       sequence={[htmlCode.join('\n'), 2000]}

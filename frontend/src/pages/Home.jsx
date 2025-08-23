@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '../components/Button';
 import { FaArrowRight } from "react-icons/fa";
 import { HighlightedText } from '../components/HighlightedText';
@@ -7,40 +6,35 @@ import { CodeBlock } from '../components/CodeBlock';
 import { Link } from 'react-router-dom';
 import showcase from '../assets/show1.png'
 import Footer  from '../components/Footer';
-import LightRays from '../assets/preComponents.jsx/LightRays';
 import featuresData from '../data/feature'
 import video2 from '../assets/production.mp4'
-import courses from '../data/course'
-import {CourseCard} from '../components/CourseCard'
 import card1 from '../assets/Card1.png'
 import card2 from '../assets/Card2.png'
 import card3 from '../assets/Card3.png'
- 
+import { ExploreMore } from '../components/HomeComponent/ExploreMore';
+import { TypeAnimation } from 'react-type-animation';
+
 export const Home = () => {
   return (
-    <div>
+    <div className='bg-rich-black-900'>
         <section className='relative mx-auto bg-rich-black-900'>
-            {/* <img src="/U.png" alt="" className='absolute opacity-50' width={150}/> */}
-            <div style={{ width: '100%', height: '600px', position: 'absolute' }}>
-              <LightRays
-                raysOrigin="top-center"
-                raysColor="#ffffff"
-                raysSpeed={1.5}
-                lightSpread={0.8}
-                rayLength={1.2}
-                followMouse={true}
-                mouseInfluence={0.1}
-                noiseAmount={0.1}
-                distortion={0.05}
-                className="custom-rays"
-              />
-            </div>
-
             <div className='flex flex-col w-9/12 gap-8 mx-auto items-center justify-between text-white'>
     
                 <Link to={"/signup"}>
-                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 h-9 pt-1 pr-4 pb-1 pl-4 mt-16 rounded-3xl border transition-all duration-200 hover:scale-95 hover:bg-rich-black-900 relative z-40'>
-                        <span className='font-medium'>Become an Instructor</span>
+                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 h-9 pt-1 pr-4 pb-1 pl-4 mt-10 rounded-3xl border transition-all duration-100 hover:scale-105 hover:bg-rich-black-900 relative z-40'>
+                        <span className='font-medium'>
+                            <TypeAnimation
+                            sequence={[
+                                'Become an Instructor',
+                                2000,
+                                'Become an Student',
+                                2000
+                            ]}
+                            speed={50}
+                            wrapper="span"
+                            repeat={Infinity}
+                            />
+                        </span>
                         <FaArrowRight />
                     </div>
                 </Link>
@@ -104,6 +98,8 @@ export const Home = () => {
                     '</body>',
                     '</html>',
                     ]}
+                
+                    color = 'text-blue-300'
                 ></CodeBlock>
             </div>
 
@@ -144,36 +140,11 @@ export const Home = () => {
                     "    return 0;",
                     "}",
                     ]}
+                    color={'text-rich-black-5'}
                 ></CodeBlock>
             </div>
 
-            <div className='flex flex-col items-center md:pb-56 text-white py-20'>
-                <div className='flex flex-col gap-2 items-center'>
-                    <p className='text-4xl font-semibold'>
-                        Unlock the 
-                        <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
-                            Power of Code 
-                        </HighlightedText>
-                    </p>
-                    <p className='text-rich-Black-300 font-medium'> 
-                        Learn to Build Anything You Can Imagine
-                    </p>
-                </div>
-                
-                <div className="lg:absolute flex flex-col lg:flex-row justify-center gap-10 md:mt-28 py-10 w-4/5">
-                  {courses.map((course, index) => (
-                    <CourseCard
-                      key={index}
-                      title={course.title}
-                      description={course.description}
-                      level={course.level}
-                      lessons={course.lessons}
-                      isFeatured={course.isFeatured}
-                    />
-                  ))}
-                </div>
-            </div>
-
+            <ExploreMore />
         </section>
         
         <section>

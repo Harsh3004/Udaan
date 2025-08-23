@@ -17,6 +17,7 @@ module.exports = {
         "rich-black-400" : "#6E727F",
         "rich-Black-300": "#838894",
         "rich-black-200" : "#999DAA",
+        "rich-black-100" : "#AFB2BF",
         "rich-black-5": "#F1F2FF",
         "yellow-50": "#FFD60A",
         "pure-greys-5": "#F9F9F9",
@@ -36,9 +37,11 @@ module.exports = {
         'card-shadow': '8px 8px 0px 0px #FFD60A',
         'white-inset': 'inset -2px -2px 0px 0px #FFFFFF2E',
         'inner-light': 'inset -2px -2px 0px 0px #FFFFFF82',
-        'shadow-custom': '18px 18px 0px 0px #F5F5F5',
+        'shadow-custom': '15px 15px 0px 0px #F5F5F5',
         "custom-left": "-20px -20px 0px 0px #FFFFFF",
-        
+      },
+      fontFamily: {
+        edu: ['"Edu SA Beginner"', 'cursive'], // add your Google font
       },
     },
   },
