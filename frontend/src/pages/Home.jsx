@@ -18,10 +18,10 @@ export const Home = () => {
   return (
     <div className='bg-rich-black-900'>
         <section className='relative mx-auto bg-rich-black-900'>
-            <div className='flex flex-col w-9/12 gap-8 mx-auto items-center justify-between text-white'>
+            <div className='flex flex-col w-9/12 gap-8 mx-auto items-center justify-between text-white  mt-10'>
     
                 <Link to={"/signup"}>
-                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 h-9 pt-1 pr-4 pb-1 pl-4 mt-10 rounded-3xl border transition-all duration-100 hover:scale-105 hover:bg-rich-black-900 relative z-40'>
+                    <div className='flex items-center gap-2 bg-rich-black-800 text-rich-black-200 max-w-56 pt-1 pr-4 pb-1 pl-4 rounded-3xl border transition-all duration-100 hover:scale-105 hover:bg-rich-black-900 relative z-30'>
                         <span className='font-medium'>
                             <TypeAnimation
                             sequence={[
