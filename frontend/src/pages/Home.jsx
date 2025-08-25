@@ -40,14 +40,14 @@ export const Home = () => {
                 </Link>
 
                 <div className='flex flex-col ma gap-3'>
-                    <p className='font-semibold text-4xl text-center gap-1 text-rich-black-5'>
+                    <p className='z-40 font-semibold text-4xl text-center gap-1 text-rich-black-5'>
                         Empower Your Future with
                         <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
                             Coding Skills 
                         </HighlightedText>
                     </p>
 
-                    <p className='font-medium text-rich-Black-300 leading-6 tracking-normal text-center'>
+                    <p className='z-40 font-medium text-rich-Black-300 leading-6 tracking-normal text-center'>
                         With our online coding courses, you can learn at your own pace, from anywhere in the world, and get access to a wealth of resources, including hands-on projects, quizzes, and personalized feedback from instructors. 
                     </p>
                 </div>
@@ -201,14 +201,16 @@ export const Home = () => {
                             <source src={video2} type="video/mp4"/>
                         </video>
                         <div className='absolute inset-0 w-full h-full bg-gradient-blue rounded-full blur-xl opacity-50'></div>
-                        <div className='w-3/4 bg-greenish absolute flex flex-row z-20 justify-center -bottom-12 p-6 text-white items-center'>
-                            <div className='flex flex-row gap-6 justify-center items-center w-1/2 border-r border-r-greenish-500 pr-6'>
-                                <p className='font-bold text-4xl'>10</p>
-                                <p className='text-sm text-greenish-300 tracking-wide'> YEARS EXPERIENCES</p>
+                        <div className='w-3/4 bg-greenish absolute flex flex-row z-20 justify-center -bottom-12 p-3 lg:p-6 text-white items-center'>
+                            <div className='flex flex-col lg:flex-row gap-2 lg:gap-6 justify-center items-center w-1/2 border-r border-r-greenish-500 pr-6'>
+                                <p className='font-bold text-xl lg:text-4xl'>10</p>
+                                <p className='lg:text-sm text-greenish-300 tracking-wide text-center lg:text-left'> YEARS EXPERIENCES</p>
                             </div>
-                            <div className='flex flex-row gap-6 pl-6 justify-center items-center w-1/2'>
-                                <p className='font-bold text-4xl'>250</p>
-                                <p className='text-sm text-greenish-300 tracking-wide'> TYPES OF COURSES</p>
+                            <div className='flex flex-col lg:flex-row gap-2 lg:gap-6 pl-6 justify-center items-center w-1/2'>
+                                <p className='font-bold lg:text-4xl'>250</p>
+                                <p className='lg:text-sm text-greenish-300 tracking-wide text-center lg:text-left'>
+                                    TYPES OF COURSES
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -244,7 +246,7 @@ export const Home = () => {
                 </div>
 
                 <div className='flex flex-col items-center md:items-start gap-3 md:w-2/3 px-4 md:pr-10 py-8 md:py-0 '>
-                    <p className='font-inter font-semibold text-4xl md:leading-[44px] tracking-[-0.02em]'>
+                    <p className='font-inter font-semibold text-4xl md:leading-[44px] tracking-[-0.02em] text-center lg:text-left'>
                         Become an 
                         <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>
                             Instructor
@@ -252,7 +254,7 @@ export const Home = () => {
                     </p>
 
                     <p className="text-rich-Black-300 font-inter font-medium text-base leading-6 tracking-normal pb-12 text-center md:text-left">
-                        Instructors from around the world teach millions of students on StudyNotion. We provide the tools and skills to teach what you love.
+                        Instructors from around the world teach millions of students on Udaan. We provide the tools and skills to teach what you love.
                     </p>
 
                     <Button active={1}>

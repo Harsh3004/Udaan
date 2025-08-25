@@ -35,12 +35,12 @@ export const ExploreMore = () => {
             </p>
         </div>
 
-        <div className='flex justify-center bg-rich-black-800 w-fit mx-auto rounded-full mt-5 border border-rich-black-5 border-opacity-20'>
+        <div className='flex justify-center items-center bg-rich-black-800 w-fit mx-auto rounded-full mt-5 border border-rich-black-5 border-opacity-20'>
             {
                 tabsName.map((element,index) => {
                     return (
                         <div 
-                        className={`text-base rounded-full transition-all duration-200 cursor-pointer hover:bg-rich-black-800 px-5 py-2 
+                        className={`text-base rounded-full transition-all duration-200 cursor-pointer hover:bg-rich-black-800 px-2 lg:px-5 py-2 
                         ${currentTab === element ? "bg-rich-black-900 text-rich-black-5 font-medium" : "bg-rich-black-800 text-rich-black-5 font-light"} 
                         `}
                         key={index}

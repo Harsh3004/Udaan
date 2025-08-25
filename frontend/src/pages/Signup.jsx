@@ -143,7 +143,7 @@ export const Signup = () => {
                     placeholder="Enter Password"
                     className="w-full bg-rich-black-800 border border-gray-700 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-8 text-gray-400">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="invisible lg:visible absolute right-4 top-8 text-gray-400">
                     {showPassword ? <IoEyeOff/> : <PiEyeDuotone/>}
                   </button>
                 </div>
@@ -156,7 +156,7 @@ export const Signup = () => {
                     placeholder="Enter Password"
                     className="w-full bg-rich-black-800 border border-gray-700 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-8 text-gray-400">
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="invisible lg:visible absolute right-4 top-8 text-gray-400">
                     {showConfirmPassword ? <IoEyeOff/> : <PiEyeDuotone/>}
                   </button>
                 </div>
