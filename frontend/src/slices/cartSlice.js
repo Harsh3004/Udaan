@@ -10,6 +10,9 @@ export const cartSlice = createSlice({
     reducers: {
         setTotalItems(state, value){
             state.totalItems = value.payload
+        },
+        resetCart(state){
+            state.totalItems = 0;
         }
 
         // add to cart
@@ -18,5 +21,5 @@ export const cartSlice = createSlice({
     }
 })
 
-export const {setTotalItems} = cartSlice.actions
+export const {setTotalItems, resetCart} = cartSlice.actions
 export default cartSlice.reducer

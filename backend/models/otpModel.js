@@ -23,7 +23,7 @@ async function sendVerificationEmail(email,otp) {
         console.log("Sending verification mail..");
 
         const response = sendMail(email,
-            `Study Notion - Otp Verification`,
+            `Udaan - Otp Verification`,
             `Verification Otp: ${otp}. It will expire in 5 minutes.`
         )
 
@@ -31,7 +31,7 @@ async function sendVerificationEmail(email,otp) {
     }catch(err){
         console.log(`Verification mail not send: ${err.message}`);
         throw err;
-    } 
+    }
 }
 
 otpSchema.pre("save",async function(next){

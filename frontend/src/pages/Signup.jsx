@@ -3,6 +3,10 @@ import education from '../assets/Illustration/education.png'
 import notes from '../assets/Illustration/notes.png'
 import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
+import { request, sendOtp } from "../services/operations/authApi";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { endpoints } from "../services/api";
 
 export const Signup = () => {
   const [userType, setUserType] = useState('Student');
@@ -14,6 +18,7 @@ export const Signup = () => {
     password: '',
     confirmPassword: '',
   });
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -21,14 +26,29 @@ export const Signup = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
   
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       console.error("Passwords do not match");
       return;
     }
 
-    console.log("Form submitted:", formData);
+    const payload = {
+      ...formData,
+      role: userType
+    };
+
+    // const otp = await sendOtp(formData);  
+    const otp = await request(endpoints.SEND_OTP_API,"POST", formData);
+    if(otp.ok){
+      navigate('/otp',{state: payload})
+      toast.success(`Otp Send Successfully`);
+    }else{
+      navigate('/error')
+      toast(`Something went Wrong`);
+    }
   };
 
 

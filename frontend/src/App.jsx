@@ -6,6 +6,10 @@ import { Login } from "./pages/Login"
 import { Signup } from "./pages/Signup"
 import { About } from "./pages/About"
 import { Contact } from "./pages/Contact"
+import { Dashboard } from "./pages/Dashboard"
+import { Otp } from "./pages/Otp"
+import { Error } from "./pages/Error"
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   return (
@@ -34,7 +38,12 @@ export default function App() {
         <Route path="/contact" element={<Contact/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/signup" element={<Signup/>}/>
+        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/otp" element={<Otp/>}/>
+        <Route path="/error" element={<Error/>}/>
       </Routes>
+
+      <Toaster/>
     </div>
   )
 }

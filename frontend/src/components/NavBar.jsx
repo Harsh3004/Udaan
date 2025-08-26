@@ -3,10 +3,12 @@ import { Link, Links, matchPath } from 'react-router-dom'
 import { navbarLinks } from '../data/navbarLinks'
 import logo from '../assets/U_logo1.ico'
 import { useLocation } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FaShoppingCart } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
+import { logout } from '../services/functions/auth'
+import { useNavigate } from 'react-router-dom'
 
 export const NavBar = () => {
     const {token} = useSelector((state) => state.auth);
@@ -14,10 +16,19 @@ export const NavBar = () => {
     const {totalItems} = useSelector((state) => state.cart); 
 
     const location = useLocation();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const matchRoutes = (route) => {
         return matchPath({ path: route }, location.pathname)
     }
 
+    const [isOpen,setisOpen] = useState(false);
+
+    const logoutHandler = () => {
+        setisOpen(!isOpen);
+        logout(dispatch,navigate);
+    }
+    
     const [subLinks, setsubLinks] = useState([
         {
             "title": "Python",
@@ -98,12 +109,33 @@ export const NavBar = () => {
                         </ul>
                     </div>) : 
                     (
-                        <div>
+                        <div className='flex items-center gap-6'>
                             {
                                 user && user?.role === 'Student' && (
                                     <div className='flex gap-5'>
                                         <IoSearch/>
                                         <FaShoppingCart />
+                                    </div>
+                                )
+                            }
+                            {
+                                user && (
+                                    <div className='relative'>
+                                        <img src={user?.profileImage} alt="profile_image" width={40} onClick={() => setisOpen(!isOpen)}/>
+
+                                        {
+                                            isOpen && (
+                                                <div>
+                                                    <div className='absolute bg-rich-black-5 rounded-sm z-40 px-2 w-1 aspect-square right-3 -bottom-5 rotate-45'>
+                                                    </div>
+                                                    <div className='bg-rich-black-5 text-rich-black-900 absolute -bottom-12 -right-7 py-2 px-4 rounded-md z-40'>
+                                                        <Link to='/login' onClick={logoutHandler}>
+                                                            LOGOUT
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 )
                             }

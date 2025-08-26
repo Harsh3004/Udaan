@@ -11,7 +11,9 @@ require('dotenv').config();
 
 exports.sendOtp = async (req,res) => {
     try{
-        const {email} = req.body;
+        const data = req.body;
+        const email = data?.email;
+
         if(!email || email.split('@')[1] != 'gmail.com'){
             return res.status(404).json({
                 success: false,
@@ -40,7 +42,10 @@ exports.sendOtp = async (req,res) => {
 
 exports.signUp = async (req,res) => {
     try{
+        console.log(`Verifying status`);
         const {fName,lName,email,password,confirmPassword,role,otp} = req.body;
+
+        console.log('fetched details');
         if(!fName || !lName || !email || !password || !confirmPassword || !otp){
             console.log(`Enter all details carefully.`);
             return res.status(400).json({
@@ -49,7 +54,8 @@ exports.signUp = async (req,res) => {
             })
         }
 
-        if(password != confirmPassword){
+        if(password !== confirmPassword){
+            console.log(`password, confirm password does not match`);
             return res.status(400).json({
                 success: false,
                 message: `password and confirm password does not match`
@@ -58,6 +64,7 @@ exports.signUp = async (req,res) => {
 
         const existingUser = await userModel.findOne({email: email,role: role});
         if(existingUser){
+            console.log(`Existing User`);
             return res.status(400).json({
                 success: false,
                 message: 'User already exists'
@@ -67,6 +74,7 @@ exports.signUp = async (req,res) => {
         try{
             const recentOtp = await otpModel.find({email}).sort({createdAt: -1}).limit(1);
             if(!recentOtp){
+                console.log(`Otp Expires`);
                 return res.status(404).json({
                     success: false,
                     message: `Otp Expires, Try Again`
@@ -74,12 +82,14 @@ exports.signUp = async (req,res) => {
             }
 
             if(recentOtp[0].otp !== otp){
+                console.log(`Otp Not matched`);
                 return res.status(401).json({
                     success: false,
                     message: `Invalid Otp`
                 })
             }
         }catch(err){
+            console.log(`Error while matching otp`);
             return res.status(400).json({
                 success: false,
                 message: `Error in OTP verification: ${err.message}`
@@ -91,6 +101,7 @@ exports.signUp = async (req,res) => {
         try{
             hashPassword = await bcrypt.hash(password,10);
         }catch(err){
+            console.log(`Error in Hashing`);
             return res.status(500).json({
                 success: false,
                 message: `error in hashing`

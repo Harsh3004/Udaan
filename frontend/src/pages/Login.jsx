@@ -2,15 +2,57 @@ import React, { useState } from 'react'
 import board1 from '../assets/Illustration/board1.png'
 import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
+import { useNavigate } from 'react-router-dom';
+import {request} from '../services/operations/authApi';
+import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
+import {useSelector, useDispatch} from 'react-redux';
+import { setToken } from '../slices/authSlice';
+import { setUser } from '../slices/profileSlice';
+import { endpoints } from '../services/api';
 
 export const Login = () => {
-    const [userType, setUserType] = useState('Instructor');
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('Instructor');
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
-    const handleInputChange = (e) => {
-      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+  const handleInputChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value 
+    }));
+  };
+  
+  const {email,password} = formData;
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+
+  const handleOnSubmit = async(e) => {
+    e.preventDefault();
+    
+    const toastId = toast.loading("Loading...");
+    try{
+      const res = await request(endpoints.LOGIN_API, "POST" , {email,password,role});
+      const data = await res.json();
+
+      if(res.ok){
+        localStorage.setItem("token",JSON.stringify(data.userDetails.token));
+        console.log(`Login Successfully`);
+        dispatch(setToken(data.userDetails.token));
+        dispatch(setUser(data.userDetails));
+        toast.dismiss(toastId);
+        toast.success("Login Successfully");
+        navigate('/dashboard');
+      }
+      else
+        throw new Error("Login Failed");
+    }catch(err){
+      console.log(`Login Failed: ${err.message}`);
+      toast.dismiss(toastId);
+      toast.error("Login Failed");
+    }
+  }
 
   return (
     <div className='h-screen flex bg-rich-black-900 text-rich-black-5 z-50'>
@@ -27,24 +69,24 @@ export const Login = () => {
 
             <div className="bg-rich-black-800 p-1 rounded-full flex gap-1 mb-6 max-w-max z-50 cursor-pointer">
               <button
-                onClick={() => setUserType('Student')}
+                onClick={() => setRole('Student')}
                 className={`px-6 py-2 rounded-full transition-colors text-base ${
-                  userType === 'Student' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
+                  role === 'Student' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
                 }`}
               >
                 Student
               </button>
               <button
-                onClick={() => setUserType('Instructor')}
+                onClick={() => setRole('Instructor')}
                 className={`px-6 py-2 rounded-full transition-colors text-base ${
-                  userType === 'Instructor' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
+                  role === 'Instructor' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
                 }`}
               >
                 Instructor
               </button>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleOnSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm mb-1">Email Address</label>
                 <input
@@ -75,9 +117,9 @@ export const Login = () => {
                 >
                   {showPassword ? <PiEyeDuotone/> : <IoEyeOff/>}
                 </button>
-                <a href="#" className="text-xs text-blue-400 mt-1 block text-right">
-                    Forgot password
-                </a>
+                <Link to="reset-password" className="text-xs text-blue-400 mt-1 block text-right">
+                  Forgot password
+                </Link>
               </div>
               <button
                 type="submit"
