@@ -10,6 +10,8 @@ import { Dashboard } from "./pages/Dashboard"
 import { Otp } from "./pages/Otp"
 import { Error } from "./pages/Error"
 import { Toaster } from 'react-hot-toast';
+import ForgotPassword from "./pages/ForgotPassword"
+import { UpdatePassword } from "./pages/UpdatePassword"
 
 export default function App() {
   return (
@@ -32,7 +34,6 @@ export default function App() {
       <NavBar />
       
       <Routes>
-        {/* <Route path="/" element={<Home/>}/> */}
         <Route path="/" element={<Home/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="/contact" element={<Contact/>}/>
@@ -41,6 +42,8 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/otp" element={<Otp/>}/>
         <Route path="/error" element={<Error/>}/>
+        <Route path="/login/forgot-password" element={<ForgotPassword/>}/>
+        <Route path="/update-password/:token" element={<UpdatePassword/>} />
       </Routes>
 
       <Toaster/>

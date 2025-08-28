@@ -117,7 +117,7 @@ export const Login = () => {
                 >
                   {showPassword ? <PiEyeDuotone/> : <IoEyeOff/>}
                 </button>
-                <Link to="reset-password" className="text-xs text-blue-400 mt-1 block text-right">
+                <Link to="forgot-password" className="text-xs text-blue-400 mt-1 block text-right">
                   Forgot password
                 </Link>
               </div>

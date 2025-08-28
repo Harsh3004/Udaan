@@ -10,6 +10,6 @@ export const logout = (dispatch,navigate) => {
     dispatch(resetCart());
     dispatch(setToken(null));
     localStorage.clear();
-    toast.success("Loggout Successfully");
+    toast.success("Logout Successfully");
     navigate("/");
 }

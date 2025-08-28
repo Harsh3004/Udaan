@@ -32,7 +32,7 @@ exports.resetPasswordToken = async (req,res) => {
             {new: true}
         );
 
-        const url = `http://localhost:3000/update-password/${token}`;
+        const url = `http://localhost:5173/update-password/${token}`;
         await sendMail(email,`RESET PASSWORD`,`RESET PASSWORD LINK: ${url}`);
         
         return res.status(200).json({
@@ -49,8 +49,11 @@ exports.resetPasswordToken = async (req,res) => {
 
 exports.resetPassword = async (req,res) => {
     try{
-        const {password,confirmPassword,token} = req.body;
+        console.log(`Resetting Password`);
+        const {password,confirmPassword} = req.body;
+        const token = req.params.token;
 
+        console.log(password,confirmPassword,token);
         if(!password || !password || !token){
             return res.status(400).json({
                 success: false,

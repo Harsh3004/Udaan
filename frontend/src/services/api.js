@@ -4,4 +4,6 @@ export const endpoints = {
     LOGIN_API: BASE_URL + "/auth/login",
     SEND_OTP_API: BASE_URL + "/auth/sendOtp",
     SIGN_UP_API: BASE_URL + "/auth/signUp",
+    FORGOT_PASSWORD: BASE_URL + "/auth/forgotPassword",
+    RESET_PASSWORD: BASE_URL + "/auth/resetPassword"
 }

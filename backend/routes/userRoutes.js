@@ -11,7 +11,8 @@ router.post('/login', login);
 router.put('/changePassword', auth, changePassword);
 
 // Reset Password route
-router.put('/resetPassword',resetPasswordToken);
+router.put('/forgotPassword',resetPasswordToken);
+router.put('/resetPassword/:token',resetPassword);
 
 // Role check routes
 router.get('/', auth, (req, res) => res.json({
