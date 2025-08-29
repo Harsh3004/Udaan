@@ -35,12 +35,11 @@ export const Otp = () => {
     const res =  await signUp(payload);
     const data = await res.json();
     if(res.ok){
-        navigate('/dashboard')
-        toast.success(`Otp Verified successfully`);
-    }else{
-        navigate('/signup');
-        toast.error(data?.message);
-    }
+      navigate('/dashboard')
+      toast.success(`Otp Verified successfully`);
+    }else
+      toast.error(data?.message);
+    
   }
  
   return (

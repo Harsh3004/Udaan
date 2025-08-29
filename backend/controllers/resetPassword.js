@@ -50,10 +50,8 @@ exports.resetPasswordToken = async (req,res) => {
 exports.resetPassword = async (req,res) => {
     try{
         console.log(`Resetting Password`);
-        const {password,confirmPassword} = req.body;
-        const token = req.params.token;
+        const {password,confirmPassword,token} = req.body;
 
-        console.log(password,confirmPassword,token);
         if(!password || !password || !token){
             return res.status(400).json({
                 success: false,

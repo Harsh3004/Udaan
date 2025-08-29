@@ -12,7 +12,7 @@ router.put('/changePassword', auth, changePassword);
 
 // Reset Password route
 router.put('/forgotPassword',resetPasswordToken);
-router.put('/resetPassword/:token',resetPassword);
+router.put('/update-password',resetPassword);
 
 // Role check routes
 router.get('/', auth, (req, res) => res.json({
