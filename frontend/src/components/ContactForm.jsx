@@ -1,5 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { contactUs } from "../services/functions/contact";
 
 export const ContactForm = () => {
   const {
@@ -9,7 +10,7 @@ export const ContactForm = () => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
+    contactUs(data);
   };
 
   return (

@@ -6,6 +6,7 @@ const courseRoutes = require('./routes/courseRoutes');
 // const paymentRoutes = require('./routes/paymentsRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const userRoutes = require('./routes/userRoutes');
+const contactRoute = require('./routes/contactRoute');
 
 const app = express();
 require('dotenv').config();
@@ -32,6 +33,7 @@ connectDB();
 app.use('/api/auth', userRoutes);
 app.use('/api/course', courseRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/contact',contactRoute);
 // app.use('/api/payment', paymentRoutes);
 
 app.get('/',(req,res) => {

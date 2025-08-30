@@ -5,6 +5,8 @@ export const endpoints = {
     SEND_OTP_API: BASE_URL + "/auth/sendOtp",
     SIGN_UP_API: BASE_URL + "/auth/signUp",
     FORGOT_PASSWORD: BASE_URL + "/auth/forgotPassword",
-    RESET_PASSWORD: BASE_URL + "/auth/update-password"
+    RESET_PASSWORD: BASE_URL + "/auth/update-password",
+    CONTACT_API: BASE_URL + "/contact",
+    PROFILE_API: BASE_URL + "/profile"
     // change password
 }
