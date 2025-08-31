@@ -3,22 +3,17 @@ import { useLocation } from 'react-router-dom'
 import { signUp } from '../services/operations/authApi';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import OtpInput from 'react-otp-input';
 
 export const Otp = () => {
   const location = useLocation();
   const {state} = location;
   console.log(state);
 
-  const [otpForm, setotpFormData] = useState({ otp: '' });
-
-  const handleInputChange = (e) => {
-    setotpFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value 
-    }));
-  };
+  const [otp, setotp] = useState('');
 
   const navigate = useNavigate();
+
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -28,15 +23,15 @@ export const Otp = () => {
         password: state.password,
         confirmPassword: state.confirmPassword,
         role: state.role,
-        otp: otpForm.otp
+        otp: otp
     }
 
     console.log(payload);
     const res =  await signUp(payload);
     const data = await res.json();
     if(res.ok){
-      navigate('/dashboard')
-      toast.success(`Otp Verified successfully`);
+      navigate('/login')
+      toast.success(`Your account created successfully`);
     }else
       toast.error(data?.message);
     
@@ -44,20 +39,28 @@ export const Otp = () => {
  
   return (
     <form className="w-screen h-screen flex flex-col justify-center items-center space-y-6 z-50" onSubmit={handleOnSubmit}>
-        <div className='z-50'>
-            <input
-              type="otp"
-              id="otp"
-              name="otp"
-              value={otpForm.otp}
-              onChange={handleInputChange}
-              placeholder="OTP"
-              className="w-full bg-[#161d29] text-white border border-gray-700 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center tracking-widest z-40"
-            />
-        </div>
+        <OtpInput
+           value={otp}
+           onChange={(newOtp) => setotp(newOtp)}
+           numInputs={6}
+           placeholder='-'
+           renderInput={(props) => <input {...props} placeholder="-"/>}
+           shouldAutoFocus='true'
+           inputStyle={{
+           width: "3rem",
+           height: "3rem",
+           margin: "0 0.5rem",
+           fontSize: "1.5rem",
+           borderRadius: "8px",  
+           zIndex: "40",
+           color: "white",
+           backgroundColor: "#2C333F",
+           outline: "none"
+          }}
+        />
         
         <button
-        type="submit"
+        onClick={handleOnSubmit}
         className="px-2 bg-yellow-50 text-black font-bold py-3 rounded-lg hover:bg-yellow-400 transition-all duration-300 text-lg z-50"
         >
             Verify Otp

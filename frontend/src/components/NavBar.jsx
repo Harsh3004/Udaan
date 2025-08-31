@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Link, Links, matchPath } from 'react-router-dom'
 import { navbarLinks } from '../data/navbarLinks'
 import logo from '../assets/U_logo1.ico'
@@ -9,6 +9,8 @@ import { IoSearch } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
 import { logout } from '../services/functions/auth'
 import { useNavigate } from 'react-router-dom'
+import { RiLogoutBoxRLine } from "react-icons/ri";
+import { CgProfile } from "react-icons/cg";
 
 export const NavBar = () => {
     const {token} = useSelector((state) => state.auth);
@@ -23,7 +25,23 @@ export const NavBar = () => {
     }
 
     const [isOpen,setisOpen] = useState(false);
+    const dropDownRef = useRef(null);
 
+    useEffect(() => {
+        console.log(`user: ${user}`);
+        console.log(token);
+      function handleClickOutside(event) {
+        if (dropDownRef.current && !dropDownRef.current.contains(event.target)) {
+          setisOpen(false);
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
+    
     const logoutHandler = () => {
         setisOpen(!isOpen);
         logout(dispatch,navigate);
@@ -94,44 +112,57 @@ export const NavBar = () => {
 
                 {
                     token === null ? 
-                    (<div className='flex'>
-                        <ul className='flex gap-5 cursor-pointer z-50'>
-                            <Link to={'login'}>
-                                <button className='rounded-lg py-2 px-3 border border-rich-black-800'>
-                                    Login
-                                </button>
-                            </Link>
-                            <Link to={'signup'}>
-                                <button className='rounded-lg py-2 px-3 border border-rich-black-800'>
-                                    SignUp
-                                </button>
-                            </Link>
-                        </ul>
-                    </div>) : 
+                    (
+                        <div className='flex'>
+                            <ul className='flex gap-5 cursor-pointer z-50'>
+                                <Link to={'login'}>
+                                    <button className='rounded-lg py-2 px-3 border border-rich-black-800'>
+                                        Login
+                                    </button>
+                                </Link>
+                                <Link to={'signup'}>
+                                    <button className='rounded-lg py-2 px-3 border border-rich-black-800'>
+                                        SignUp
+                                    </button>
+                                </Link>
+                            </ul>
+                        </div>
+                    ) : 
                     (
                         <div className='flex items-center gap-6'>
                             {
-                                user && user?.role === 'Student' && (
+                                user && (
                                     <div className='flex gap-5'>
-                                        <IoSearch/>
+                                        {/* <IoSearch/> */}
                                         <FaShoppingCart />
                                     </div>
                                 )
                             }
                             {
                                 user && (
-                                    <div className='relative'>
-                                        <img src={user?.profileImage} alt="profile_image" width={40} onClick={() => setisOpen(!isOpen)}/>
+                                    <div className='relative' ref={dropDownRef}>
+                                        <button onClick={() => setisOpen(!isOpen)}>
+                                            <img src={user?.profileImage} alt="profile_image" width={40} className='rounded-full'/>
+                                        </button>
 
                                         {
                                             isOpen && (
                                                 <div>
-                                                    <div className='absolute bg-rich-black-5 rounded-sm z-40 px-2 w-1 aspect-square right-3 -bottom-5 rotate-45'>
+                                                    <div className='absolute bg-rich-black-800 rounded-sm z-40 px-2 w-1 aspect-square right-3 -bottom-5 rotate-45'>
                                                     </div>
-                                                    <div className='bg-rich-black-5 text-rich-black-900 absolute -bottom-12 -right-7 py-2 px-4 rounded-md z-40'>
-                                                        <Link to='/login' onClick={logoutHandler}>
-                                                            LOGOUT
-                                                        </Link>
+                                                    <div className='bg-rich-black-800 text-rich-black-5 absolute top-12 -right-10 py-2 px-4 rounded-md z-40 w-32 flex flex-col gap-2 items-center'>
+                                                        <div>
+                                                            <Link to='/profile' className='flex items-center gap-2'>
+                                                                <CgProfile />
+                                                                My Profile
+                                                            </Link>
+                                                        </div>
+                                                        <div>
+                                                            <Link to='/login' onClick={logoutHandler} className='flex items-center gap-2'>
+                                                                <RiLogoutBoxRLine/>
+                                                                LOGOUT 
+                                                            </Link>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )

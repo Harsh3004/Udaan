@@ -33,11 +33,12 @@ export const Login = () => {
     
     const toastId = toast.loading("Loading...");
     try{
-      const res = await request(endpoints.LOGIN_API, "POST" , {email,password,role});
-      const data = await res.json();
+        const res = await request(endpoints.LOGIN_API, "POST" , {email,password,role});
+        const data = await res.json();
 
       if(res.ok){
         localStorage.setItem("token",JSON.stringify(data.userDetails.token));
+        localStorage.setItem("user",JSON.stringify(data.userDetails));  
         console.log(`Login Successfully`);
         dispatch(setToken(data.userDetails.token));
         dispatch(setUser(data.userDetails));
