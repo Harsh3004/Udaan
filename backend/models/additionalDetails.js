@@ -22,7 +22,6 @@ const additionalDetailsSchema = new mongoose.Schema({
             type: String,
             trim: true
         }
-
 });
 
 const additionalDetailsModel = mongoose.model('additionalDetails',additionalDetailsSchema);

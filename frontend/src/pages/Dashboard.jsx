@@ -1,9 +1,14 @@
 import React from 'react'
+import { Sidebar } from '../components/Dasboard/Sidebar'
+import { Outlet } from 'react-router-dom'
 
 export const Dashboard = () => {
   return (
-    <div className='w-screen h-screen flex justify-center items-center text-white'>
-      <p className='text-4xl'>Dashboard</p>
+    <div className='relative w-screen h-screen flex text-white transition-all duration-200'>
+      <Sidebar />
+      <div className='w-3/4'>
+        <Outlet/>
+      </div>
     </div>
   )
 }

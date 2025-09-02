@@ -12,7 +12,7 @@ import { setUser } from '../slices/profileSlice';
 import { endpoints } from '../services/api';
 
 export const Login = () => {
-  const [role, setRole] = useState('Instructor');
+  const [role, setRole] = useState('Student');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
 

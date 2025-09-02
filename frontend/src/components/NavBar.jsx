@@ -16,6 +16,7 @@ export const NavBar = () => {
     const {token} = useSelector((state) => state.auth);
     const {user} = useSelector((state) => state.profile);
     const {totalItems} = useSelector((state) => state.cart); 
+    const [modal, setModal] = useState(null);
 
     const location = useLocation();
     const dispatch = useDispatch();
@@ -152,7 +153,7 @@ export const NavBar = () => {
                                                     </div>
                                                     <div className='bg-rich-black-800 text-rich-black-5 absolute top-12 -right-10 py-2 px-4 rounded-md z-40 w-32 flex flex-col gap-2 items-center'>
                                                         <div>
-                                                            <Link to='/profile' className='flex items-center gap-2'>
+                                                            <Link to='/dashboard/my-profile' className='flex items-center gap-2'>
                                                                 <CgProfile />
                                                                 My Profile
                                                             </Link>
