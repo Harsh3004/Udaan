@@ -38,6 +38,7 @@ export const Login = () => {
       if(res.ok){
         localStorage.setItem("token",JSON.stringify(data.userDetails.token));
         localStorage.setItem("user",JSON.stringify(data.userDetails));  
+        console.log(data.userDetails);
         console.log(`Login Successfully`);
         dispatch(setToken(data.userDetails.token));
         dispatch(setUser(data.userDetails));
