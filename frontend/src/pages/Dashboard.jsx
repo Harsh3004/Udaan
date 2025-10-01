@@ -6,7 +6,7 @@ export const Dashboard = () => {
   //Here we can add loading functionality..
   
   return (
-    <div className='relative w-screen h-screen flex text-white transition-all duration-200'>
+    <div className='relative w-screen flex text-white transition-all duration-200'>
       <Sidebar />
       <div className='w-3/4'>
         <Outlet/>

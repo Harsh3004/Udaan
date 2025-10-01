@@ -7,13 +7,12 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 export const Profile = () => {
     const {user} = useSelector((state) => state.profile);
-    console.log("USER: ", {user});
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     return (
         <div className='text-white flex flex-col items-center justify-center mt-10 gap-2'>
-            <div className='flex bg-rich-black-800 p-6 justify-between items-center rounded-lg border border-rich-black-700 z-40 w-3/4'>
+            <div className='flex bg-rich-black-800 p-6 justify-between items-center rounded-lg border border-rich-black-700 w-3/4 z-40'>
                 <div className='flex items-center gap-5'>
                     <img src={user?.profileImage} alt="profile_image" width={40} className='rounded-full'/>
                     <div>
@@ -27,7 +26,7 @@ export const Profile = () => {
                 </NavLink>
             </div>
 
-            <div className='bg-rich-black-800 px-6 py-2  rounded-lg border border-rich-black-700 z-40 w-3/4'>
+            <div className='bg-rich-black-800 px-6 py-2  rounded-lg border border-rich-black-700 w-3/4'>
                     <div className='flex justify-between items-center'>
                         <p className='font-semibold text-lg'>About</p>
                         <NavLink to='/dashboard/setting' className='bg-yellow-50 px-4 py-2 text-rich-black-900 flex items-center gap-2 rounded-lg'>

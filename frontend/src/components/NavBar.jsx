@@ -151,7 +151,7 @@ export const NavBar = () => {
                                                 <div>
                                                     <div className='absolute bg-rich-black-800 rounded-sm z-40 px-2 w-1 aspect-square right-3 -bottom-5 rotate-45'>
                                                     </div>
-                                                    <div className='bg-rich-black-800 text-rich-black-5 absolute top-12 -right-10 py-2 px-4 rounded-md z-40 w-32 flex flex-col gap-2 items-center'>
+                                                    <div className='bg-rich-black-800 text-rich-black-5 absolute top-12 -right-10 py-2 px-4 rounded-md w-32 flex flex-col gap-2 items-center border box-content border-rich-black-600 z-50'>
                                                         <div>
                                                             <Link to='/dashboard/my-profile' className='flex items-center gap-2'>
                                                                 <CgProfile />

@@ -20,8 +20,8 @@ import Setting from "./components/Dasboard/Setting"
 
 export default function App() {
   return (
-    <div className='w-full min-h-screen overflow-hidden relative select-none bg-rich-black-900'>
-      <div style={{ width: '100%', height: '600px', position: 'absolute'}}>
+    <div className='w-full min-h-screen overflow-x-hidden relative select-none bg-rich-black-900'>
+      <div style={{ width: '100%', height: '100%', position: 'absolute'}}>
         <LightRays
           raysOrigin="top-center"
           raysColor="#ffffff"

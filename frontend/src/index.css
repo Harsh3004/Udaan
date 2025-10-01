@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+#root {
+  min-height: 100vh;
+}
+
 .border-gradient {
   border: 1px solid;
   border-image-source: linear-gradient(121.74deg, rgba(255, 255, 255, 0.22) -7.75%, rgba(255, 255, 255, 0) 37.38%);
