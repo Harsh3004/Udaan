@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { GoArrowLeft } from 'react-icons/go';
 import toast from 'react-hot-toast';
-import { endpoints } from '../services/api';
+import { endpoints } from '../../services/api';
 import { PiEyeDuotone } from 'react-icons/pi';
 import { IoEyeOff } from 'react-icons/io5';
-import { request } from '../services/operations/authApi';
+import { request } from '../../services/operations/authApi';
 
 export const UpdatePassword = () => {
     const params = useParams();
@@ -31,7 +31,7 @@ export const UpdatePassword = () => {
             data.token = token;
             
             console.log(data)
-            const res = await request(endpoints.RESET_PASSWORD, "PUT", data);
+            const res = await request(endpoints.RESET_PASSWORD_API, "PUT", data);
             const response = await res.json();
 
             console.log(res);

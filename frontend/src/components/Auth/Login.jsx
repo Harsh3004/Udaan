@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
-import board1 from '../assets/Illustration/board1.png'
+import { Link,useNavigate } from 'react-router-dom';
+import {useSelector, useDispatch} from 'react-redux';
+import toast from 'react-hot-toast';
 import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
-import { useNavigate } from 'react-router-dom';
-import {request} from '../services/operations/authApi';
-import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
-import {useSelector, useDispatch} from 'react-redux';
-import { setToken } from '../slices/authSlice';
-import { setUser } from '../slices/profileSlice';
-import { endpoints } from '../services/api';
+import { endpoints } from '../../services/api';
+import {request} from '../../services/operations/authApi';
+import { setToken } from '../../slices/authSlice';
+import { setUser } from '../../slices/profileSlice';
+import board1 from '../../assets/Illustration/board1.png'
 
 export const Login = () => {
   const [role, setRole] = useState('Student');
@@ -33,8 +32,8 @@ export const Login = () => {
     
     const toastId = toast.loading("Loading...");
     try{
-        const res = await request(endpoints.LOGIN_API, "POST" , {email,password,role});
-        const data = await res.json();
+      const res = await request(endpoints.LOGIN_API, "POST" , {email,password,role});
+      const data = await res.json();
 
       if(res.ok){
         localStorage.setItem("token",JSON.stringify(data.userDetails.token));

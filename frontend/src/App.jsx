@@ -2,17 +2,21 @@ import { Routes,Route,Link } from "react-router-dom"
 import { Home } from "./pages/Home"
 import LightRays from "./assets/preComponents.jsx/LightRays"
 import { NavBar } from "./components/NavBar"
-import { Login } from "./pages/Login"
-import { Signup } from "./pages/Signup"
+import { Login } from "./components/Auth/Login"
+import { Signup } from "./components/Auth/Signup"
 import { About } from "./pages/About"
 import { Contact } from "./pages/Contact"
 import { Dashboard } from "./pages/Dashboard"
-import { Otp } from "./pages/Otp"
+import { Otp } from "./components/Auth/Otp"
 import { Error } from "./pages/Error"
 import { Toaster } from 'react-hot-toast';
-import ForgotPassword from "./pages/ForgotPassword"
-import { UpdatePassword } from "./pages/UpdatePassword"
+import ForgotPassword from "./components/Auth/ForgotPassword"
+import { UpdatePassword } from "./components/Auth/UpdatePassword"
 import { Profile } from "./components/Dasboard/Profile"
+import EnrolledCourses from "./components/Dasboard/EnrolledCourses"
+import ProtectedRoute from "./components/Auth/ProtectedRoute"
+import PurschasedHistory from "./components/Dasboard/PurchasedHistory"
+import Setting from "./components/Dasboard/Setting"
 
 export default function App() {
   return (
@@ -45,13 +49,18 @@ export default function App() {
         <Route path="/login/forgot-password" element={<ForgotPassword/>}/>
         <Route path="/update-password/:token" element={<UpdatePassword/>} />
 
-        <Route path="/dashboard" element={<Dashboard/>}>
+        <Route path="/dashboard" element={
+          <ProtectedRoute> 
+            <Dashboard/>
+          </ProtectedRoute>
+        }>
           <Route path="/dashboard/my-profile" element={<Profile/>}/>
           <Route path="/dashboard/instructor" element={<Profile/>}/>
           <Route path="/dashboard/my-courses" element={<Profile/>}/>
           <Route path="/dashboard/add-course" element={<Profile/>}/>
-          <Route path="/dashboard/enrolled-courses" element={<Profile/>}/>
-          <Route path="/dashboard/purchase-history" element={<Profile/>}/>
+          <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
+          <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
+          <Route path="/dashboard/setting" element={<Setting/>}/>
         </Route>
 
         <Route path="*" element={<Error/>}/>

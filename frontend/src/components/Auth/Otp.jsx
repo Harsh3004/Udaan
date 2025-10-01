@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { signUp } from '../services/operations/authApi';
+import { signUp } from '../../services/operations/authApi';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import OtpInput from 'react-otp-input';

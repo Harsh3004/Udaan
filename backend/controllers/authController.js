@@ -154,7 +154,10 @@ exports.login = async (req,res) => {
             })
         }
 
-        const userDetails = await userModel.findOne({email, role: role});
+        const userDetails = await userModel.findOne({email, role: role})
+        .populate('additionalDetails')
+        .exec();
+        
         if(!userDetails){
             return res.status(401).json({
                 success: false,

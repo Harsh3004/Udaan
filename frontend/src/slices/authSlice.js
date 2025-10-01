@@ -2,6 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     // here we are trying to fetch token from local storage if exists
+    storedToken: localStorage.getItem("token"),
+    
     token: localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token")) : null,
     loading: false
 }

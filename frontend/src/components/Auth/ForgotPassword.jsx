@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
-import { request } from '../services/operations/authApi';
-import { endpoints } from '../services/api';
+import { request } from '../../services/operations/authApi';
+import { endpoints } from '../../services/api';
 import { Link } from 'react-router-dom';
 import { GoArrowLeft } from "react-icons/go";
 
@@ -18,7 +18,7 @@ const ForgotPassword = () => {
         console.log(`Sending mail`);
         const toastId = toast.loading(`Sending Mail`);
         try{
-            const res = await request(endpoints.FORGOT_PASSWORD, "PUT", {email: email});
+            const res = await request(endpoints.FORGOT_PASSWORD_API, "PUT", {email: email});
             const data = await res.json();
             console.log(res.ok);
             if(res.ok){

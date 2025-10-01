@@ -13,6 +13,7 @@ import card2 from '../assets/Card2.png'
 import card3 from '../assets/Card3.png'
 import { ExploreMore } from '../components/HomeComponent/ExploreMore';
 import { TypeAnimation } from 'react-type-animation';
+import OpenRoute from '../components/Auth/OpenRoute';
 
 export const Home = () => {
   return (
