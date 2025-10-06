@@ -34,9 +34,6 @@ export const UpdatePassword = () => {
             const res = await request(endpoints.RESET_PASSWORD_API, "PUT", data);
             const response = await res.json();
 
-            console.log(res);
-            console.log(response);
-
             if(!res.ok)
                 throw new Error(response.message);
             

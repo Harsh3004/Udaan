@@ -208,7 +208,7 @@ exports.login = async (req,res) => {
 exports.changePassword = async (req,res) => {
     try{
         const {password,newPassword} = req.body;
-        const userId = req.user.id;
+        const userId = req.body.userId;
         
         if(!userId || !password || !newPassword){
             return res.status(400).json({
@@ -259,7 +259,6 @@ exports.changePassword = async (req,res) => {
         console.log(user,response);
         
         sendMail(user.email,`Changed Password`,`Your password changed successfully`);
-        // Check if previous password entry was stored in cookie or other parameters then remove them
         
         return res.status(200).json({
             success: true,

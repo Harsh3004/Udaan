@@ -26,7 +26,7 @@ export const Profile = () => {
                 </NavLink>
             </div>
 
-            <div className='bg-rich-black-800 px-6 py-2  rounded-lg border border-rich-black-700 w-3/4'>
+            <div className='bg-rich-black-800 px-6 py-2 rounded-lg border border-rich-black-700 w-3/4'>
                     <div className='flex justify-between items-center'>
                         <p className='font-semibold text-lg'>About</p>
                         <NavLink to='/dashboard/setting' className='bg-yellow-50 px-4 py-2 text-rich-black-900 flex items-center gap-2 rounded-lg'>

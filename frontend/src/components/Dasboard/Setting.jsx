@@ -1,6 +1,12 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
 import { Button } from '../Button';
+import { useState } from 'react';
+import { IoEyeOff} from "react-icons/io5";
+import { PiEyeDuotone } from "react-icons/pi";
+import toast from 'react-hot-toast';
+import { endpoints } from '../../services/api';
+import { request } from '../../services/operations/authApi';
 
 
 // SVG Icons as React Components for cleaner use
@@ -24,25 +30,93 @@ const TrashIcon = () => (
 
 const Setting = () => {
   const { user } = useSelector((state) => state.profile);
+  const [previewImage, setPreviewImage] = useState(user.profileImage);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [data,setData] = useState({ password: '' , newPassword: ''})
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create a temporary URL for the selected file to display a preview
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewImage(imageUrl);
+      console.log(previewImage);
+
+      // Pass the file to a parent component or handle the upload logic
+      // if (onImageChange) {
+      //   onImageChange(file);
+      // }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setPreviewImage(user.profileImage);
+    // if (onImageRemove) {
+    //   onImageRemove(); // Call a function to handle removal logic
+    // }
+  };
+
+  const changePasswordHandler = async (e) => {
+    e.preventDefault();
+    console.log(`Change Password Request...`);
+    const toastId = toast.loading(`Changing Password`);
+    try{
+      data.userId = user._id;
+      const res = await request(endpoints.CHANGE_PASSWORD_API, "PUT", data);
+      const response = await res.json();
+
+      if(!res.ok)
+        throw new Error(response.message);
+            
+      toast.dismiss(toastId);
+      toast.success(`Password Changed Successfully`);
+    }catch(err){
+      toast.dismiss(toastId);
+      toast.error(err.message);
+    }
+  }
+
+  const handleInputChange = (e) => {
+    setData((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+    }));
+  }
+  
   return (
     <div className="min-h-screen flex justify-center items-center p-4 sm:p-6 lg:p-8 z-40">
       <div className="max-w-3xl w-full space-y-6 z-40">
 
-        {/* --- Section 1: Change Profile Picture --- */}
         <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-6 z-40">
-          <img
-            src={user.profileImage}
-            alt="User profile"
-            className="w-20 h-20 rounded-full object-cover border-2 border-rich-black-600"
-          />
+          <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-rich-black-600">
+            <img
+              src={previewImage}
+              alt="User profile"
+              className="w-full h-full object-cover"
+            />
+            <input
+              type="file"
+              id="profile-image-upload"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+          </div>
+
           <div className="text-center sm:text-left">
             <h3 className="text-base font-medium text-rich-black-5">Change Profile Picture</h3>
             <div className="mt-2 flex gap-3">
-              <button className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors">
+              <label
+                htmlFor="profile-image-upload"
+                className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm cursor-pointer hover:bg-amber-300 transition-colors"
+              >
                 Change
-              </button>
-              <button className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors">
+              </label>
+              <button
+                onClick={handleRemoveImage}
+                className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors"
+              >
                 Remove
               </button>
             </div>
@@ -131,27 +205,72 @@ const Setting = () => {
           </form>
         </div>
 
+        <div className="mt-2 flex flex-row-reverse gap-3">
+          <button className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors">
+            Save
+          </button>
+          <button className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors">
+            Cancel
+          </button>
+        </div>
+        
         {/* --- Section 3: Password --- */}
         <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl p-6 z-40">
           <h2 className="text-lg font-semibold text-rich-black-100 mb-6">Password</h2>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form 
+            onSubmit={changePasswordHandler}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             <div className="flex flex-col space-y-2">
               <label htmlFor="currentPassword" className="text-sm font-medium text-rich-black-400">Current Password *</label>
               <div className="relative">
-                <input type="password" id="currentPassword" placeholder="**********" className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <div className="absolute inset-y-0 right-3 flex items-center">
-                  <EyeSlashIcon />
-                </div>
+                <input 
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  onChange={handleInputChange}
+                  name='password'
+                  id="currentPassword"
+                  placeholder="Enter current password" 
+                  className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center"
+                >
+                  {showCurrentPassword ? <PiEyeDuotone/> : <IoEyeOff/>}
+                </button>
               </div>
             </div>
             <div className="flex flex-col space-y-2">
-              <label htmlFor="changePassword" className="text-sm font-medium text-rich-black-400">Change Password *</label>
+              <label htmlFor="changePassword" className="text-sm font-medium text-rich-black-400">New Password *</label>
               <div className="relative">
-                <input type="password" id="changePassword" placeholder="**********" className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <div className="absolute inset-y-0 right-3 flex items-center">
-                  <EyeSlashIcon />
-                </div>
+                <input 
+                  type={showNewPassword ? 'text' : 'password'}
+                  onChange={handleInputChange}
+                  name='newPassword'
+                  id="changePassword" 
+                  placeholder="Enter new password" 
+                  className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center"
+                >
+                  {showNewPassword ? <PiEyeDuotone/> : <IoEyeOff/>}
+                </button>
               </div>
+            </div>
+
+            <div className="mt-2 flex flex-row-reverse gap-3 col-span-2">
+              <button 
+              type='submit'
+              className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors">
+                Change Password
+              </button>
+              {/* <button className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors">
+                Cancel
+              </button> */}
             </div>
           </form>
         </div>
@@ -173,14 +292,6 @@ const Setting = () => {
           </div>
         </div>
 
-        <div className="mt-2 flex flex-row-reverse gap-3">
-          <button className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors">
-            Save
-          </button>
-          <button className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors">
-            Cancel
-          </button>
-        </div>
 
       </div>
     </div>
