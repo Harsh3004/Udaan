@@ -190,8 +190,9 @@ exports.login = async (req,res) => {
                 message: `Login Successfully`,
                 userDetails
             })
-        }else{
-            return res.status(403).json({
+        }
+        else{
+            return res.status(401).json({
                 success: false,
                 message: `Invalid Password`
             })
@@ -226,7 +227,7 @@ exports.changePassword = async (req,res) => {
         }
         
         if(!(await bcrypt.compare(password,user.password))){
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
                 message: `Invalid password`
             })

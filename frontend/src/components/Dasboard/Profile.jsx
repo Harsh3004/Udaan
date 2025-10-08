@@ -66,15 +66,15 @@ export const Profile = () => {
                         </div>
                         <div>
                             <p className='font-normal text-sm text-rich-black-600'>Phone Number</p>
-                            <p>{user.mobile ? user.mobile : "Add Contact Number"}</p>
+                            <p>{user.additionalDetails.mobile ? user.additionalDetails.mobile : "Add Contact Number"}</p>
                         </div>
                         <div>
                             <p className='font-normal text-sm text-rich-black-600'>Gender</p>
-                            <p>{user.gender ? user.gender : "Add Gender"}</p>
+                            <p>{user.additionalDetails.gender ? user.additionalDetails.gender : "Add Gender"}</p>
                         </div>
                         <div>
                             <p className='font-normal text-sm text-rich-black-600'>Date of Birth</p>
-                            <p>{user.dob ? user.dob : "Add date of Birth"}</p>
+                            <p>{user.additionalDetails.dob ? user.additionalDetails.dob : "Add date of Birth"}</p>
                         </div>
                     </div>
             </div>

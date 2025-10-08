@@ -7,14 +7,20 @@ const {
 } = endpoints;
 
 export const request = async (API, type, data) => {
-  console.log(data);
+  let body = undefined;
+  let headers = {};
+  if(data instanceof FormData)
+    body = data
+  else{
+    body = JSON.stringify(data);
+    headers['Content-Type'] = 'application/json';
+  }
+
   return await fetch(API,{
     method: type,
-    headers: {
-      "Content-Type": "application/json",
-      },
+    headers: headers,
     credentials: "include",
-    body: JSON.stringify(data)
+    body: body
   });
 } 
 

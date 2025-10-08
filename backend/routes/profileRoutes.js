@@ -4,7 +4,7 @@ const { showProfileDetails, updateProfile } = require('../controllers/profileCon
 const router = express.Router();
 
 // Profile routes
-router.get('/', auth, showProfileDetails);
-router.put('/update', auth, updateProfile);
+router.get('/', showProfileDetails);
+router.put('/update', updateProfile);
 
 module.exports = router;
