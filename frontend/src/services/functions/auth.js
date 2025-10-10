@@ -13,3 +13,11 @@ export const logout = (dispatch,navigate) => {
     toast.success("Logout Successfully");
     navigate("/");
 }
+
+export const deleteAccount = (dispatch, navigate) => {
+    console.log(`Deleting Account`);
+
+    // Deleting Account API and backend functionality to be created... 
+
+    toast.error(`Coming Soon...`)
+}
