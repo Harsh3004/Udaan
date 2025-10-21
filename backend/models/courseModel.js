@@ -53,17 +53,17 @@ const courseSchema = new mongoose.Schema({
 
 courseSchema.post("save", async function(doc,next){
     try{
-        // const instructor = await userModel.findById(doc.instructor);
         const instructor = await userModel.findByIdAndUpdate(
-                doc.instructor,
-                { $push: { courses: doc._id } },
-                { new: true }
-            );
+            doc.instructor,
+            { $push: { courses: doc._id } },
+            { new: true }
+        );
 
-        const response = await sendMail(instructor.email,
-                `Course Created Successfully 🎉`,
-                `Your course was uploaded successfully`
-            )
+        const response = await sendMail(
+            instructor.email,
+            `Course Created Successfully 🎉`,
+            `Your course was uploaded successfully`
+        )
 
         console.log(`Course creation mail send successfully`);
         next();

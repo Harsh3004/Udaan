@@ -10,17 +10,18 @@ require('dotenv').config();
 
 exports.createCourse = async(req,res) => {
     try{
-        const {title,desc,language,price,whatyouwilllearn} = req.body;
+        console.log(`Create Course API triggered...`);
+        const {title,desc,language,price,whatyouwilllearn,user} = req.body;
         const thumbnail = req.files.image;
-        const userDetails = req.user;
-        
+
         if(!title || !desc || !language || !price || !whatyouwilllearn || !thumbnail){
+            console.log("Missing Details");
             return res.status(400).json({
                 success: false,
                 message: `Enter all details`
             })
         }
-        
+
         const supportedTypes = ['jpeg','jpg','png'];
         const fileType = thumbnail.name.split('.')[1];
         if(!isFileSupported(fileType,supportedTypes)){
@@ -31,10 +32,9 @@ exports.createCourse = async(req,res) => {
         }
         
         const response = await uploadToCloudinary(thumbnail,process.env.FOLDER_NAME);
-
         const course = await courseModel.create({
             title,desc,
-            instructor: userDetails.id,
+            instructor: user,
             language: language,
             price: price,
             thumbnail: response,
@@ -51,6 +51,7 @@ exports.createCourse = async(req,res) => {
             course
         })
     }catch(error){
+        console.log(error.message);
         return res.status(400).json({
             success: false,
             message: `Error in Creating Course: ${error.message}`
