@@ -17,6 +17,7 @@ import EnrolledCourses from "./components/Dasboard/EnrolledCourses"
 import ProtectedRoute from "./components/Auth/ProtectedRoute"
 import PurschasedHistory from "./components/Dasboard/PurchasedHistory"
 import Setting from "./components/Dasboard/Setting"
+import AddCourse from "./components/Dasboard/AddCourse/AddCourse"
 
 export default function App() {
   return (
@@ -57,7 +58,7 @@ export default function App() {
           <Route path="/dashboard/my-profile" element={<Profile/>}/>
           <Route path="/dashboard/instructor" element={<Profile/>}/>
           <Route path="/dashboard/my-courses" element={<Profile/>}/>
-          <Route path="/dashboard/add-course" element={<Profile/>}/>
+          <Route path="/dashboard/add-course" element={<AddCourse/>}/>
           <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
           <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
           <Route path="/dashboard/setting" element={<Setting/>}/>
