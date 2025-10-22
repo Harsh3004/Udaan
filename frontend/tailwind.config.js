@@ -20,11 +20,11 @@ module.exports = {
         "rich-black-100" : "#AFB2BF",
         "rich-black-5": "#F1F2FF",
         "yellow-50": "#FFD60A",
+        "yellow-900": "#251400",
         "pure-greys-5": "#F9F9F9",
         "greenish": "#014A32",
         "greenish-300": "#05A77B",
         "greenish-500": "#037957",
-        
       },
       backgroundImage: {
         'gradient-custom': 'linear-gradient(111.93deg, rgba(14, 26, 45, 0.24) -1.4%, rgba(17, 30, 50, 0.38) 104.96%)',
@@ -41,6 +41,10 @@ module.exports = {
         'inner-light': 'inset -2px -2px 0px 0px #FFFFFF82',
         'shadow-custom': '15px 15px 0px 0px #F5F5F5',
         "custom-left": "-20px -20px 0px 0px #FFFFFF",
+        "input-shadow": "0px -1px 0px 0px #FFFFFF2E inset",
+        "button-shadow": "-2px -2px 0px 0px #FFFFFF1A inset",
+        "yellow-button-shadow": "-2px -2px 0px 0px #FFFFFF82 inset"
+
       },
       fontFamily: {
         edu: ['"Edu SA Beginner"', 'cursive'], // add your Google font

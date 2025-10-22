@@ -11,8 +11,9 @@ require('dotenv').config();
 exports.createCourse = async(req,res) => {
     try{
         console.log(`Create Course API triggered...`);
-        const {title,desc,language,price,whatyouwilllearn,user} = req.body;
+        const {title,desc,language,price,whatyouwilllearn} = req.body;
         const thumbnail = req.files.image;
+        const user = req.user;git
 
         if(!title || !desc || !language || !price || !whatyouwilllearn || !thumbnail){
             console.log("Missing Details");
@@ -34,7 +35,7 @@ exports.createCourse = async(req,res) => {
         const response = await uploadToCloudinary(thumbnail,process.env.FOLDER_NAME);
         const course = await courseModel.create({
             title,desc,
-            instructor: user,
+            instructor: user.id,
             language: language,
             price: price,
             thumbnail: response,

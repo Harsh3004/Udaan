@@ -7,20 +7,20 @@ const {addRatingReview,averageRating,showAllRatingAndReview} = require('../contr
 const router = express.Router();
 
 // Course routes
-router.get('/', auth, isInstructor, showAllCourses);
-router.get('/:courseId', auth, isInstructor, getCourseDetails);
+router.get('/',showAllCourses);
+router.get('/:courseId', getCourseDetails);
 router.post('/create', auth, isInstructor, createCourse);
 router.delete('/delete/:courseId', auth, isInstructor, deleteCourse);
 router.put('/update/:courseId', auth, isInstructor, updateCourse);
 
 // Section routes
-router.get('/:courseId/section', auth, isInstructor, showAllSection);
+router.get('/:courseId/section', showAllSection);
 router.post('/:courseId/section/create', auth, isInstructor, createSection);
 router.put('/:courseId/section/update/:sectionId', auth, isInstructor, updateSection);
 router.delete('/:courseId/section/delete/:sectionId', auth, isInstructor, deleteSection);
 
 // Subsection routes
-router.get('/:courseId/section/:sectionId/subsection', auth, isInstructor, showAllsubsection);
+router.get('/:courseId/section/:sectionId/subsection', showAllsubsection);
 router.post('/:courseId/section/:sectionId/subsection/create', auth, isInstructor, createsubSection);
 router.put('/:courseId/section/:sectionId/subsection/update/:subsectionId', auth, isInstructor, updatesubSection);
 router.delete('/:courseId/section/:sectionId/subsection/delete/:subsectionId', auth, isInstructor, deletesubSection);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { signUp } from '../../services/operations/authApi';
+import { endpoints } from '../../services/api';
+import { request } from '../../services/operations/authApi';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import OtpInput from 'react-otp-input';
@@ -27,7 +28,7 @@ export const Otp = () => {
     }
 
     console.log(payload);
-    const res =  await signUp(payload);
+    const res =  await request(endpoints.SIGN_UP_API,"POST",payload);
     const data = await res.json();
     if(res.ok){
       navigate('/login')

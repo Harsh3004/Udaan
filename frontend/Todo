@@ -1,6 +1,14 @@
 Add Route for outlet --> Nested Route --> done
 Add Open Route and Protected Route --> done
 
+resend otp feature
+Unable to send otp to accounts without '@gmail.com'
+Otp time is less
+mobile number validation since currently any mobile number can be entered without verification.
+
 Loading... until data loaded to show
+
 video validity automation via admin
-In each uploaded video instructor face will be there so that we can use face recogination for 
+In each uploaded video instructor face will be there so that we can use face recogination for verification.
+
+Fetching category for course creationg instead of showing hardcoded.

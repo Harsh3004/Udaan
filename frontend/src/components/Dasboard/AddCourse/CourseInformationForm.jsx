@@ -333,6 +333,11 @@ const CourseInformationForm = ({setcurrStep}) => {
       }
 
       const response = await request(endpoints.CREATE_COURSE_API,"POST",formPayload);
+      if(!response.ok){
+        const data = await res.json();
+        throw new Error(data.message);
+      }
+      
       console.log(response);
       toast.dismiss(toastID);
       toast.success("Course Created Successfully");
