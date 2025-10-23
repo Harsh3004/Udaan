@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { endpoints } from "../../services/api";
-import { request, sendOtp } from "../../services/operations/authApi";
+import { request } from "../../services/operations/authApi";
 import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
 import education from '../../assets/Illustration/education.png'

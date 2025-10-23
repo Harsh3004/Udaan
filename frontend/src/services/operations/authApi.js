@@ -1,4 +1,6 @@
-export const request = async (API, type, data) => {
+import { useSelector } from "react-redux";
+
+export const request = async (API, type, data,token) => {
   let body = undefined;
   let headers = {};
   if(data instanceof FormData)
@@ -8,10 +10,8 @@ export const request = async (API, type, data) => {
     headers['Content-Type'] = 'application/json';
   }
 
-  const token = localStorage.getItem("token");
-  if (token) {
+  if (token)
     headers["Authorization"] = `Bearer ${token}`;
-  }
 
   return await fetch(API,{
     method: type,

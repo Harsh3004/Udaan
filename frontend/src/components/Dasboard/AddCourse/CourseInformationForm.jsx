@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useForm, Controller, Form } from 'react-hook-form';
 import { FaChevronRight } from "react-icons/fa";
 import { endpoints } from '../../../services/api';
 import { request } from '../../../services/operations/authApi';
 import toast from 'react-hot-toast';
+import { setCourse, setStep } from '../../../slices/courseSlice';
 
 // --- Tag Component ---
 const Tag = ({ tag, onRemove }) => (
@@ -288,8 +289,11 @@ const TextInput = ({ label, name, placeholder, type = 'text', rows, register, va
 
 
 // --- Main Application Component ---
-const CourseInformationForm = ({setcurrStep}) => {
+const CourseInformationForm = () => {
   const user = useSelector((state) => state.profile);
+  const token = useSelector((state) => state.auth.token);
+  const dispatch = useDispatch();
+
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     defaultValues: {
       title: '',
@@ -332,16 +336,17 @@ const CourseInformationForm = ({setcurrStep}) => {
         formPayload.append("image", data.thumbnailUrl); 
       }
 
-      const response = await request(endpoints.CREATE_COURSE_API,"POST",formPayload);
+      const response = await request(endpoints.CREATE_COURSE_API,"POST",formPayload,token);
+      const result = await response.json();
       if(!response.ok){
-        const data = await res.json();
         throw new Error(data.message);
       }
       
       console.log(response);
+      dispatch(setCourse(result.course));
       toast.dismiss(toastID);
       toast.success("Course Created Successfully");
-      setcurrStep(2);
+      dispatch(setStep(2));
     }catch(error){
       toast.dismiss(toastID);
       toast.error(error.message || "Course Creation Failed")

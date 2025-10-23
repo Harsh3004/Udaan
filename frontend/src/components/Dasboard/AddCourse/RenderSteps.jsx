@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CourseInformationForm from './CourseInformationForm';
 import CourseBuilder from './CourseBuilder';
 import { FaCheckCircle } from "react-icons/fa";
+import { useSelector } from 'react-redux';
 
 const steps = [
     {
@@ -18,8 +19,15 @@ const steps = [
     }
 ];
 
+
 export const RenderSteps = () => {
-    const [currStep,setcurrStep] = useState(1);
+    const step = useSelector((state)=>state.course.step);
+    const [currStep,setcurrStep] = useState(step);
+    
+    useEffect(()=>{
+        setcurrStep(step);
+    },[step])
+
   return (
     <>
         <div className='flex justify-evenly relative transition-all duration-200'>
@@ -41,13 +49,13 @@ export const RenderSteps = () => {
         </div>
 
         {
-            currStep == 1 && <CourseInformationForm setcurrStep={setcurrStep}/>
+            currStep == 1 && <CourseInformationForm/>
         }
         {
-            currStep == 2 && <CourseBuilder setcurrStep={setcurrStep}/>
+            currStep == 2 && <CourseBuilder/>
         }
         {
-            currStep == 3 && <CourseBuilder setcurrStep={setcurrStep}git />
+            currStep == 3 && <CourseBuilder/>
         }
     </>
   )

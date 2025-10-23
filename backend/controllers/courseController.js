@@ -13,7 +13,7 @@ exports.createCourse = async(req,res) => {
         console.log(`Create Course API triggered...`);
         const {title,desc,language,price,whatyouwilllearn} = req.body;
         const thumbnail = req.files.image;
-        const user = req.user;git
+        const user = req.user;
 
         if(!title || !desc || !language || !price || !whatyouwilllearn || !thumbnail){
             console.log("Missing Details");
