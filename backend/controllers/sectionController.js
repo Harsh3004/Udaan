@@ -5,8 +5,7 @@ const subsectionModel = require('../models/subsectionModel');
 exports.createSection = async (req,res) => {
     try{
         console.log(`Creating Section`);
-        const {title} = req.body;
-        const courseId = req.params.courseId;
+        const {title, courseId} = req.body;
         const userId = req.user.id;
 
         if(!title || !courseId || !userId){
@@ -35,16 +34,18 @@ exports.createSection = async (req,res) => {
 
         const section = await sectionModel.create({title});
 
-        await courseModel.findByIdAndUpdate(
+        const course = await courseModel.findByIdAndUpdate(
             courseId,
             { $push: { section: section._id } },
             { new: true }
-        );
+        ).populate("section").exec();
+
         console.log(`Section created successfully`);
         
         return res.status(200).json({
             success: true,
-            message: `Section created successfully`
+            message: `Section created successfully`,
+            course
         })
     }catch(error){
         return res.status(500).json({
@@ -57,8 +58,7 @@ exports.createSection = async (req,res) => {
 exports.updateSection = async (req,res) => {
     try{
         console.log(`Updating section`);
-        const {title} = req.body;
-        const {courseId,sectionId} = req.params;
+        const {title, courseId, sectionId} = req.body;
         const userId = req.user.id;
 
         if(!sectionId || !title || !userId || !courseId){
@@ -93,12 +93,21 @@ exports.updateSection = async (req,res) => {
                 message: `Section not found`
             })
         }
-        
+
+        const course = await courseModel.findById(courseId).populate("section").exec();
+        if(!course){
+            return res.status(500).json({
+                success: false,
+                message: `Something went wrong`
+            })
+        }
+
         console.log(`Section updated successfully`);
 
         return res.status(200).json({
             success: true,
-            message: `Section updated successfully`
+            message: `Section updated successfully`,
+            course
         })
     }catch(err){
         return res.status(500).json({

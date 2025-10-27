@@ -9,7 +9,7 @@ exports.auth = (req,res,next) => {
 
         console.log(`token fetched`);
         if(!token){
-            return res.status(401).json({
+            return res.status(404).json({
                 success: false,
                 message: `Token Missing`
             })
@@ -73,6 +73,7 @@ exports.isAdmin = (req,res,next) => {
 }
 
 exports.isInstructor = (req,res,next) => {
+    console.log('Checking for Instructor...');
     try{
         if(req.user.role !== "Instructor"){
             return res.status(401).json({

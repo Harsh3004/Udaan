@@ -12,3 +12,5 @@ video validity automation via admin
 In each uploaded video instructor face will be there so that we can use face recogination for verification.
 
 Fetching category for course creationg instead of showing hardcoded.
+
+Delete Section Feature While creating course --> When we click on delete section button then first the modal will open for confimation and after that we finally delete if confirmed.

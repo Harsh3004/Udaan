@@ -6,9 +6,9 @@ export const Dashboard = () => {
   //Here we can add loading functionality..
   
   return (
-    <div className='relative w-screen flex text-white transition-all duration-200'>
-      <Sidebar />
-      <div className='w-3/4'>
+    <div className='relative flex text-white transition-all duration-200'>
+      <Sidebar className='w-2/12'/>
+      <div className='w-full'>
         <Outlet/>
       </div>
     </div>

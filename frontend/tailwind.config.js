@@ -18,6 +18,7 @@ module.exports = {
         "rich-Black-300": "#838894",
         "rich-black-200" : "#999DAA",
         "rich-black-100" : "#AFB2BF",
+        "rich-black-50" : "#C5C7D4",
         "rich-black-5": "#F1F2FF",
         "yellow-50": "#FFD60A",
         "yellow-900": "#251400",
