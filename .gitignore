@@ -24,6 +24,9 @@ dist
 dist-ssr
 *.local
 
+synopsis.md
+frontend/Info
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
