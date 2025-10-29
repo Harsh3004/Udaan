@@ -175,7 +175,7 @@ export const ThumbnailUploader = ({
   const validationPrefix = fileType === 'image' ? 'image/' : 'video/';
 
   useEffect(() => {
-    if (file) {
+    if (file instanceof File) {
       const url = URL.createObjectURL(file);
       setPreviewURL(url);
 
@@ -183,7 +183,11 @@ export const ThumbnailUploader = ({
         URL.revokeObjectURL(url);
         setPreviewURL(null);
       };
-    } else {
+    } 
+    else if (typeof file === 'string' && file.length > 0) {
+      setPreviewURL(file); 
+    } 
+    else {
       setPreviewURL(null);
     }
   }, [file]);
@@ -193,7 +197,7 @@ export const ThumbnailUploader = ({
     if (selectedFile && selectedFile.type.startsWith(validationPrefix)) {
       field.onChange(selectedFile);
     } else {
-      field.onChange(null);
+      field.onChange(null); 
     }
   };
 
@@ -243,7 +247,7 @@ export const ThumbnailUploader = ({
             />
           ) : (
             <video
-              src={previewURL}
+              src={previewURL} 
               controls 
               className="absolute inset-0 w-full h-full object-cover"
             />

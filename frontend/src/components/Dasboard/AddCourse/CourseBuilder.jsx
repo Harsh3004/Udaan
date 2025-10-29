@@ -69,15 +69,22 @@ const CourseBuilder = () => {
         toast.success("Course Edited Successfully");
       }
       else{
-        // Create section API call
         const response = await request(endpoints.CREATE_SECTION_API,"POST",data);
         console.log(response);
 
         if(!response.ok)
           throw new Error("Error while creating section..");
         
-        const responseData = await response.json();
-        dispatch(setCourse(responseData.course));
+        try {
+            const courseRequest = await request(`${endpoints.GET_COURSE_DETAILS_API}/${course._id}`, 'GET');
+            if (!courseRequest.ok)
+                throw new Error("Error while fetching course");
+            
+            const courseResponse = await courseRequest.json();
+            dispatch(setCourse(courseResponse.courseDetails));
+        } catch (error) {
+            console.error("Error re-fetching course:", error.message);
+        }
         toast.dismiss(toastId);
         toast.success("Section Created Successfully");
       }

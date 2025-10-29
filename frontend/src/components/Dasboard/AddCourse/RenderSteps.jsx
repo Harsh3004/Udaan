@@ -3,6 +3,7 @@ import CourseInformationForm from './CourseInformationForm';
 import CourseBuilder from './CourseBuilder';
 import { FaCheckCircle } from "react-icons/fa";
 import { useSelector } from 'react-redux';
+import { Publish } from './Publish';
 
 const steps = [
     {
@@ -55,7 +56,7 @@ export const RenderSteps = () => {
             currStep == 2 && <CourseBuilder/>
         }
         {
-            currStep == 3 && <CourseBuilder/>
+            currStep == 3 && <Publish/>
         }
     </>
   )

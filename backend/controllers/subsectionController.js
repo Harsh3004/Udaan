@@ -6,6 +6,7 @@ require('dotenv').config();
 
 exports.createsubSection = async (req,res) => {
     try{
+        console.log('Creating Subsection')
         const {topic,description,timeDuration,sectionId} = req.body;
         const file = req?.files?.lectureVideo;
         const userId = req.user.id;
@@ -17,33 +18,10 @@ exports.createsubSection = async (req,res) => {
             })
         }
 
-        // Check wheater this additional validation required or not 
-
-        // const course = await courseModel.findById(courseId);
-        // if(!course){
-        //     return res.status(404).json({
-        //         success: false,
-        //         message: `Course Not found`
-        //     })
-        // }
-
-        // if(course.instructor.toString() !== userId){
-        //     return res.status(403).json({
-        //         success: false,
-        //         message: `Unauthorized`
-        //     })
-        // }
-
-        // const section = await sectionModel.findById(sectionId);
-        // if(!section){
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: `section not found`
-        //     })
-        // }
-
+        console.log('Checking file Type')
         const supportedType = ["mp4", "mov", "avi", "mkv"];
-        if(!isFileSupported(file.name.split('.')[1],supportedType)){
+        const fileName = file.name.split('.');
+        if(!isFileSupported(fileName[fileName.length-1],supportedType)){
             return res.status(400).json({
                 success: false,
                 message: `File type not supported`
