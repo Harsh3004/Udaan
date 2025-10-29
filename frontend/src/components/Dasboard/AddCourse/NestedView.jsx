@@ -13,15 +13,10 @@ const NestedView = ({seteditSectionName}) => {
   const [confirmModal,setconfirmModal] = useState(false);
 
   const course = useSelector((state) => state.course.course);
-  console.log('Course: ',course.section[0].title)
-
+  console.log('Course: ',course.section[0])
+  console.log({course});
   const deleteSection = () => {
     // Function to delete section
-  }
-
-  const createsubSection = (sectionId) => {
-    //Function for creating subsection
-    setaddSubSection(true);
   }
 
   return (
@@ -46,8 +41,16 @@ const NestedView = ({seteditSectionName}) => {
             </summary>
 
             {/* // Subsection to be rendered here  */}
+            {
+              section.subsection.map((subsection) => {
+                console.log('Subsection: ', {subsection});
+                return (
+                  <p>{subsection.topic}</p>
+                )
+              })
+            }
 
-            <button onClick={() => createsubSection(section._id)} className='flex items-center gap-1 py-3 font-semibold text-yellow-50'>
+            <button onClick={() => setaddSubSection(section._id)} className='flex items-center gap-1 py-3 font-semibold text-yellow-50'>
               <IoMdAdd />
               Add Lecture
             </button>
@@ -58,7 +61,7 @@ const NestedView = ({seteditSectionName}) => {
     </div>
     
     {
-      addSubSection ? <AddSubsectionModal setaddSubSection={setaddSubSection}/> : <div></div>
+      addSubSection ? <AddSubsectionModal addSubSection={addSubSection} setaddSubSection={setaddSubSection}/> : <div></div>
     }
     </>
   )

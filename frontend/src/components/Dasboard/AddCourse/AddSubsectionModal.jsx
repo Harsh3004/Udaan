@@ -1,9 +1,16 @@
 import { IoCloseCircle } from "react-icons/io5";
 import { useForm, Controller } from 'react-hook-form';
 import { TextInput, ThumbnailUploader } from '../../Common/Inputs';
+import { endpoints } from "../../../services/api";
+import { request } from "../../../services/operations/authApi";
+import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from "react-redux";
+import { setCourse } from "../../../slices/courseSlice";
 
-const AddSubsectionModal = ({ setaddSubSection }) => {
-
+const AddSubsectionModal = ({addSubSection, setaddSubSection }) => {
+  const course = useSelector((state) => state.course.course)
+  const dispatch = useDispatch();
+  
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     defaultValues: {
       title: '',
@@ -12,13 +19,42 @@ const AddSubsectionModal = ({ setaddSubSection }) => {
     },
   });
 
-  const submitHandler = (data) => {
+  const submitHandler = async (data) => {
     console.log(`Submitting data`);
     console.log("Data: ", data);
+    const toastId = toast.loading("Creating Lecture..");
 
-    // Creating subsection API CALL
+    try{
+      const formPayload = new FormData();
+      formPayload.append("topic",data.title);
+      formPayload.append("description",data.description);
+      formPayload.append("lectureVideo",data.lectureVideo);
+      formPayload.append("sectionId",addSubSection);
 
-    setaddSubSection(false);
+      const response = await request(endpoints.CREATE_SUBSECTION_API,"POST",formPayload);
+      console.log(response);
+      
+      if(!response.ok)
+        throw new Error("Error while creating lecture")
+
+      try{
+        const courseRequest = await request(`${endpoints.GET_COURSE_DETAILS_API}/${course._id}`,'GET');
+        if(!courseRequest.ok)
+          throw new Error("Error while fetching course")
+        
+        const courseResponse = await courseRequest.json();
+        dispatch(setCourse(courseResponse.courseDetails));
+      }catch(error){
+        console.log(error.message);
+      }
+
+      toast.dismiss(toastId);
+      toast.success("Lecture Created Successfully");
+      setaddSubSection(false);
+    }catch(error){
+      toast.dismiss(toastId);
+      toast.error("Try Again Later");
+    }
   }
   
   return (

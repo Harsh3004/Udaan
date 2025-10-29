@@ -6,10 +6,8 @@ require('dotenv').config();
 
 exports.createsubSection = async (req,res) => {
     try{
-        const {topic,description,timeDuration} = req.body;
-        console.log(req.files);
-        const file = req.files.file;
-        const {courseId,sectionId} = req.params;
+        const {topic,description,timeDuration,sectionId} = req.body;
+        const file = req?.files?.lectureVideo;
         const userId = req.user.id;
 
         if(!topic || !description || !file){
@@ -52,9 +50,12 @@ exports.createsubSection = async (req,res) => {
             })
         }
         
+        console.log("Uploading to cloudinary"); 
         const cloudResponse = await uploadToCloudinary(file,process.env.FOLDER_NAME);
 
         console.log(cloudResponse);
+
+        console.log('Creating subsection')
 
         const subsection = await subsectionModel.create({
             topic: topic,
@@ -62,11 +63,15 @@ exports.createsubSection = async (req,res) => {
             file: cloudResponse
         });
 
+        console.log('subsection uploaded successfully')
+
         await sectionModel.findByIdAndUpdate(
             sectionId,
             { $push: { subsection: subsection._id } },
             { new: true }
         );
+
+        console.log("Adding subsection id in section")
 
         return res.status(200).json({
             success: true,

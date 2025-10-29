@@ -11,7 +11,7 @@ export const endpoints = {
 
     
     SHOW_COURSES_API: BASE_URL + "/course",
-    GET_COURSE_DETAILS_API: BASE_URL + "/course/:courseId",
+    GET_COURSE_DETAILS_API: BASE_URL + "/course",
     CREATE_COURSE_API: BASE_URL + "/course/create",
     DELETE_COURSE_API: BASE_URL + "/course/delete/:courseId",
     UPDATE_COURSE_API: BASE_URL + "/course/update/:courseId",

@@ -54,8 +54,17 @@ const CourseBuilder = () => {
         if(!response.ok)
           throw new Error("Error while editing section");
 
-        const responseData = await response.json();
-        dispatch(setCourse(responseData.course));
+        try{
+          const courseRequest = await request(`${endpoints.GET_COURSE_DETAILS_API}/${course._id}`,'GET');
+          if(!courseRequest.ok)
+            throw new Error("Error while fetching course")
+          
+          const courseResponse = await courseRequest.json();
+          dispatch(setCourse(courseResponse.courseDetails));
+        }catch(error){
+          console.log(error.message);
+        }
+        
         toast.dismiss(toastId);
         toast.success("Course Edited Successfully");
       }
