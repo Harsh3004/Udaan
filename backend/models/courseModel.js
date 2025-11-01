@@ -37,6 +37,11 @@ const courseSchema = new mongoose.Schema({
     whatyouwilllearn: {
         type: String
     },
+    status:{
+        type: String,
+        enum: ["Published","Reviewing","Draft"],
+        default: "Draft"
+    },
     section: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'section'

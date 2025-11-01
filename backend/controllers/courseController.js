@@ -6,6 +6,7 @@ const subsectionModel = require('../models/subsectionModel');
 const sectionModel = require('../models/sectionModel');
 const sendMail = require('../utils/sendMail');
 const ratingAndReview = require('../models/ratingAndReviewModel');
+const { default: mongoose } = require('mongoose');
 require('dotenv').config();
 
 exports.createCourse = async(req,res) => {
@@ -276,6 +277,33 @@ exports.getCourseDetails = async (req,res) => {
         return res.status(500).json({
             success: false,
             message: `Error: ${error.message}`
+        })
+    }
+}
+
+exports.getInstructorCourses = async (req,res) => {
+    try{
+        console.log("Fetching Instructor Courses");
+
+        const userId = req.user.id;
+
+        if(!userId){
+            return res.status(404).json({
+                success: false,
+                message: "Missing Instuctor"
+            })
+        }
+
+        const courses = await courseModel.find({instructor: userId});
+        return res.status(200).json({
+            success: true,
+            message: `Fetched Instructor Courses`,
+            courses
+        })
+    }catch(error){
+        return res.status(500).json({
+            success: false,
+            message: 'Error while fetching instructor courses'
         })
     }
 }
