@@ -36,3 +36,6 @@
     -- currently with same otp user is able to create student as well as instructor account
 
 12. Course views and likes
+
+
+13. We can do that for video lecture which is uploaded we can convert video in text and then on that text we can use sentiment analysis for reviewing course

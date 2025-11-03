@@ -18,3 +18,7 @@ Delete Section Feature While creating course --> When we click on delete section
 Create Subsection API Call to be implemented.
 
 While uploading video or thumbnail there is no option to remove the uploaded file or add new file once uploaded in form so add reset thumbnail uploader feature.
+
+If cookie removed facing issues while creating courses and other issues
+
+Currently user does not required to click on publish to move it in reviewing process.

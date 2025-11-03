@@ -4,14 +4,15 @@ import {resetCart} from '../../slices/cartSlice';
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
-export const logout = (dispatch,navigate) => {
+export const logout = (dispatch,navigate,flag=true) => {
     console.log(`In logout`);
     dispatch(setUser(null));
     dispatch(resetCart());
     dispatch(setToken(null));
     localStorage.clear();
-    toast.success("Logout Successfully");
-    navigate("/");
+    if(flag)
+        toast.success("Logout Successfully");
+    navigate("/login");
 }
 
 export const deleteAccount = (dispatch, navigate) => {

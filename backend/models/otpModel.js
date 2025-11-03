@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const sendMail = require('../utils/sendMail');
+const fs = require('fs/promises');
+const path = require('path');
 
 const otpSchema = new mongoose.Schema({
     email: {
@@ -20,12 +22,19 @@ const otpSchema = new mongoose.Schema({
 
 async function sendVerificationEmail(email,otp) {
     try{
-        console.log("Sending verification mail..");
+        const text = `Your verification OTP for Udaan is: ${otp}. It will expire in 5 minutes.`;
+        const templatePath = path.join(__dirname, '..', 'templates', 'otp-email.html');
+        let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
-        const response = sendMail(email,
-            `Udaan - Otp Verification`,
-            `Verification Otp: ${otp}. It will expire in 5 minutes.`
-        )
+        let htmlBody = htmlTemplate.replace('{{OTP}}', otp);
+        htmlBody = htmlBody.replace('{{EXPIRATION}}', '5 minutes');
+
+        await sendMail(
+            email,
+            'Udaan - OTP Verification',
+            text,
+            htmlBody
+        );
 
         console.log(`Verification mail send successfully`);
     }catch(err){
