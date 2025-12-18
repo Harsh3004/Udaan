@@ -6,23 +6,42 @@ const subsectionModel = require('../models/subsectionModel');
 const sectionModel = require('../models/sectionModel');
 const sendMail = require('../utils/sendMail');
 const ratingAndReview = require('../models/ratingAndReviewModel');
+const categoryModel = require('../models/categoryModel');
 const { default: mongoose } = require('mongoose');
 require('dotenv').config();
 
 exports.createCourse = async(req,res) => {
     try{
         console.log(`Create Course API triggered...`);
-        const {title,desc,language,price,whatyouwilllearn} = req.body;
+        const {title,desc,language,price,whatyouwilllearn, category} = req.body;
         const thumbnail = req.files.image;
         const user = req.user;
 
-        if(!title || !desc || !language || !price || !whatyouwilllearn || !thumbnail){
+        const rawCategory = (typeof category === 'string') ? category.trim() : '';
+
+        if(!title || !desc || !language || !price || !whatyouwilllearn || !thumbnail || !rawCategory){
             console.log("Missing Details");
             return res.status(400).json({
                 success: false,
                 message: `Enter all details`
             })
         }
+
+        // Allow either an existing category id or a new category name; create on-the-fly if needed
+        let categoryDoc = null;
+        if(mongoose.Types.ObjectId.isValid(rawCategory)){
+            categoryDoc = await categoryModel.findById(rawCategory);
+        }
+
+        if(!categoryDoc){
+            categoryDoc = await categoryModel.findOne({ name: { $regex: new RegExp(`^${rawCategory}$`, 'i') } });
+        }
+
+        if(!categoryDoc){
+            categoryDoc = await categoryModel.create({ name: rawCategory });
+        }
+
+        const categoryId = categoryDoc._id;
 
         const supportedTypes = ['jpeg','jpg','png'];
         const fileType = thumbnail.name.split('.')[1];
@@ -40,8 +59,15 @@ exports.createCourse = async(req,res) => {
             language: language,
             price: price,
             thumbnail: response,
-            whatyouwilllearn: whatyouwilllearn
+            whatyouwilllearn: whatyouwilllearn,
+            category: categoryId
         });
+
+        await categoryModel.findByIdAndUpdate(
+            categoryId,
+            { $addToSet: { courses: course._id } },
+            { new: true }
+        );
 
         // Post middleware:
         // --> push course in instructor course array
@@ -118,6 +144,8 @@ exports.deleteCourse = async (req,res) => {
         );
         console.log(`Remove course from instructor course array: ${temp}`);
         
+        await categoryModel.findByIdAndUpdate(course.category, { $pull: { courses: courseId } });
+
         temp = await courseModel.findByIdAndDelete(courseId);
         console.log(`Course deleted successfully: ${temp}`);
 
@@ -187,6 +215,21 @@ exports.updateCourse = async (req,res) => {
 
             console.log(`Thumbnail updated successfully`);
         }
+
+        if(updates.category){
+            const newCategory = await categoryModel.findById(updates.category);
+            if(!newCategory){
+                return res.status(404).json({
+                    success: false,
+                    message: `Category not found`
+                })
+            }
+
+            if(courseDetails.category && courseDetails.category.toString() !== updates.category){
+                await categoryModel.findByIdAndUpdate(courseDetails.category, { $pull: { courses: courseId } });
+                await categoryModel.findByIdAndUpdate(updates.category, { $addToSet: { courses: courseId } });
+            }
+        }
         
         const updatedCourse = await courseModel.findByIdAndUpdate(courseId,updates,{new: true});
         
@@ -206,7 +249,7 @@ exports.updateCourse = async (req,res) => {
 exports.showAllCourses = async (req,res) => {
     try{
         console.log(`Fetching all course details`);
-        const courses = await courseModel.find({});
+        const courses = await courseModel.find({}).populate('category','name description');
 
         console.log(`Fetched all course details successfully`);
 
@@ -259,6 +302,7 @@ exports.getCourseDetails = async (req,res) => {
                 path: 'user'
             }
         })
+        .populate('category')
         .exec();
 
         if(!courseDetails){
@@ -294,7 +338,7 @@ exports.getInstructorCourses = async (req,res) => {
             })
         }
 
-        const courses = await courseModel.find({instructor: userId});
+        const courses = await courseModel.find({instructor: userId}).populate('category','name');
         return res.status(200).json({
             success: true,
             message: `Fetched Instructor Courses`,
@@ -305,5 +349,70 @@ exports.getInstructorCourses = async (req,res) => {
             success: false,
             message: 'Error while fetching instructor courses'
         })
+    }
+}
+
+// Top rated published courses (for homepage)
+exports.getTopRatedCourses = async (req, res) => {
+    try {
+        const limit = Math.min(Number(req.query.limit) || 6, 20);
+
+        const topCourses = await ratingAndReview.aggregate([
+            {
+                $group: {
+                    _id: "$course",
+                    avgRating: { $avg: "$rating" },
+                    totalReviews: { $sum: 1 }
+                }
+            },
+            { $sort: { avgRating: -1, totalReviews: -1 } },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "courses",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "course"
+                }
+            },
+            { $unwind: "$course" },
+            { $match: { "course.status": "Published" } },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "course.category",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: "$course._id",
+                    title: "$course.title",
+                    desc: "$course.desc",
+                    language: "$course.language",
+                    price: "$course.price",
+                    thumbnail: "$course.thumbnail",
+                    status: "$course.status",
+                    category: {
+                        _id: "$category._id",
+                        name: "$category.name"
+                    },
+                    avgRating: { $round: ["$avgRating", 2] },
+                    totalReviews: 1
+                }
+            }
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            courses: topCourses
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `Error while fetching top rated courses: ${error.message}`
+        });
     }
 }

@@ -44,7 +44,9 @@ export const Login = () => {
         dispatch(setUser(data.userDetails));
         toast.dismiss(toastId);
         toast.success("Login Successfully");
-        navigate('/dashboard');
+        const accountType = data?.userDetails?.accountType || role;
+        const redirectPath = accountType === 'Student' ? '/browse' : '/dashboard';
+        navigate(redirectPath);
       }
       else
         throw new Error("Login Failed");

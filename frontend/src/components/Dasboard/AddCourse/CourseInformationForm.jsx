@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm, Controller, Form } from 'react-hook-form';
 import { FaChevronRight } from "react-icons/fa";
@@ -13,12 +13,12 @@ const CourseInformationForm = () => {
   const token = useSelector((state) => state.auth.token);
   const dispatch = useDispatch();
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm({
+  const { register, handleSubmit, control, formState: { errors }, setValue } = useForm({
     defaultValues: {
       title: '',
       description: '',
       price: '',
-      category: 'default',
+      category: '',
       tags: [], 
       courseThumbnail: null, 
       benefits: [], 
@@ -28,12 +28,39 @@ const CourseInformationForm = () => {
     // We can add a 'mode' here like 'onBlur' for better performance
   });
   
-  const categories = [
-    { value: 'default', label: 'Choose a Category' },
-    { value: 'programming', label: 'Programming' },
-    { value: 'design', label: 'Design' },
-    { value: 'marketing', label: 'Marketing' },
-  ];
+  const [categories, setCategories] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState('');
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      setCategoryLoading(true);
+      try{
+        const response = await request(endpoints.GET_ALL_CATEGORIES_API,"GET");
+        const data = await response.json();
+        if(!response.ok){
+          throw new Error(data.message || 'Unable to fetch categories');
+        }
+        const fetched = data.categories || [];
+        setCategories(fetched);
+        if(fetched.length === 0){
+          setCategoryError('No categories found. Enter a name to create one.');
+          setValue('category', '');
+        }else{
+          setCategoryError('');
+          setValue('category', fetched[0].name || '');
+        }
+      }catch(error){
+        console.error('Failed to load categories', error);
+        setCategoryError(error.message || 'Failed to load categories');
+        toast.error(error.message || 'Failed to load categories');
+      }finally{
+        setCategoryLoading(false);
+      }
+    }
+
+    loadCategories();
+  }, []);
   
   const submitHandler = async (data) => {
     const toastID = toast.loading('Creating Course');
@@ -126,33 +153,30 @@ const CourseInformationForm = () => {
               <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <select
+              <input
                 id="category"
-                className={`w-full p-3 rounded-lg appearance-none cursor-pointer bg-rich-black-700 shadow-input-shadow text-rich-black-5 ${errors.category ? 'border-2 border-red-500' : ''}`}
-                {...register("category", { 
-                  required: 'Please select a category',
-                  validate: value => value !== 'default' || 'Please select a valid category'
+                list="category-options"
+                placeholder={categoryLoading ? 'Loading categories...' : 'Type or choose a category'}
+                className={`w-full p-3 rounded-lg bg-rich-black-700 shadow-input-shadow text-rich-black-5 ${errors.category ? 'border-2 border-red-500' : ''}`}
+                disabled={categoryLoading}
+                {...register("category", {
+                  required: 'Please enter a category',
+                  validate: value => value.trim() !== '' || 'Please enter a valid category'
                 })}
-              >
+              />
+              <datalist id="category-options">
                 {categories.map(cat => (
-                  <option 
-                    key={cat.value} 
-                    value={cat.value}
-                    disabled={cat.value === 'default'}
-                    className='text-rich-black-5 bg-rich-black-700'
-                  >
-                    {cat.label}
-                  </option>
+                  <option key={cat._id} value={cat.name} />
                 ))}
-              </select>
-              {/* Custom arrow for select box */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                <svg className="h-4 w-4 text-rich-Black-300" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
+              </datalist>
             </div>
+            {categoryError && <p className="text-xs text-red-500 mt-1">{categoryError}</p>}
             {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>}
+            {(!categoryLoading && categories.length === 0) && (
+              <p className="text-xs text-rich-black-200 mt-2">
+                No categories yet. Enter a new category name to create one.
+              </p>
+            )}
           </div>
 
           {/* Tags - Controller for Custom TagInput Component */}

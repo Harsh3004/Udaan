@@ -13,26 +13,25 @@ import { IoAddCircleOutline } from 'react-icons/io5'
 
 export const MyCourses = () => {
     const [courses,setCourses] = useState([]);
-    const [loading,setLoading] = useState(false);
+    const [loading,setLoading] = useState(true);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     
     const fetchCourses = async () => {
       try{
-          setLoading(false);
-          const response = await request(endpoints.GET_INSTRUCTOR_COURSES,"GET");
-          if(response.status === 401)
-            dispatch(logout(dispatch,navigate,false));
-          else if(!response.ok)
-            throw new Error("Error while fetching courses");
-          else{
-            const data = await response.json();
-            setCourses(data.courses);
-          }
-          setLoading(false);
-        }catch(error){
-          setLoading(false);
-          toast.error("Try Again Later")
+        const response = await request(endpoints.GET_INSTRUCTOR_COURSES,"GET");
+        if(response.status === 401)
+          dispatch(logout(dispatch,navigate,false));
+        else if(!response.ok)
+          throw new Error("Error while fetching courses");
+        else{
+          const data = await response.json();
+          setCourses(data.courses);
+        }
+        setLoading(false);
+      }catch(error){
+        setLoading(false); 
+        toast.error("Try Again Later")
       }
     }
     
@@ -58,7 +57,11 @@ export const MyCourses = () => {
         </button>
       </div>
       
-      {courses.length > 0 ? (
+      {loading ? (
+        <div className='text-center text-gray-500 text-lg mt-10'>
+          Loading your courses...
+        </div>
+      ) : courses.length > 0 ? (
         <Table className='w-full border-separate border-spacing-y-4'>
           
           <Thead className='hidden md:table-header-group'>
@@ -127,10 +130,11 @@ export const MyCourses = () => {
           </Tbody>
         </Table>
       ) : (
-        <div className='text-gray-500'>
+        <div className='text-center text-gray-500 text-lg mt-10'>
           You have not created any courses yet.
         </div>
       )}
+
     </div>
   );
-}   
+}

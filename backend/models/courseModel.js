@@ -34,6 +34,11 @@ const courseSchema = new mongoose.Schema({
         url : { type: String },
         public_id: {type: String}
     },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'category',
+        required: true
+    },
     whatyouwilllearn: {
         type: String
     },

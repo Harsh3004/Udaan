@@ -7,6 +7,7 @@ const courseRoutes = require('./routes/courseRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoute = require('./routes/contactRoute');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 const app = express();
 require('dotenv').config();
@@ -14,7 +15,9 @@ require('dotenv').config();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: `http://localhost:5173`,
+    origin: [
+      "http://localhost:5173"
+    ],
     credentials: true
 }));
 
@@ -34,6 +37,7 @@ app.use('/api/auth', userRoutes);
 app.use('/api/course', courseRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/contact',contactRoute);
+app.use('/api/category', categoryRoutes);
 // app.use('/api/payment', paymentRoutes);
 
 app.get('/',(req,res) => {

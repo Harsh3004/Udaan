@@ -1,7 +1,11 @@
 import React from 'react';
-import { FaUserGraduate, FaBookOpen } from 'react-icons/fa'
+import { FaUserGraduate, FaBookOpen, FaStar } from 'react-icons/fa'
 
-export const CourseCard = ({ title, description, level, lessons, isFeatured }) => {
+export const CourseCard = ({ title, description, level, lessons, isFeatured, rating, reviewsCount }) => {
+  const metaLevel = level || 'Self paced';
+  const metaLessons = lessons || 'Flexible schedule';
+  const metaRating = rating ? `${rating} ★` : 'No ratings yet';
+  const metaReviews = reviewsCount ? `(${reviewsCount})` : '';
   return (
     <article
       className={`relative md:w-[300px] lg:min-h-[300px] flex flex-col overflow-hidden rounded-lg bg-rich-black-800 text-white shadow-lg transition-all duration-500 hover:translate-y-[-5px] hover:bg-white hover:text-rich-black-800  hover:shadow-card-shadow`}
@@ -12,12 +16,16 @@ export const CourseCard = ({ title, description, level, lessons, isFeatured }) =
       </div>
       <div className="flex items-center justify-between border-t border-gray-700 p-4 text-rich-black-400">
         <div className="flex items-center space-x-2">
+          <FaStar className={`h-5 w-5 ${rating ? 'text-yellow-400' : ''}`} />
+          <span>{metaRating} {metaReviews}</span>
+        </div>
+        <div className="flex items-center space-x-2">
           <FaUserGraduate className="h-5 w-5" />
-          <span>{level}</span>
+          <span>{metaLevel}</span>
         </div>
         <div className="flex items-center space-x-2">
           <FaBookOpen className="h-5 w-5" />
-          <span>{lessons}</span>
+          <span>{metaLessons}</span>
         </div>
       </div>
     </article>

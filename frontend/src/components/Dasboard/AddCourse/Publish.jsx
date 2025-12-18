@@ -9,6 +9,7 @@ import { endpoints } from '../../../services/api';
 export const Publish = () => {
   const dispatch = useDispatch();
   const course = useSelector((state) => state.course.course);
+  const token = useSelector((state) => state.auth.token);
 
   const gotoBack = () => {
     console.log("Back");
@@ -16,7 +17,32 @@ export const Publish = () => {
   }
 
   const PublishHandler = () => {
-    // To be implemented 
+    if(!course?._id){
+      toast.error('Create course details first');
+      dispatch(setStep(1));
+      return;
+    }
+
+    const toastId = toast.loading('Publishing course...');
+    request(
+      endpoints.UPDATE_COURSE_API.replace(':courseId', course._id),
+      'PUT',
+      { status: 'Published' },
+      token
+    )
+    .then(async (response) => {
+      const data = await response.json();
+      if(!response.ok){
+        throw new Error(data.message || 'Publish failed');
+      }
+      toast.success('Course published');
+    })
+    .catch((error) => {
+      toast.error(error.message || 'Publish failed');
+    })
+    .finally(() => {
+      toast.dismiss(toastId);
+    });
   }
 
   return (

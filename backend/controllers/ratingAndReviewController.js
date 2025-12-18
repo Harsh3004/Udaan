@@ -4,11 +4,8 @@ const ratingAndReviewModel = require('../models/ratingAndReviewModel');
 exports.addRatingReview = async (req,res) => {
     try{
         const {rating,review} = req.body;
-
         const userId = req.user.id;
-        console.log(userId);
         const courseId = req.params.courseId;
-        console.log(courseId);
 
         if(!rating || !userId || !courseId){
             return res.status(400).json({
@@ -28,31 +25,29 @@ exports.addRatingReview = async (req,res) => {
             })
         }
 
-        if(!courseDetails.studentEnrolled.includes(userId)){
+        if(!courseDetails.studentEnrolled.map(String).includes(userId.toString())){
             return res.status(403).json({
                 success: false,
                 message: `Only enrolled Student can post rating and review`
             })
         }
 
-        const existingReview = courseDetails.ratingAndReviews.find(
-            (review) => {review.user.toString() == userId.toString()}
-        )
-
+        const existingReview = await ratingAndReviewModel.findOne({ course: courseId, user: userId });
         if(existingReview){
             return res.status(400).json({
                 success: false,
-                message: `User Already reviewed course`
+                message: `User already reviewed this course`
             })
         }
 
         const response = await ratingAndReviewModel.create({
             rating,
             review,
-            userId
+            user: userId,
+            course: courseId
         });
 
-        const course = await courseModel.findByIdAndUpdate(
+        await courseModel.findByIdAndUpdate(
             courseId,
             {$push: {ratingAndReviews: response._id}},
             {new: true}
@@ -90,17 +85,23 @@ exports.averageRating = async (req,res) => {
             })
         }
 
-        let rating = 0;
-        for(const rating of courseDetails.ratingAndReviews){
-            rating += rating.rating;
+        const ratingsCount = courseDetails.ratingAndReviews.length;
+        if(ratingsCount === 0){
+            return res.status(200).json({
+                success: true,
+                message: `No ratings yet`,
+                averageRating: 0
+            })
         }
 
-        const averageRating = rating/(courseDetails.ratingAndReviews.length*5);
+        const sum = courseDetails.ratingAndReviews.reduce((acc, cur) => acc + (cur.rating || 0), 0);
+        const averageRating = Number((sum / ratingsCount).toFixed(2));
 
         return res.status(200).json({
             success: true,
             message: `Average rating calculated successfully`,
-            averageRating
+            averageRating,
+            ratingsCount
         })
     }catch(error){
         return res.status(500).json({

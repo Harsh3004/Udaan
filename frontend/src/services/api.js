@@ -10,6 +10,7 @@ export const endpoints = {
     RESET_PASSWORD_API: BASE_URL + "/auth/update-password",
 
     GET_INSTRUCTOR_COURSES: BASE_URL + "/course/getInstructorCourses",
+    GET_TOP_RATED_COURSES: BASE_URL + "/course/top-rated",
     SHOW_COURSES_API: BASE_URL + "/course",
     GET_COURSE_DETAILS_API: BASE_URL + "/course",
     CREATE_COURSE_API: BASE_URL + "/course/create",
@@ -29,6 +30,11 @@ export const endpoints = {
     GET_RATINGS_API: BASE_URL + "/course/:courseId/rating",
     ADD_RATING_API: BASE_URL + "/:courseId/rating/create",
     AVERAGE_RATING_API: BASE_URL + "/:courseId/rating/average",
+    
+    // Categories
+    GET_ALL_CATEGORIES_API: BASE_URL + "/category",
+    CREATE_CATEGORY_API: BASE_URL + "/category/create",
+    GET_CATEGORY_COURSES_API: BASE_URL + "/category/:categoryId/courses",
     
     PROFILE_API: BASE_URL + "/profile",
     UPDATE_PROFILE_API: BASE_URL + "/profile/update",

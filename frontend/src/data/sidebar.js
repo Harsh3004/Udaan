@@ -39,5 +39,12 @@ export const sidebarLinks = [
         path: "/dashboard/purchase-history",
         type: "Student",
         icon: "VscHistory"
+    },
+    {
+        id: 7,
+        name: "Browse Courses",
+        path: "/browse",
+        type: "Student",
+        icon: "VscCompass"
     }
 ]
