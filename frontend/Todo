@@ -11,14 +11,10 @@ Loading... until data loaded to show
 video validity automation via admin
 In each uploaded video instructor face will be there so that we can use face recogination for verification.
 
-Fetching category for course creationg instead of showing hardcoded.
+Fetching category for course creation instead of showing hardcoded.
 
 Delete Section Feature While creating course --> When we click on delete section button then first the modal will open for confimation and after that we finally delete if confirmed.
 
-Create Subsection API Call to be implemented.
-
 While uploading video or thumbnail there is no option to remove the uploaded file or add new file once uploaded in form so add reset thumbnail uploader feature.
-
-If cookie removed facing issues while creating courses and other issues
 
 Currently user does not required to click on publish to move it in reviewing process.
