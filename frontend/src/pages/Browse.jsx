@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
@@ -11,6 +12,7 @@ const ROW_LIMIT = 10;
 
 const Browse = () => {
   const user = useSelector((state) => state.profile?.user);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -88,6 +90,8 @@ const Browse = () => {
               isFeatured={course.status === 'Published'}
               rating={course.avgRating}
               reviewsCount={course.totalReviews || (course.ratingAndReviews ? course.ratingAndReviews.length : 0)}
+              thumbnail={course.thumbnail}
+              onClick={() => navigate(`/course/${course._id}`)}
             />
           ))}
         </div>

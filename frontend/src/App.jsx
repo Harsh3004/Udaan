@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/Dashboard"
 import { Otp } from "./components/Auth/Otp"
 import { Error } from "./pages/Error"
 import Browse from "./pages/Browse"
+import CourseDetails from "./pages/CourseDetails"
 import { Toaster } from 'react-hot-toast';
 import ForgotPassword from "./components/Auth/ForgotPassword"
 import { UpdatePassword } from "./components/Auth/UpdatePassword"
@@ -26,7 +27,7 @@ export default function App() {
   return (
 
     <div className='w-full min-h-screen overflow-x-hidden relative select-none bg-rich-black-900'>
-      <div style={{ width: '100%', height: '100%', position: 'absolute'}}>
+      <div style={{ width: '100%', height: '100%', position: 'absolute', pointerEvents: 'none'}}>
         <LightRays
           raysOrigin="top-center"
           raysColor="#ffffff"
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/otp" element={<Otp/>}/>
         <Route path="/error" element={<Error/>}/>
         <Route path="/browse" element={<Browse/>}/>
+        <Route path="/course/:courseId" element={<CourseDetails className='z-50'/>}/>
         <Route path="/login/forgot-password" element={<ForgotPassword/>}/>
         <Route path="/update-password/:token" element={<UpdatePassword/>} />
 
