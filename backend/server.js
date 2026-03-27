@@ -9,6 +9,9 @@ const userRoutes = require('./routes/userRoutes');
 const contactRoute = require('./routes/contactRoute');
 const categoryRoutes = require('./routes/categoryRoutes');
 
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google/Cloudflare DNS
+
 const app = express();
 require('dotenv').config();
 
