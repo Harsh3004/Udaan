@@ -21,6 +21,7 @@ import PurschasedHistory from "./components/Dasboard/PurchasedHistory"
 import Setting from "./components/Dasboard/Setting"
 import AddCourse from "./components/Dasboard/AddCourse/AddCourse"
 import { MyCourses } from "./components/Dasboard/MyCourses"
+import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 
 export default function App() {
   console.log("VITE_BASE_URL =", import.meta.env.VITE_BASE_URL);
@@ -63,7 +64,7 @@ export default function App() {
           </ProtectedRoute>
         }>
           <Route path="/dashboard/my-profile" element={<Profile/>}/>
-          <Route path="/dashboard/instructor" element={<Profile/>}/>
+          <Route path="/dashboard/instructor" element={<InstructorDashboard/>}/>
           <Route path="/dashboard/my-courses" element={<MyCourses/>}/>
           <Route path="/dashboard/add-course" element={<AddCourse/>}/>
           <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
