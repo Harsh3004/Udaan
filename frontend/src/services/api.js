@@ -40,4 +40,8 @@ export const endpoints = {
     UPDATE_PROFILE_API: BASE_URL + "/profile/update",
     
     CONTACT_API: BASE_URL + "/contact",
+
+    // Payments
+    CREATE_ORDER_API: BASE_URL + "/payment/create-order",
+    VERIFY_PAYMENT: BASE_URL + "/payment/verify"
 }
