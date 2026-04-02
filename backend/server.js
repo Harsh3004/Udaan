@@ -17,11 +17,22 @@ require('dotenv').config();
 
 app.use(express.json());
 app.use(cookieParser());
+
+const allowedOrigins = [
+  process.env.CLIENT_URL_DEV,
+  process.env.CLIENT_URL_PROD
+];
+
 app.use(cors({
-    origin: [
-      "http://localhost:5173"
-    ],
-    credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
 }));
 
 app.use(fileUpload({
