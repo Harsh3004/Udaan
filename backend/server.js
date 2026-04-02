@@ -3,7 +3,7 @@ const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
 const courseRoutes = require('./routes/courseRoutes');
-// const paymentRoutes = require('./routes/paymentsRoutes');
+const paymentRoutes = require('./routes/paymentsRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoute = require('./routes/contactRoute');
@@ -41,7 +41,7 @@ app.use('/api/course', courseRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/contact',contactRoute);
 app.use('/api/category', categoryRoutes);
-// app.use('/api/payment', paymentRoutes);
+app.use('/api/payment', paymentRoutes);
 
 app.get('/',(req,res) => {
     return res.json({

@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
 import { HighlightedText } from '../components/HighlightedText';
+import { buyCourse } from '../services/operations/paymentService';
 
 const CourseDetails = () => {
   const { courseId } = useParams();
   const [loading, setLoading] = useState(false);
   const [course, setCourse] = useState(null);
+  const navigate = useNavigate();
 
   const fetchCourse = async () => {
     if(!courseId) return;
@@ -97,8 +99,12 @@ const CourseDetails = () => {
                 </div>
                 )}
                 <p className='text-3xl font-semibold text-yellow-50'>₹ {course.price}</p>
-                <button className='w-full bg-yellow-50 text-rich-black-900 font-semibold py-3 rounded-lg hover:bg-yellow-400 transition-colors'>
+                <button className='w-full bg-yellow-50 text-rich-black-900 font-semibold py-3 rounded-lg hover:bg-yellow-400 transition-colors'
+                onClick={() => buyCourse(course,navigate)}>
                     Buy Now
+                </button>
+                <button className='w-full bg-rich-black-700 font-semibold py-3 rounded-lg hover:bg-rich-black-900 transition-colors'>
+                    Add to Cart
                 </button>
                 <div className='text-sm text-rich-black-200 space-y-1'>
                     <p>{rating ? `${rating} ★` : 'No ratings yet'}</p>
