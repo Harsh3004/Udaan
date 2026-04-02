@@ -1,11 +1,15 @@
+const razorpay = require('razorpay');
 const {razorpayInstance} = require('../config/razorpay');
 const courseModel = require('../models/courseModel');
 const userModel = require('../models/userModel');
+const { default: mongoose } = require('mongoose');
+const crypto = require("crypto");
 
 exports.capturePayment = async (req,res) => {
+    console.log("Create Order API Triggered...");
     try{
         const userId = req.user.id;
-        const courseId = req.params.id;
+        const courseId = req.body.courseId;
 
         if(!userId || !courseId){
             return res.status(400).json({
@@ -13,6 +17,8 @@ exports.capturePayment = async (req,res) => {
                 message: `Missing Information`
             })
         }
+
+        console.log(`Fetching Course Details`);
 
         const courseDetails = await courseModel.findById(courseId);
         if(!courseDetails){
@@ -22,22 +28,36 @@ exports.capturePayment = async (req,res) => {
             })
         }
 
+        console.log(`Checking for valid student`);
+
+        const uid = new mongoose.Types.ObjectId(userId);
+        if(courseDetails.studentEnrolled.includes(uid)){
+            return res.status(200).json({
+                success: false,
+                message: "Student is Already Enrolled"
+            })
+        }
+
+        console.log(`Creating Options`);
+
         const options = {
-            amount: courseDetails.price * 100,
+            amount: courseDetails.price * 100, // In paise
             currency: "INR",
-            receipt: Math.random(Date.now()).toString(),
+            receipt: "receipt_" + Math.random(Date.now()).toString(),
             notes: {
                 userId: userId,
                 courseId: courseId
             }
         }
 
+        console.log(`Creating Order`);
+
         try{
             const order = await razorpayInstance.orders.create(options);
-            return res.status(200).json({
+            return res.json({
                 success: true,
                 courseDetails,
-                orderId: order.id
+                order
             })
         }catch(error){
             return res.status(500).json({
@@ -55,48 +75,59 @@ exports.capturePayment = async (req,res) => {
 
 exports.verifyPayment = async (req,res) => {
     try{
-        const {userId,courseId} = req.body.payload.payment.entity.notes;
-        if(!userId,!courseId){
+        console.log(`Verifying Payment`);
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+        const order = await razorpayInstance.orders.fetch(razorpay_order_id);
+        const { userId, courseId } = order.notes;
+        if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature){
             return res.status(400).json({
                 success: false,
                 message: `Missing Information`
             })
         }
 
-        const shasum = crypto.createHmac('sha256',process.env.RAZORPAY_SECRET);
-        shasum.update(JSON.stringify(req.body));
-        const digest = shasum.digest('hex');
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_SECRET)
+        .update(body)
+        .digest("hex");
 
-        if(digest === req.headers['x-razorpay-signature']){
-            console.log(`Webhook Verification successful`);
+        if (expectedSignature === razorpay_signature){
+            console.log("Signature Verified");
+            const updatedUser = await userModel.findByIdAndUpdate(userId,
+                {$push: {courses: courseId}},
+                {new: true}
+            );
 
-            try{
-                const updatedUser = await userModel.findByIdAndUpdate(
-                    userId,
-                    { $push: { courses: courseId }},
-                    {new: true}
-                )
-
-                if(!updatedUser)
-                    return res.status(404).send(`User Not Found`);
-                
-                const updatedCourse = await courseModel.findByIdAndUpdate(
-                    courseId,
-                    {$push: {studentEnrolled: userId}},
-                    { new: true }
-                );
-
-                if(!updatedCourse)
-                    return res.status(404).send(`Course Not Found`);
-
-            }catch(error){
-                return res.status(500).send(`Error while making entries in database`);
+            if(!updatedUser){
+                return res.status(404).json({
+                    success: false,
+                    message: "User Not Found"
+                });
             }
-            
-            return res.status(200).send('Course Buyed successfully');
-        }else{
-            console.log(`Webhook verification failed`)
-            return res.status(400).send('Invalid Signature');
+
+            const updatedCourse = await courseModel.findByIdAndUpdate(courseId,
+                {$push: {studentEnrolled: userId}},
+                {new: true}
+            );
+
+            if(!updatedCourse){
+                return res.status(404).json({
+                    success: false,
+                    message: "Course Not Found"
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Course Buyed Successfully"
+            });
+        }
+        else{
+            res.status(400).json({
+                success: false ,
+                message: "Payment Failed"
+            });
         }
     }catch(err){
         console.log(`Webhook verification failed`)

@@ -18,3 +18,8 @@ Delete Section Feature While creating course --> When we click on delete section
 While uploading video or thumbnail there is no option to remove the uploaded file or add new file once uploaded in form so add reset thumbnail uploader feature.
 
 Currently user does not required to click on publish to move it in reviewing process.
+
+Share option for courses
+
+In enrolled course pages replace static data with dynamic data in which show only courses in which student is currently enrolled.
+After buying course don't show buy courses screen in the course directly navigate to the content of the course
