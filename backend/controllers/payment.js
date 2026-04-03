@@ -4,6 +4,9 @@ const courseModel = require('../models/courseModel');
 const userModel = require('../models/userModel');
 const { default: mongoose } = require('mongoose');
 const crypto = require("crypto");
+const fs = require('fs');
+const path = require('path');
+const sendMail = require('../utils/sendMail');
 
 exports.capturePayment = async (req,res) => {
     console.log("Create Order API Triggered...");
@@ -116,6 +119,26 @@ exports.verifyPayment = async (req,res) => {
                     success: false,
                     message: "Course Not Found"
                 });
+            }
+
+            // Send Enrollment Email
+            try {
+                const templatePath = path.join(__dirname, '../templates/course-enrollment.html');
+                let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+                
+                emailTemplate = emailTemplate.replace('{{STUDENT_NAME}}', updatedUser.fName);
+                emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', updatedCourse.title);
+                emailTemplate = emailTemplate.replace('{{COURSE_LINK}}', 'http://localhost:5173/dashboard/enrolled-courses');
+
+                await sendMail(
+                    updatedUser.email,
+                    `Successfully Enrolled in ${updatedCourse.title}`,
+                    `Congratulations! You have successfully enrolled in ${updatedCourse.title}.`,
+                    emailTemplate
+                );
+                console.log(`Enrollment email sent to ${updatedUser.email}`);
+            } catch (mailError) {
+                console.log(`Failed to send enrollment email: ${mailError.message}`);
             }
 
             return res.status(200).json({
