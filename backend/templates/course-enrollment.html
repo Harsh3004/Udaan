@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { width: 90%; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .header { font-size: 24px; color: #333; margin-bottom: 20px; }
+        .success-text { font-size: 18px; color: #28a745; margin: 20px 0; }
+        .course-title { font-size: 20px; font-weight: bold; color: #007BFF; }
+        .footer { font-size: 12px; color: #888; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Udaan - Enrollment Successful!</div>
+        <p>Hi {{STUDENT_NAME}},</p>
+        <p>Congratulations! Your payment was successful and you have been successfully enrolled in the following course:</p>
+        
+        <div class="course-title">{{COURSE_NAME}}</div>
+        
+        <p>You can now access your course materials from your dashboard.</p>
+        
+        <div style="margin: 30px 0;">
+            <a href="{{COURSE_LINK}}" style="background-color: #007BFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Start Learning</a>
+        </div>
+        
+        <p>Happy Learning!</p>
+        <br>
+        <div class="footer">
+            &copy; 2025 Udaan. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
