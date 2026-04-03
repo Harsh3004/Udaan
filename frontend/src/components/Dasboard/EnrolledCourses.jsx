@@ -1,47 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { FiPlayCircle, FiCheckCircle, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
+import { request } from '../../services/operations/authApi';
+import { endpoints } from '../../services/api';
+import toast from 'react-hot-toast';
 
-// Dummy Data for Enrolled Courses
-const DUMMY_ENROLLED_COURSES = [
-  {
-    _id: "course_1",
-    thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1000&auto=format&fit=crop",
-    courseName: "The Complete Full-Stack Web Development Bootcamp",
-    courseDescription: "Learn full-stack web development from scratch with hands-on projects.",
-    totalDuration: "32h 45m",
-    progressPercentage: 45,
-    status: "In Progress"
-  },
-  {
-    _id: "course_2",
-    thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop",
-    courseName: "Advanced React patterns and Performance Optimization",
-    courseDescription: "Master advanced React concepts including hooks, context, state management.",
-    totalDuration: "18h 20m",
-    progressPercentage: 12,
-    status: "In Progress"
-  },
-  {
-    _id: "course_3",
-    thumbnail: "https://images.unsplash.com/photo-1526379095098-d400fd0bfce8?q=80&w=1000&auto=format&fit=crop",
-    courseName: "UX/UI Design Principles & Figma Mastery",
-    courseDescription: "Create stunning user interfaces and intuitive user experiences.",
-    totalDuration: "24h 15m",
-    progressPercentage: 100,
-    status: "Completed"
+const fetchEnrolledCourses = async(setEnrolledCourses) => {
+  try{
+    const response = await request(endpoints.GET_ENROLLED_COURSES,"GET");
+    if(!response.ok)
+      throw new Error("Error while fetching Enrolled Courses");
+
+    const data = await response.json();
+    setEnrolledCourses(data.courses)
   }
-];
+  catch(err){
+    toast.error("Try Again Later");
+  }
+}
 
 const EnrolledCourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState(null)
   const navigate = useNavigate()
-
+  
   useEffect(() => {
-    // Simulating API call fetching enrolled courses
-    setTimeout(() => {
-      setEnrolledCourses(DUMMY_ENROLLED_COURSES)
-    }, 1200)
+    fetchEnrolledCourses(setEnrolledCourses);
   }, [])
 
   return (
@@ -75,7 +58,7 @@ const EnrolledCourses = () => {
             >
               <div className='relative w-full h-48 overflow-hidden'>
                 <img 
-                  src={course.thumbnail} 
+                  src={course?.thumbnail?.url} 
                   alt={course.courseName}
                   className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
                 />
@@ -94,19 +77,20 @@ const EnrolledCourses = () => {
               <div className='flex flex-col p-6 h-full justify-between'>
                 <div>
                   <h2 className='text-xl font-semibold text-rich-black-5 line-clamp-2 mb-2 group-hover:text-yellow-50 transition-colors duration-300'>
-                    {course.courseName}
+                    {course.title}
                   </h2>
                   <p className='text-sm text-rich-black-100 line-clamp-2 mb-5'>
-                    {course.courseDescription}
+                    {course.desc}
                   </p>
                 </div>
 
                 <div className='flex flex-col gap-3 mt-auto'>
                   <div className='flex items-center justify-between text-sm text-rich-black-100 font-medium'>
-                    <div className='flex items-center gap-1.5 text-rich-black-50'>
+                    {/* For total Course Duration  */}
+                    {/* <div className='flex items-center gap-1.5 text-rich-black-50'>
                        <FiClock size={16} />
                        <span>{course.totalDuration}</span>
-                    </div>
+                    </div> */}
                     <span>{course.progressPercentage}% Completed</span>
                   </div>
                   

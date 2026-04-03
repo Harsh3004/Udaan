@@ -10,6 +10,7 @@ export const endpoints = {
     RESET_PASSWORD_API: BASE_URL + "/auth/update-password",
 
     GET_INSTRUCTOR_COURSES: BASE_URL + "/course/getInstructorCourses",
+    GET_ENROLLED_COURSES: BASE_URL + "/course/getEnrolledCourses",
     GET_TOP_RATED_COURSES: BASE_URL + "/course/top-rated",
     SHOW_COURSES_API: BASE_URL + "/course",
     GET_COURSE_DETAILS_API: BASE_URL + "/course",

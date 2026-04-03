@@ -4,10 +4,12 @@ const courseModel = require('../models/courseModel');
 const userModel = require('../models/userModel');
 const subsectionModel = require('../models/subsectionModel');
 const sectionModel = require('../models/sectionModel');
-const sendMail = require('../utils/sendMail');
 const ratingAndReview = require('../models/ratingAndReviewModel');
 const categoryModel = require('../models/categoryModel');
 const { default: mongoose } = require('mongoose');
+const sendMail = require('../utils/sendMail');
+const courseProgressModel = require('../models/courseProgressModel');
+
 require('dotenv').config();
 
 exports.createCourse = async(req,res) => {
@@ -321,6 +323,80 @@ exports.getCourseDetails = async (req,res) => {
         return res.status(500).json({
             success: false,
             message: `Error: ${error.message}`
+        })
+    }
+}
+
+exports.getStudentEnrolledCourses = async (req,res) => {
+    try{
+        console.log("Fetching course student enrolled in..");
+        const userId = req.user.id;
+
+        if(!userId){
+            return res.status(404).json({
+                success: false,
+                message: "Missing Information"
+            })
+        }
+
+        const userDetails = await userModel.findById(userId).populate({
+            path: 'courses',
+            populate: {
+                path: 'section',
+                populate: {
+                    path: 'subsection'
+                }
+            }
+        });
+
+        if (!userDetails)
+            return res.status(404).json({ success: false, message: "User not found" });
+
+        const courseProgressRecords = await courseProgressModel.find({ userId: userId });
+
+        const coursesWithProgress = userDetails.courses.map((course) => {
+            // Counting total videos in course
+            let totalVideos = 0;
+            if (course.section) {
+                course.section.forEach(sec => {
+                    totalVideos += sec.subSection ? sec.subSection.length : 0;
+                });
+            }
+
+            // progress record for course
+            const progressRecord = courseProgressRecords.find(
+                (record) => record.courseID.toString() === course._id.toString()
+            );
+
+            // Counting completed videos
+            const completedVideosCount = progressRecord ? progressRecord.completedVideos.length : 0;
+
+            // Calculating percentage
+            let progressPercentage = 0;
+            if (totalVideos !== 0) {
+                progressPercentage = Math.round((completedVideosCount / totalVideos) * 100);
+            }
+
+            const status = progressPercentage === 100 ? "Completed" : "In Progress";
+
+            return {
+                ...course.toObject(),
+                progressPercentage,
+                status,
+                // totalDuration: "..." // sum up subSection video durations
+            };
+        });
+        
+        return res.status(200).json({
+            success : true,
+            message: "Enrolled Courses fetched",
+            courses: coursesWithProgress
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success: false,
+            message: `Error while fetching Enrolled Courses: ${error}`
         })
     }
 }
