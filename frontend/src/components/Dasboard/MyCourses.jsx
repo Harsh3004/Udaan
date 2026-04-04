@@ -41,7 +41,7 @@ export const MyCourses = () => {
     }, []);
 
   return (
-    <div className='flex w-full min-h-screen flex-col p-8 text-rich-black-900'>
+    <div className='flex w-9/12 mx-auto min-h-screen flex-col py-8 text-rich-black-900'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold mb-6 text-rich-black-5'>
           My Courses

@@ -7,7 +7,7 @@ const AddCourse = () => {
   return (
     <div className='flex justify-between w-full'>
         <div className='relative w-5/6'>
-            <Link className='flex items-center gap-1 text-rich-Black-300 py-6 px-6 font-normal text-sm' to={'/dashboard'}><IoArrowBackCircle /> Back to Dashboard </Link>
+            <Link className='flex items-center gap-1 text-rich-Black-300 py-6 px-6 font-normal text-sm' to={'/dashboard/instructor'}><IoArrowBackCircle /> Back to Dashboard </Link>
 
             <RenderSteps />
         </div>

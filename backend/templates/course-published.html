@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { width: 90%; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .header { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #007BFF; padding-bottom: 15px; }
+        .success-text { font-size: 18px; color: #28a745; margin: 20px 0; font-weight: bold; }
+        .course-title { font-size: 22px; font-weight: bold; color: #007BFF; padding: 10px; background-color: #f8f9fa; border-radius: 4px; text-align: center; }
+        .content { margin: 25px 0; }
+        .footer { font-size: 12px; color: #888; margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Udaan - Course Launched!</div>
+        <p>Hi {{INSTRUCTOR_NAME}},</p>
+        
+        <div class="success-text">🎉 Congratulations! Your course is now live.</div>
+        
+        <div class="content">
+            <p>We are thrilled to inform you that your course has been successfully published and is now available to students worldwide on the Udaan platform.</p>
+            
+            <div class="course-title">{{COURSE_NAME}}</div>
+            
+            <p>Students can now discover, enroll in, and learn from your amazing content. Keep up the great work!</p>
+        </div>
+        
+        <div style="margin: 30px 0; text-align: center;">
+            <a href="{{DASHBOARD_LINK}}" style="background-color: #007BFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+        </div>
+        
+        <p>Happy Teaching!<br>- The Udaan Team</p>
+        
+        <div class="footer">
+            &copy; 2025 Udaan. All rights reserved.<br>
+            You are receiving this because you are an active instructor on Udaan.
+        </div>
+    </div>
+</body>
+</html>
