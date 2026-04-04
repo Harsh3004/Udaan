@@ -6,8 +6,8 @@ exports.auth = (req,res,next) => {
         console.log(`In auth function`);
         let token;
         try{
-            token = req?.cookies?.token || req?.body?.token || req.header("Authorization").replace("Bearer ","");
-            console.log(token);
+            token = req?.cookies?.token || req?.body?.token || req.header("Authorization")?.replace("Bearer ", "");
+            console.log("Extracted Token:", token);
         }catch(error){
             console.log("User: ",req?.user);
             console.log("Cookies: ", req?.cookies);
@@ -23,7 +23,7 @@ exports.auth = (req,res,next) => {
 
         console.log(`token fetched`);
         if(!token){
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
                 message: `Token Missing`
             })
