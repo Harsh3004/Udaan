@@ -56,7 +56,7 @@ export const InstructorDashboard = () => {
         <div className="flex w-full min-h-screen flex-col p-8 text-rich-black-5">
             <div className="mb-10">
                 <h1 className="text-4xl font-extrabold text-rich-black-5 tracking-tight">
-                    Hi {user?.firstName || "Instructor"} 👋
+                    Welcome {user?.fName || "Instructor"} 👋
                 </h1>
                 <p className="text-lg text-rich-black-200 mt-2 font-medium">
                     Let's start something new and inspire the world.

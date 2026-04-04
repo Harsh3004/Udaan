@@ -8,6 +8,29 @@ const fs = require('fs');
 const path = require('path');
 const sendMail = require('../utils/sendMail');
 
+const sendEnrollmentMail = async (course,user) => {
+    // Send Enrollment Email
+    try {
+        const templatePath = path.join(__dirname, '../templates/course-enrollment.html');
+        let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+        
+        emailTemplate = emailTemplate.replace('{{STUDENT_NAME}}', user.fName);
+        emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', course.title);
+        emailTemplate = emailTemplate.replace('{{COURSE_LINK}}', 'http://localhost:5173/dashboard/enrolled-courses')
+
+        await sendMail(
+            user.email,
+            `Successfully Enrolled in ${course.title}`,
+            `Congratulations! You have successfully enrolled in ${course.title}.`,
+            emailTemplate
+        );
+
+        console.log(`Enrollment email sent to ${user.email}`);
+    } catch (mailError) {
+        console.log(`Failed to send enrollment email: ${mailError.message}`);
+    }
+}
+
 exports.capturePayment = async (req,res) => {
     console.log("Create Order API Triggered...");
     try{
@@ -121,25 +144,7 @@ exports.verifyPayment = async (req,res) => {
                 });
             }
 
-            // Send Enrollment Email
-            try {
-                const templatePath = path.join(__dirname, '../templates/course-enrollment.html');
-                let emailTemplate = fs.readFileSync(templatePath, 'utf8');
-                
-                emailTemplate = emailTemplate.replace('{{STUDENT_NAME}}', updatedUser.fName);
-                emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', updatedCourse.title);
-                emailTemplate = emailTemplate.replace('{{COURSE_LINK}}', 'http://localhost:5173/dashboard/enrolled-courses');
-
-                await sendMail(
-                    updatedUser.email,
-                    `Successfully Enrolled in ${updatedCourse.title}`,
-                    `Congratulations! You have successfully enrolled in ${updatedCourse.title}.`,
-                    emailTemplate
-                );
-                console.log(`Enrollment email sent to ${updatedUser.email}`);
-            } catch (mailError) {
-                console.log(`Failed to send enrollment email: ${mailError.message}`);
-            }
+            sendEnrollmentMail(updatedCourse,updatedUser);
 
             return res.status(200).json({
                 success: true,

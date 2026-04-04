@@ -63,11 +63,10 @@ export const buyCourse = async(course,navigate) => {
         // "image": rzpLogo,
         "order_id": data.order.id,
         // "callback_url": endpoints.VERIFY_PAYMENT,
+        
         handler: async function(response){
             // verify payment
             verifyPayment(response,navigate);
-
-            // send buy course successfully mail
         },
         "notes": {
           "address": "Razorpay Corporate Office"
