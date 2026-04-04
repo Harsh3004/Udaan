@@ -9,10 +9,11 @@ exports.auth = (req,res,next) => {
             token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ","");
             console.log(token);
         }catch(error){
+            console.log("User: ",req.user);
             console.log("Cookies: ", req.cookies.token);
             console.log("Body", req.body.token);
             console.log(req.header("Authorization"));
-            
+
             return res.status(401).json({
                 success: false,
                 message: "Missing Token"
