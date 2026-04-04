@@ -181,13 +181,13 @@ exports.login = async (req,res) => {
 
             const options = {
                 expires: new Date(Date.now() + 3*24*60*60*1000),
-                httpOnly: true
+                httpOnly: true,
+                sameSite: 'none',
             }
 
             res.cookie('token',token,options).status(200).json({
                 success: true,
                 message: `Login Successfully`,
-                sameSite: 'none',
                 userDetails
             })
         }
@@ -203,6 +203,26 @@ exports.login = async (req,res) => {
             success: false,
             message: `While login: ${err.message}`
         })
+    }
+}
+
+exports.logout = async (req, res) => {
+    try {
+        const options = {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true
+        };
+
+        res.clearCookie('token', options).status(200).json({
+            success: true,
+            message: "Logged out successfully"
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: `While logout: ${err.message}`
+        });
     }
 }
 
