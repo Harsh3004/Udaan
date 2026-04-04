@@ -151,10 +151,12 @@ export const Home = () => {
         <section>
             <div className='frame flex justify-center items-center'>
                 <div className='flex flex-row gap-2 md:pt-32 absolute z-10'>  
-                    <Button active={1}>
-                        Explore Full Catalog
-                        <FaArrowRight />
-                    </Button>
+                    <Link to="/browse">
+                        <Button active={1}>
+                            Explore All Courses
+                            <FaArrowRight />
+                        </Button>
+                    </Link>
 
                     <Button active={0}>
                         Learn More

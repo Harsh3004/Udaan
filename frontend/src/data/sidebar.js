@@ -5,20 +5,7 @@ export const sidebarLinks = [
         path: "/dashboard/my-profile",
         icon: "VscAccount"
     },
-    {
-        id: 2,
-        name: "Dashboard",
-        path: "/dashboard/instructor",
-        type: "Instructor",
-        icon: "VscDashboard"
-    },
-    {
-        id: 3,
-        name: "My Courses",
-        path: "/dashboard/my-courses",
-        type: "Instructor",
-        icon: "VscArchive"
-    },
+
     {
         id: 4,
         name: "Add Course",
@@ -32,19 +19,5 @@ export const sidebarLinks = [
         path: "/dashboard/enrolled-courses",
         type: "Student",
         icon: "VscBook"
-    },
-    {
-        id: 6,
-        name: "Purchase History",
-        path: "/dashboard/purchase-history",
-        type: "Student",
-        icon: "VscHistory"
-    },
-    {
-        id: 7,
-        name: "Browse Courses",
-        path: "/browse",
-        type: "Student",
-        icon: "VscCompass"
     }
 ]
