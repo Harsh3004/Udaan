@@ -147,6 +147,7 @@ exports.deleteCourse = async (req, res) => {
         console.log(`Remove course from instructor course array: ${temp}`);
 
         await categoryModel.findByIdAndUpdate(course.category, { $pull: { courses: courseId } });
+        await courseProgressModel.deleteMany({ courseID: courseId });
 
         temp = await courseModel.findByIdAndDelete(courseId);
         console.log(`Course deleted successfully: ${temp}`);
@@ -212,7 +213,11 @@ exports.updateCourse = async (req, res) => {
                 })
             }
 
-            const cloudResponse = await uploadToCloudinary(thumbnail, "Udaan");
+            if (courseDetails.thumbnail && courseDetails.thumbnail.public_id) {
+                await cloudinary.uploader.destroy(courseDetails.thumbnail.public_id);
+            }
+
+            const cloudResponse = await uploadToCloudinary(thumbnail, process.env.FOLDER_NAME);
             updates.thumbnail = cloudResponse;
 
             console.log(`Thumbnail updated successfully`);

@@ -53,7 +53,7 @@ export const InstructorDashboard = () => {
     }
 
     return (
-        <div className="flex w-9/12 mx-auto min-h-screen flex-col py-8 text-rich-black-5">
+        <div className="flex w-full min-h-screen flex-col p-8 text-rich-black-5">
             <div className="mb-10">
                 <h1 className="text-4xl font-extrabold text-rich-black-5 tracking-tight">
                     Welcome {user?.fName || "Instructor"} 👋

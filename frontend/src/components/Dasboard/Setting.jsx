@@ -51,7 +51,7 @@ const Setting = () => {
   });
 
   const [modal, setModal] = useState(null);
-   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

@@ -23,3 +23,13 @@ Share option for courses
 
 In enrolled course pages replace static data with dynamic data in which show only courses in which student is currently enrolled.
 After buying course don't show buy courses screen in the course directly navigate to the content of the course
+
+
+
+Notes: 
+Problem : when refresh on specific page the vercel was unable to render page instead look for specific file for that route.
+we added vercel.json file to tell vercel that this is single page application so load index.html alway initially since when we refresh deployed frontend the try to look for path url and file for that where as we are using react router to update content dynamically in single page application
+
+Problem : Unable to fetch cookie for production code due to cross-origin domain for frontend and backend
+Modern browser have a strict, unbreakable security rule.
+If a cookie is set to SameSite: 'none' (meaning it travels across different domains), it absolutely MUST be flagged as Secure. If you try to set SameSite: 'none' without secure: true, the browser basically says, "This is illegal," and silently downgrades your cookie to SameSite: 'Lax'.
