@@ -227,20 +227,31 @@ exports.updateCourse = async (req, res) => {
         }
 
         if (updates.category) {
-            const newCategory = await categoryModel.findById(updates.category);
-            if (!newCategory) {
-                return res.status(404).json({
-                    success: false,
-                    message: `Category not found`
-                })
+            const rawCategory = (typeof updates.category === 'string') ? updates.category.trim() : '';
+            let categoryDoc = null;
+            if (mongoose.Types.ObjectId.isValid(rawCategory)) {
+                categoryDoc = await categoryModel.findById(rawCategory);
+            }
+            if (!categoryDoc) {
+                categoryDoc = await categoryModel.findOne({ name: { $regex: new RegExp(`^${rawCategory}$`, 'i') } });
+            }
+            if (!categoryDoc) {
+                categoryDoc = await categoryModel.create({ name: rawCategory });
             }
 
-            if (courseDetails.category && courseDetails.category.toString() !== updates.category) {
-                await categoryModel.findByIdAndUpdate(courseDetails.category, { $pull: { courses: courseId } });
-                await categoryModel.findByIdAndUpdate(updates.category, { $addToSet: { courses: courseId } });
+            const newCategoryId = categoryDoc._id;
+
+            if (!courseDetails.category || courseDetails.category.toString() !== newCategoryId.toString()) {
+                if (courseDetails.category) {
+                    await categoryModel.findByIdAndUpdate(courseDetails.category, { $pull: { courses: courseId } });
+                }
+                await categoryModel.findByIdAndUpdate(newCategoryId, { $addToSet: { courses: courseId } });
             }
+            
+            updates.category = newCategoryId;
         }
 
+        console.log(`Updating course`)
         const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updates, { new: true });
 
         console.log(`Course updated successfully`);

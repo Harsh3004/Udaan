@@ -11,9 +11,10 @@ import { TagInput, RequirementsInput, ThumbnailUploader, TextInput } from '../..
 const CourseInformationForm = () => {
   const user = useSelector((state) => state.profile);
   const token = useSelector((state) => state.auth.token);
+  const { course, editCourse } = useSelector((state) => state.course);
   const dispatch = useDispatch();
 
-  const { register, handleSubmit, control, formState: { errors }, setValue } = useForm({
+  const { register, handleSubmit, control, formState: { errors }, setValue, getValues } = useForm({
     defaultValues: {
       title: '',
       description: '',
@@ -61,9 +62,41 @@ const CourseInformationForm = () => {
 
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    if (editCourse && course) {
+      setValue('title', course.title);
+      setValue('language', course.language);
+      setValue('description', course.desc);
+      setValue('price', course.price);
+      setValue('category', course.category?.name || course.category);
+      setValue('tags', course.tags || []); 
+      setValue('requirements', course.instructions || []);
+      setValue('courseThumbnail', course.thumbnail?.url || null);
+      setValue('benefits', course.whatyouwilllearn);
+    }
+  }, [editCourse, course, setValue]);
   
   const submitHandler = async (data) => {
-    const toastID = toast.loading('Creating Course');
+    if (editCourse) {
+      const currentValues = getValues();
+      const isChanged = 
+        currentValues.title !== course.title ||
+        currentValues.language !== course.language ||
+        currentValues.description !== course.desc ||
+        currentValues.price != course.price ||
+        currentValues.category !== (course.category?.name || course.category) ||
+        currentValues.benefits !== course.whatyouwilllearn ||
+        data.courseThumbnail instanceof File;
+
+      if (!isChanged && !(data.courseThumbnail instanceof File)) {
+        toast.error("No changes made to the form");
+        dispatch(setStep(2));
+        return;
+      }
+    }
+
+    const toastID = toast.loading(editCourse ? 'Updating Course...' : 'Creating Course...');
     console.log( 'Form Data:', data);
     try{
       const formPayload = new FormData();
@@ -79,24 +112,39 @@ const CourseInformationForm = () => {
       formPayload.append("tags", JSON.stringify(data.tags)); 
       formPayload.append("instructions", JSON.stringify(data.requirements));
       formPayload.append("user", user.user._id)
-      if (data.courseThumbnail) {
+      if (data.courseThumbnail instanceof File) {
         formPayload.append("image", data.courseThumbnail); 
       }
 
-      const response = await request(endpoints.CREATE_COURSE_API,"POST",formPayload,token);
+      let response;
+      if (editCourse) {
+        response = await request(`${endpoints.UPDATE_COURSE_API.replace(':courseId', course._id)}`,"PUT",formPayload,token);
+      } else {
+        response = await request(endpoints.CREATE_COURSE_API,"POST",formPayload,token);
+      }
+
       const result = await response.json();
       if(!response.ok){
-        throw new Error(data.message);
+        throw new Error(data.message || result.message);
       }
       
       console.log(response);
-      dispatch(setCourse(result.course));
+      if (editCourse) {
+        const fetchCourse = await request(`${endpoints.GET_COURSE_DETAILS_API}/${course._id}`, 'GET');
+        const fetchResult = await fetchCourse.json();
+        if (fetchResult.success) {
+           dispatch(setCourse(fetchResult.courseDetails));
+        }
+      } else {
+        dispatch(setCourse(result.course));
+      }
+
       toast.dismiss(toastID);
-      toast.success("Course Created Successfully");
+      toast.success(editCourse ? "Course Updated Successfully" : "Course Created Successfully");
       dispatch(setStep(2));
     }catch(error){
       toast.dismiss(toastID);
-      toast.error(error.message || "Course Creation Failed")
+      toast.error(error.message || (editCourse ? "Course Update Failed" : "Course Creation Failed"))
       console.log("Error while Creating Course...", error);
     }
   }
