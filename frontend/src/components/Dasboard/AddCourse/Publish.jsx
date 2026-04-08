@@ -38,6 +38,7 @@ export const Publish = () => {
       toast.success('Course published');
     })
     .catch((error) => {
+      console.log(error.message);
       toast.error(error.message || 'Publish failed');
     })
     .finally(() => {

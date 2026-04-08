@@ -5,12 +5,15 @@ import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
 import { HighlightedText } from '../components/HighlightedText';
 import { buyCourse } from '../services/operations/paymentService';
+import { useSelector } from 'react-redux';
 
 const CourseDetails = () => {
   const { courseId } = useParams();
   const [loading, setLoading] = useState(false);
   const [course, setCourse] = useState(null);
   const navigate = useNavigate();
+
+  const { token } = useSelector((state) => state.auth);
 
   const fetchCourse = async () => {
     if(!courseId) return;
@@ -34,11 +37,32 @@ const CourseDetails = () => {
   useEffect(() => {
     fetchCourse();
   }, [courseId]);
+  
+  const handleBuyCourse = () => {
+    if (!token) {
+      toast.error("Please log in to purchase this course.");
+      navigate('/login');
+      return;
+    }
+    
+    buyCourse(course, navigate);
+  };
+
+  const handleAddToCart = () => {
+    if (!token) {
+      toast.error("Please log in to add items to your cart.");
+      navigate('/login');
+      return;
+    }
+
+    // Add actual Add to Cart logic here later
+    toast.success("Added to cart!"); 
+  };
 
   if(loading){
     return <div className='min-h-screen bg-rich-black-900 text-white flex items-center justify-center'>Loading course...</div>
   }
-
+  
   if(!course){
     return <div className='min-h-screen bg-rich-black-900 text-white flex items-center justify-center'>Course not found.</div>
   }
@@ -100,10 +124,11 @@ const CourseDetails = () => {
                 )}
                 <p className='text-3xl font-semibold text-yellow-50'>₹ {course.price}</p>
                 <button className='w-full bg-yellow-50 text-rich-black-900 font-semibold py-3 rounded-lg hover:bg-yellow-400 transition-colors'
-                onClick={() => buyCourse(course,navigate)}>
+                onClick={handleBuyCourse}>
                     Buy Now
                 </button>
-                <button className='w-full bg-rich-black-700 font-semibold py-3 rounded-lg hover:bg-rich-black-900 transition-colors'>
+                <button className='w-full bg-rich-black-700 font-semibold py-3 rounded-lg hover:bg-rich-black-900 transition-colors'
+                onClick={handleAddToCart}>
                     Add to Cart
                 </button>
                 <div className='text-sm text-rich-black-200 space-y-1'>

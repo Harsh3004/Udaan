@@ -29,7 +29,7 @@ exports.createCourse = async (req, res) => {
             })
         }
 
-        // Allow either an existing category id or a new category name; create on-the-fly if needed
+        console.log('Checking Category');
         let categoryDoc = null;
         if (mongoose.Types.ObjectId.isValid(rawCategory)) {
             categoryDoc = await categoryModel.findById(rawCategory);
@@ -45,6 +45,7 @@ exports.createCourse = async (req, res) => {
 
         const categoryId = categoryDoc._id;
 
+        console.log(`Checking for supported format`);
         const supportedTypes = ['jpeg', 'jpg', 'png'];
         const fileType = thumbnail.name.split('.')[1];
         if (!isFileSupported(fileType, supportedTypes)) {
@@ -54,6 +55,7 @@ exports.createCourse = async (req, res) => {
             })
         }
 
+        console.log(`Upload to cloudinary`);
         const response = await uploadToCloudinary(thumbnail, process.env.FOLDER_NAME);
         const course = await courseModel.create({
             title, desc,
@@ -75,6 +77,7 @@ exports.createCourse = async (req, res) => {
         // --> push course in instructor course array
         // --> Send mail
 
+        console.log('Course Created Successfully');
         return res.status(200).json({
             success: true,
             message: `Course created successfully`,
