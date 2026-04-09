@@ -7,6 +7,8 @@ import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
 import education from '../../assets/Illustration/education.png'
 import notes from '../../assets/Illustration/notes.png'
+import { useGoogleLogin } from '@react-oauth/google';
+import { FcGoogle } from "react-icons/fc";
 
 export const Signup = () => {
   const [userType, setUserType] = useState('Student');
@@ -26,6 +28,35 @@ export const Signup = () => {
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
+  const googleSignup = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const toastId = toast.loading("Verifying Google Auth...");
+      try {
+        const res = await request(endpoints.GOOGLE_AUTH_API, "POST", { 
+            token: tokenResponse.access_token,
+            role: userType // Pass the selected role!
+        });
+        const data = await res.json();
+
+        // If our backend treats Google Auth as a seamless login/signup (which it should):
+        if (res.ok) {
+            toast.dismiss(toastId);
+            toast.success("Account Created Successfully");
+            
+            navigate('/login'); 
+        } else {
+            throw new Error(data.message);
+        }
+      } catch (error) {
+          toast.dismiss(toastId);
+          toast.error("Google Signup Failed");
+      }
+    },
+    onError: () => {
+        toast.error("Google Signup Failed");
+    }
+  });
   
   const navigate = useNavigate();
 
@@ -212,6 +243,21 @@ export const Signup = () => {
                 {isLoading ? 'Sending OTP...' : 'Create Account'}
               </button>
             </form>
+
+            <div className="flex items-center my-6">
+              <div className="flex-1 border-t border-rich-black-700"></div>
+              <span className="px-3 text-sm text-rich-black-200">OR</span>
+              <div className="flex-1 border-t border-rich-black-700"></div>
+            </div>
+
+            <button 
+              onClick={() => googleSignup()} 
+              className="w-full flex items-center justify-center gap-3 bg-rich-black-800 border border-rich-black-700 text-rich-black-5 font-semibold py-2 rounded-lg hover:bg-rich-black-700 transition-all duration-300 text-lg"
+            >
+              <FcGoogle className="text-2xl" /> 
+              Sign up with Google
+            </button>
+            
           </div>
 
         </div>

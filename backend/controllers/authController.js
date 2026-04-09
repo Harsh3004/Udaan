@@ -294,3 +294,115 @@ exports.changePassword = async (req,res) => {
         })
     }
 }
+
+exports.googleAuth = async (req, res) => {
+    try {
+        console.log(`Starting Google Auth...`);
+        const { token, role } = req.body;
+
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing Google Token"
+            });
+        }
+
+        // 1. Fetch user data from Google
+        const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const googleUser = await googleResponse.json();
+
+        if (!googleUser.email) {
+            return res.status(400).json({
+                success: false,
+                message: "Failed to verify Google Token"
+            });
+        }
+
+        const email = googleUser.email;
+
+        // 2. Check if the user already exists
+        let userDetails = await userModel.findOne({ email }).populate('additionalDetails').exec();
+
+        // 3. Seamless Signup: If they don't exist, create their account
+        if (!userDetails) {
+            console.log(`New Google User, creating account...`);
+            
+            // Generate a random, secure password since they login via Google
+            const randomPassword = crypto.randomBytes(16).toString('hex');
+            let hashPassword;
+            try {
+                hashPassword = await bcrypt.hash(randomPassword, 10);
+            } catch (err) {
+                console.log(`Error in Hashing Google User Password`);
+                return res.status(500).json({ success: false, message: `error in hashing` });
+            }
+
+            // Create their empty profile
+            const profile = await additionalDetails.create({
+                profession: null,
+                dob: null,
+                gender: null,
+                mobile: null,
+                bio: null
+            });
+
+            try {
+                userDetails = await userModel.create({
+                    fName: googleUser.given_name,
+                    lName: googleUser.family_name || '', // Fallback if no last name
+                    email: email,
+                    password: hashPassword,
+                    role: role || 'Student', // Default to Student if role isn't passed
+                    profileImage: googleUser.picture, // Use their real Google Profile Picture!
+                    additionalDetails: profile._id
+                });
+                
+                userDetails = await userModel.findById(userDetails._id).populate('additionalDetails').exec();
+            } catch (error) {
+                await additionalDetails.findByIdAndDelete(profile._id);
+                throw error;
+            }
+        }
+
+        // 4. Log them in (Generate JWT)
+        console.log(`Generating JWT for Google User...`);
+        const payload = { 
+            email: userDetails.email, 
+            id: userDetails._id, 
+            role: userDetails.role 
+        };
+        
+        const jwtToken = jwt.sign(
+            payload,
+            process.env.SECRET_KEY
+        );
+
+        // Convert to plain object to safely manipulate
+        userDetails = userDetails.toObject();
+        userDetails.token = jwtToken;
+        userDetails.password = undefined;
+
+        // 5. Set Cookie exactly like your standard login
+        const options = {
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+        };
+
+        return res.cookie('token', jwtToken, options).status(200).json({
+            success: true,
+            message: `Google Login Successfully`,
+            userDetails
+        });
+
+    } catch (error) {
+        console.log(`Error during Google Auth: ${error.message}`);
+        return res.status(500).json({
+            success: false,
+            message: `While google login: ${error.message}`
+        });
+    }
+}

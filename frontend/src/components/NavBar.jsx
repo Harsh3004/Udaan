@@ -120,7 +120,7 @@ export const NavBar = () => {
                                     user && (
                                         <div className='relative' ref={dropDownRef}>
                                             <button onClick={() => setisOpen(!isOpen)}>
-                                                <img src={user?.profileImage} alt="profile_image" width={40} className='rounded-full' />
+                                                <img src={user?.profileImage} alt="profile_image" width={40} className='rounded-full' referrerPolicy="no-referrer" />
                                             </button>
 
                                             {

@@ -24,60 +24,66 @@ import { MyCourses } from "./components/Dasboard/MyCourses"
 import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
 
+// NEW: Import the Google OAuth Provider
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 export default function App() {
   console.log("VITE_BASE_URL =", import.meta.env.VITE_BASE_URL);
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
   return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <div className='w-full min-h-screen overflow-x-hidden relative select-none bg-rich-black-900'>
+        <div style={{ width: '100%', height: '100%', position: 'absolute', pointerEvents: 'none'}}>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#ffffff"
+            raysSpeed={1.5}
+            lightSpread={0.8}
+            rayLength={1.2}
+            followMouse={true}
+            mouseInfluence={0.1}
+            noiseAmount={0.1}
+            distortion={0.05}
+            className="custom-rays"
+          />
+        </div>
 
-    <div className='w-full min-h-screen overflow-x-hidden relative select-none bg-rich-black-900'>
-      <div style={{ width: '100%', height: '100%', position: 'absolute', pointerEvents: 'none'}}>
-        <LightRays
-          raysOrigin="top-center"
-          raysColor="#ffffff"
-          raysSpeed={1.5}
-          lightSpread={0.8}
-          rayLength={1.2}
-          followMouse={true}
-          mouseInfluence={0.1}
-          noiseAmount={0.1}
-          distortion={0.05}
-          className="custom-rays"
-        />
+        <NavBar />
+        
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/about" element={<About/>}/>
+          <Route path="/contact" element={<Contact/>}/>
+          <Route path="/login" element={<Login/>}/>
+          <Route path="/signup" element={<Signup/>}/>
+          <Route path="/otp" element={<Otp/>}/>
+          <Route path="/error" element={<Error/>}/>
+          <Route path="/browse" element={<Browse/>}/>
+          <Route path="/course/:courseId" element={<CourseDetails className='z-50'/>}/>
+          <Route path="/login/forgot-password" element={<ForgotPassword/>}/>
+          <Route path="/update-password/:token" element={<UpdatePassword/>} />
+
+          <Route path="/dashboard" element={
+            <ProtectedRoute> 
+              <Dashboard/>
+            </ProtectedRoute>
+          }>
+            <Route path="/dashboard/my-profile" element={<Profile/>}/>
+            <Route path="/dashboard/instructor" element={<InstructorDashboard/>}/>
+            <Route path="/dashboard/my-courses" element={<MyCourses/>}/>
+            <Route path="/dashboard/add-course" element={<AddCourse/>}/>
+            <Route path="/dashboard/edit-course/:courseId" element={<EditCourse/>}/>
+            <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
+            <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
+            <Route path="/dashboard/setting" element={<Setting/>}/>
+          </Route>
+
+          <Route path="*" element={<Error/>}/>
+        </Routes>
+
+        <Toaster/>
       </div>
-
-      <NavBar />
-      
-      <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/about" element={<About/>}/>
-        <Route path="/contact" element={<Contact/>}/>
-        <Route path="/login" element={<Login/>}/>
-        <Route path="/signup" element={<Signup/>}/>
-        <Route path="/otp" element={<Otp/>}/>
-        <Route path="/error" element={<Error/>}/>
-        <Route path="/browse" element={<Browse/>}/>
-        <Route path="/course/:courseId" element={<CourseDetails className='z-50'/>}/>
-        <Route path="/login/forgot-password" element={<ForgotPassword/>}/>
-        <Route path="/update-password/:token" element={<UpdatePassword/>} />
-
-        <Route path="/dashboard" element={
-          <ProtectedRoute> 
-            <Dashboard/>
-          </ProtectedRoute>
-        }>
-          <Route path="/dashboard/my-profile" element={<Profile/>}/>
-          <Route path="/dashboard/instructor" element={<InstructorDashboard/>}/>
-          <Route path="/dashboard/my-courses" element={<MyCourses/>}/>
-          <Route path="/dashboard/add-course" element={<AddCourse/>}/>
-          <Route path="/dashboard/edit-course/:courseId" element={<EditCourse/>}/>
-          <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
-          <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
-          <Route path="/dashboard/setting" element={<Setting/>}/>
-        </Route>
-
-        <Route path="*" element={<Error/>}/>
-      </Routes>
-
-      <Toaster/>
-    </div>
+    </GoogleOAuthProvider>
   )
 }
