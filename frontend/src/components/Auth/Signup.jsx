@@ -21,6 +21,7 @@ export const Signup = () => {
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,30 +31,46 @@ export const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (isLoading) return;
+
     if (formData.password !== formData.confirmPassword) {
-      console.error("Passwords do not match");
+      toast.error("Passwords do not match"); 
       return;
     }
+
+    // Lock the button
+    setIsLoading(true);
+    const toastId = toast.loading(`Sending Otp...`);
 
     const payload = {
       ...formData,
       role: userType
     };
 
-    const otp = await request(endpoints.SEND_OTP_API,"POST", formData);
-    if(otp.ok){
-      navigate('/otp',{state: payload})
-      toast.success(`Otp Send Successfully`);
-    }else{
-      navigate('/error')
-      toast(`Something went Wrong`);
+    try {
+      const otp = await request(endpoints.SEND_OTP_API, "POST", formData);
+      
+      if(otp.ok){
+        toast.dismiss(toastId);
+        toast.success(`Otp Sent Successfully`);
+        navigate('/otp', {state: payload});
+      } else {
+        toast.dismiss(toastId);
+        toast.error(`Something went wrong`);
+        navigate('/error');
+      }
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
 
   return (
     <div className="bg-[#000814] min-h-screen text-gray-200 font-sans">
-
       <main className="w-10/12 max-w-7xl mx-auto py-4">
         <div className="grid md:grid-cols-2 gap-16 items-start">
             
@@ -83,6 +100,7 @@ export const Signup = () => {
 
             <div className="bg-rich-black-800 p-1 rounded-full flex gap-1 mb-4 max-w-max z-50 cursor-pointer">
               <button
+                type="button" // Added type="button" so it doesn't accidentally trigger form submit
                 onClick={() => setUserType('Student')}
                 className={`px-6 py-1 rounded-full transition-colors text-base ${
                   userType === 'Student' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
@@ -91,6 +109,7 @@ export const Signup = () => {
                 Student
               </button>
               <button
+                type="button" // Added type="button" 
                 onClick={() => setUserType('Instructor')}
                 className={`px-6 py-1 rounded-full transition-colors text-base ${
                   userType === 'Instructor' ? 'bg-rich-black-900 text-white' : 'text-gray-400'
@@ -183,9 +202,14 @@ export const Signup = () => {
               
               <button
                 type="submit"
-                className="w-full bg-yellow-50 text-rich-black-900 font-bold py-1 rounded-lg hover:bg-yellow-500 transition-all duration-300 text-lg mt-6"
+                disabled={isLoading}
+                className={`w-full font-bold py-2 rounded-lg transition-all duration-300 text-lg mt-6 flex justify-center items-center ${
+                  isLoading 
+                    ? 'bg-rich-black-500 text-rich-black-200 cursor-not-allowed' 
+                    : 'bg-yellow-50 text-rich-black-900 hover:bg-yellow-500'
+                }`}
               >
-                Create Account
+                {isLoading ? 'Sending OTP...' : 'Create Account'}
               </button>
             </form>
           </div>
@@ -195,4 +219,3 @@ export const Signup = () => {
     </div>
   );
 }
-
