@@ -1,22 +1,29 @@
 import { useSelector } from "react-redux";
 
-export const request = async (API, type, data,token) => {
+export const request = async (API, type, data, token) => {
   let body = undefined;
   let headers = {};
-  if(data instanceof FormData)
+  if (data instanceof FormData)
     body = data
-  else{
-    body = JSON.stringify(data);
-    headers['Content-Type'] = 'application/json';
+  else {
+    if (data !== undefined && data !== null) {
+      body = JSON.stringify(data);
+      headers['Content-Type'] = 'application/json';
+    }
   }
 
   if (token)
     headers["Authorization"] = `Bearer ${token}`;
 
-  return await fetch(API,{
+  const options = {
     method: type,
     headers: headers,
     credentials: "include",
-    body: body
-  });
+  };
+
+  if (type !== 'GET' && type !== 'HEAD' && body !== undefined) {
+    options.body = body;
+  }
+
+  return await fetch(API, options);
 }

@@ -6,7 +6,7 @@ import { endpoints } from '../../../services/api';
 import { request } from '../../../services/operations/authApi';
 import toast from 'react-hot-toast';
 import { setCourse, setStep } from '../../../slices/courseSlice';
-import { TagInput, RequirementsInput, ThumbnailUploader, TextInput } from '../../Common/Inputs';
+import { TagInput, RequirementsInput, BenefitsInput, ThumbnailUploader, TextInput } from '../../Common/Inputs';
 
 const CourseInformationForm = () => {
   const user = useSelector((state) => state.profile);
@@ -105,7 +105,7 @@ const CourseInformationForm = () => {
       formPayload.append("desc", data.description);
       formPayload.append("price", data.price);
       formPayload.append("category", data.category);
-      formPayload.append("whatyouwilllearn", data.benefits);
+      formPayload.append("whatyouwilllearn", JSON.stringify(data.benefits));
 
       // For arrays (tags and requirements), we need to stringify them or append individually
       // Stringifying as JSON is generally cleaner for array data
@@ -260,15 +260,18 @@ const CourseInformationForm = () => {
             )}
           />
 
-          <TextInput
-            label="Benefits of the course"
+          <Controller
             name="benefits"
-            placeholder="Enter benefits of the course"
-            rows={2}
-            register={register}
-            error={errors.benefits}
-            validation={{ required: 'Benefits are required' }}
+            control={control}
+            render={({ field }) => (
+              <BenefitsInput
+                label="Benefits of the course"
+                placeholder="Enter benefits of the course"
+                field={field}
+              />
+            )}
           />
+          {errors.benefits && <p className="text-xs text-red-500 mt-1 mb-6">{errors.benefits.message}</p>}
 
           <Controller
             name="requirements"

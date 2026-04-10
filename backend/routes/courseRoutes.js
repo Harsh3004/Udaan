@@ -1,6 +1,6 @@
 const express = require('express');
 const { auth, isInstructor, isStudent } = require('../middlewares/Auth');
-const { createCourse, showAllCourses, deleteCourse, updateCourse , getCourseDetails, getInstructorCourses, getTopRatedCourses, getStudentEnrolledCourses} = require('../controllers/courseController');
+const { createCourse, showAllCourses, deleteCourse, updateCourse , getCourseDetails, getInstructorCourses, getTopRatedCourses, getStudentEnrolledCourses, updateCourseProgress, getRecommendedCourses} = require('../controllers/courseController');
 const { createSection, updateSection, deleteSection, showAllSection } = require('../controllers/sectionController');
 const { showAllsubsection, createsubSection, updatesubSection, deletesubSection } = require('../controllers/subsectionController');
 const {addRatingReview,averageRating,showAllRatingAndReview} = require('../controllers/ratingAndReviewController');
@@ -9,11 +9,14 @@ const router = express.Router();
 //Get courses
 router.get('/getInstructorCourses',auth,isInstructor,getInstructorCourses);
 router.get('/getEnrolledCourses',auth,isStudent,getStudentEnrolledCourses);
+router.post('/update-course-progress', auth, isStudent, updateCourseProgress);
 router.get('/top-rated', getTopRatedCourses);
+router.get('/recommended/:courseId', getRecommendedCourses);
 
 // Course routes
 router.get('/',showAllCourses);
 router.get('/:courseId', getCourseDetails);
+router.get('/view/:courseId', auth, getCourseDetails);
 router.post('/create', auth, isInstructor, createCourse);
 router.delete('/delete/:courseId', auth, isInstructor, deleteCourse);
 router.put('/update/:courseId', auth, isInstructor, updateCourse);

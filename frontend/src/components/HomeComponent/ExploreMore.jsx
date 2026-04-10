@@ -22,7 +22,7 @@ export const ExploreMore = () => {
     };
 
   return (
-    <div className='flex flex-col items-center md:pb-56 text-white py-20'>
+    <div className='flex flex-col items-center lg:pb-[480px] md:pb-56 text-white py-20'>
         <div className='flex flex-col gap-2 items-center text-rich-black-5'>
             <p className='text-4xl font-semibold'>
                 Unlock the 
@@ -55,7 +55,7 @@ export const ExploreMore = () => {
 
         </div>
 
-        <div className="lg:absolute flex flex-col lg:flex-row justify-center gap-10 md:mt-40 py-10 w-4/5">
+        <div className="lg:absolute flex flex-col lg:flex-row justify-center gap-10 md:mt-40 py-10 w-4/5 z-50">
                 {courses.map((course, index) => (
                     <CourseCard
                       key={index}

@@ -54,7 +54,7 @@ const EnrolledCourses = () => {
             <div 
               key={course._id} 
               className='flex flex-col bg-rich-black-800 rounded-xl overflow-hidden shadow-[8px_8px_0px_0px_rgba(255,214,10,0.1)] hover:shadow-[12px_12px_0px_0px_rgba(255,214,10,0.2)] hover:-translate-y-1 transition-all duration-300 border border-rich-black-700 cursor-pointer group'
-              onClick={() => navigate(`/course/${course._id}`)}
+              onClick={() => navigate(`/view-course/${course._id}`)}
             >
               <div className='relative w-full h-48 overflow-hidden'>
                 <img 
