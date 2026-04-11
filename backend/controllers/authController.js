@@ -6,6 +6,8 @@ const userModel = require('../models/userModel')
 const otpModel = require('../models/otpModel');
 const additionalDetails = require('../models/additionalDetails');
 const sendMail = require('../utils/sendMail');
+const fs = require('fs');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -129,6 +131,23 @@ exports.signUp = async (req,res) => {
         }catch(error){
             await additionalDetails.findByIdAndDelete(profile._id);
             throw error;
+        }
+
+        // Send Welcome Email
+        try {
+            const templatePath = path.join(__dirname, '../templates/welcome-email.html');
+            let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+            
+            emailTemplate = emailTemplate.replace('{{NAME}}', `${fName} ${lName}`);
+
+            await sendMail(
+                email,
+                'Welcome to Udaan - Account Created Successfully',
+                `Hi ${fName}, Welcome to Udaan! Your account has been created successfully.`,
+                emailTemplate
+            );
+        } catch (mailError) {
+            console.error(`Failed to send welcome email: ${mailError.message}`);
         }
 
         return res.status(200).json({
