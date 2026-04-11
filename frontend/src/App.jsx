@@ -24,6 +24,7 @@ import { MyCourses } from "./components/Dasboard/MyCourses"
 import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
 import ViewCourse from "./pages/ViewCourse"
+import Cart from "./components/Dasboard/Cart/Cart"
 
 // NEW: Import the Google OAuth Provider
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/dashboard/add-course" element={<AddCourse/>}/>
             <Route path="/dashboard/edit-course/:courseId" element={<EditCourse/>}/>
             <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
+            <Route path="/dashboard/cart" element={<Cart />} />
             <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
             <Route path="/dashboard/setting" element={<Setting/>}/>
           </Route>

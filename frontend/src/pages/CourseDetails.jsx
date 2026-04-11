@@ -5,7 +5,8 @@ import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
 import { HighlightedText } from '../components/HighlightedText';
 import { buyCourse } from '../services/operations/paymentService';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '../slices/cartSlice';
 import { CourseCard } from '../components/CourseCard';
 
 const CourseDetails = () => {
@@ -14,8 +15,11 @@ const CourseDetails = () => {
     const [course, setCourse] = useState(null);
     const [recommendedCourses, setRecommendedCourses] = useState([]);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const { token } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.profile);
+    const { cart } = useSelector((state) => state.cart);
 
     const fetchRecommendedCourses = async (id) => {
         try {
@@ -68,15 +72,20 @@ const CourseDetails = () => {
     };
 
     const handleAddToCart = () => {
+        if (user && user?.role === "Instructor") {
+            toast.error("You are an Instructor. You can't buy a course.");
+            return;
+        }
         if (!token) {
             toast.error("Please log in to add items to your cart.");
             navigate('/login');
             return;
         }
 
-        // Add actual Add to Cart logic here later
-        toast.success("Added to cart!");
+        dispatch(addToCart(course));
     };
+
+    const isInCart = cart ? cart.some((item) => item._id === course?._id) : false;
 
     if (loading) {
         return <div className='min-h-screen bg-rich-black-900 text-white flex items-center justify-center'>Loading course...</div>
@@ -426,8 +435,8 @@ const CourseDetails = () => {
                                             Buy Now
                                         </button>
                                         <button className='w-full bg-rich-black-900 font-bold py-4 rounded-xl hover:bg-rich-black-800 transition-all duration-300 border border-rich-black-700'
-                                            onClick={handleAddToCart}>
-                                            Add to Cart
+                                            onClick={isInCart ? () => navigate('/dashboard/cart') : handleAddToCart}>
+                                            {isInCart ? "Go to Cart" : "Add to Cart"}
                                         </button>
                                     </div>
 
