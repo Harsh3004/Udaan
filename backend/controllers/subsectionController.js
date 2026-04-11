@@ -33,11 +33,18 @@ exports.createsubSection = async (req,res) => {
 
         console.log(cloudResponse);
 
+        // Calculate duration in MM:SS format
+        const totalSeconds = Math.round(cloudResponse.duration);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const formattedDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
         console.log('Creating subsection')
 
         const subsection = await subsectionModel.create({
             topic: topic,
             description: description,
+            timeDuration: formattedDuration,
             file: cloudResponse
         });
 
@@ -110,13 +117,19 @@ exports.updatesubSection = async (req,res) => {
         //     })
         // }
         
-        if(req.files && req.files.file){
-            const toupdatefile = req.files.file;
+        if(req.files && req.files.lectureVideo){
+            const toupdatefile = req.files.lectureVideo;
             const cloudResponse = await uploadToCloudinary(toupdatefile,process.env.FOLDER_NAME);
             updates.file = cloudResponse;
+            
+            // Update duration if new video is uploaded
+            const totalSeconds = Math.round(cloudResponse.duration);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            updates.timeDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
         
-        const updatedsubsection = await sectionModel.findByIdAndUpdate(subsectionId,
+        const updatedsubsection = await subsectionModel.findByIdAndUpdate(subsectionId,
             updates,
             {new: true}
         );

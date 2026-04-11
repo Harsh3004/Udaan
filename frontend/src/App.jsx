@@ -23,6 +23,7 @@ import AddCourse from "./components/Dasboard/AddCourse/AddCourse"
 import { MyCourses } from "./components/Dasboard/MyCourses"
 import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
+import ViewCourse from "./pages/ViewCourse"
 
 // NEW: Import the Google OAuth Provider
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -33,7 +34,7 @@ export default function App() {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div className='w-full min-h-screen overflow-x-hidden relative select-none bg-rich-black-900'>
+      <div className='w-full min-h-screen relative select-none bg-rich-black-900'>
         <div style={{ width: '100%', height: '100%', position: 'absolute', pointerEvents: 'none'}}>
           <LightRays
             raysOrigin="top-center"
@@ -79,6 +80,11 @@ export default function App() {
             <Route path="/dashboard/setting" element={<Setting/>}/>
           </Route>
 
+          <Route path="/view-course/:courseId" element={
+            <ProtectedRoute>
+              <ViewCourse/>
+            </ProtectedRoute>
+          }/>
           <Route path="*" element={<Error/>}/>
         </Routes>
 

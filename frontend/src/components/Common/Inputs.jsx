@@ -158,6 +158,82 @@ export const RequirementsInput = ({ label, placeholder, field }) => {
   );
 };
 
+// --- Benefit Component ---
+export const Benefit = ({ benefit, onRemove }) => (
+  <div className="inline-flex items-center px-3 py-1 mr-2 mb-2 text-sm rounded-full bg-gray-700 text-white shadow-md">
+    {benefit}
+    <button
+      onClick={onRemove}
+      className="ml-2 text-gray-400 hover:text-white transition-colors"
+      aria-label={`Remove tag: ${benefit}`}
+    >
+      &times;
+    </button>
+  </div>
+);
+
+// --- Benefits Input Component ---
+export const BenefitsInput = ({ label, placeholder, field }) => {
+  const benefits = field.value || []; 
+  const [inputValue, setInputValue] = useState('');
+
+  const addBenefit = useCallback((input) => {
+    const newBenefit = input.trim();
+
+    if (newBenefit.length > 0)
+      field.onChange([...benefits, newBenefit]);
+    
+  }, [benefits, field]); 
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addBenefit(inputValue);
+      setInputValue('');
+    }
+  };
+
+  const handleBlur = () => {
+    addBenefit(inputValue);
+    setInputValue('');
+  };
+
+  const handleRemoveBenefit = (benefitToRemove) => {
+    const updatedBenefits = benefits.filter(benefit => benefit !== benefitToRemove);
+    field.onChange(updatedBenefits);
+  };
+
+  return (
+    <div className="mb-6">
+      <label className="block text-sm font-normal mb-2 text-rich-black-5">
+        {label}
+      </label>
+      
+      <div 
+        className="p-3 rounded-lg focus-within:ring-1 focus-within:ring-yellow-500 min-h-[44px] bg-rich-black-700 shadow-input-shadow text-rich-black-200"
+        >
+        <div className="flex flex-wrap items-center">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            placeholder={benefits.length === 0 ? placeholder : ''}
+            className="flex-grow bg-transparent outline-none text-white placeholder-rich-black-200 mt-1 min-w-[100px]"
+            />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap mt-3">
+        {benefits.map((benefit, index) => (
+          <Benefit key={index} benefit={benefit} onRemove={() => handleRemoveBenefit(benefit)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 // --- Thumbnail Uploader Component ---
 export const ThumbnailUploader = ({ 

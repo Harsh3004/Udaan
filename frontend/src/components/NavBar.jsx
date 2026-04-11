@@ -50,7 +50,7 @@ export const NavBar = () => {
     }
 
     return (
-        <div className='bg-rich-black-900 text-rich-black-100 border-b border-b-rich-black-700 z-40'>
+        <div className='sticky top-0 bg-rich-black-900/80 text-rich-black-100 border-b border-b-rich-black-700 z-[100] backdrop-blur-xl'>
             <div className='w-9/12 flex justify-between items-center mx-auto '>
                 <div className='z-50'>
                     <Link to={'/'}>

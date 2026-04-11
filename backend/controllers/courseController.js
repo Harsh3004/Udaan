@@ -15,7 +15,7 @@ require('dotenv').config();
 exports.createCourse = async (req, res) => {
     try {
         console.log(`Create Course API triggered...`);
-        const { title, desc, language, price, whatyouwilllearn, category } = req.body;
+        const { title, desc, language, price, whatyouwilllearn, category, instructions, tags } = req.body;
         const thumbnail = req.files.image;
         const user = req.user;
 
@@ -63,8 +63,10 @@ exports.createCourse = async (req, res) => {
             language: language,
             price: price,
             thumbnail: response,
-            whatyouwilllearn: whatyouwilllearn,
-            category: categoryId
+            whatyouwilllearn: whatyouwilllearn ? JSON.parse(whatyouwilllearn) : [],
+            category: categoryId,
+            instructions: instructions ? JSON.parse(instructions) : [],
+            tags: tags ? JSON.parse(tags) : [],
         });
 
         await categoryModel.findByIdAndUpdate(
@@ -251,6 +253,28 @@ exports.updateCourse = async (req, res) => {
             updates.category = newCategoryId;
         }
 
+        if (updates.instructions) {
+            try {
+                updates.instructions = JSON.parse(updates.instructions);
+            } catch (e) {
+                // Already an array or invalid JSON
+            }
+        }
+        if (updates.whatyouwilllearn) {
+            try {
+                updates.whatyouwilllearn = JSON.parse(updates.whatyouwilllearn);
+            } catch (e) {
+                // Already an array or invalid JSON
+            }
+        }
+        if (updates.tags) {
+            try {
+                updates.tags = JSON.parse(updates.tags);
+            } catch (e) {
+                // Already an array or invalid JSON
+            }
+        }
+
         console.log(`Updating course`)
         const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updates, { new: true });
 
@@ -308,10 +332,10 @@ exports.getCourseDetails = async (req, res) => {
             })
             .populate({
                 path: 'instructor',
-                populate: {
-                    path: 'additionalDetails',
-                    path: 'courses'
-                }
+                populate: [
+                    { path: 'additionalDetails' },
+                    { path: 'courses' }
+                ]
             })
             .populate({
                 path: 'section',
@@ -335,16 +359,92 @@ exports.getCourseDetails = async (req, res) => {
             })
         }
 
+        let completedVideos = [];
+        if (req.user) {
+            const courseProgressCount = await courseProgressModel.findOne({
+                courseID: courseId,
+                userId: req.user.id,
+            });
+            completedVideos = courseProgressCount ? courseProgressCount.completedVideos : [];
+        }
+
         return res.status(200).json({
             success: true,
             message: `Fetch course details`,
-            courseDetails
+            courseDetails,
+            completedVideos
         })
     } catch (error) {
         return res.status(500).json({
             success: false,
             message: `Error: ${error.message}`
         })
+    }
+}
+
+exports.getRecommendedCourses = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const currentCourse = await courseModel.findById(courseId);
+        
+        if (!currentCourse) {
+            return res.status(404).json({ success: false, message: "Course not found" });
+        }
+
+        const tags = Array.isArray(currentCourse.tags) ? currentCourse.tags : [];
+        const category = currentCourse.category;
+        
+        // 1. Try fetching by tags first
+        let recommendedCourses = await courseModel.find({
+            _id: { $ne: courseId },
+            tags: { $in: tags },
+            status: "Published"
+        })
+        .limit(10)
+        .populate("instructor")
+        .populate("category")
+        .populate("ratingAndReviews")
+        .exec();
+
+        // 2. If not enough results, fallback to category
+        if (recommendedCourses.length < 4 && category) {
+            const byCategory = await courseModel.find({
+                _id: { $ne: courseId, $nin: recommendedCourses.map(c => c._id) },
+                category: category,
+                status: "Published"
+            })
+            .limit(10 - recommendedCourses.length)
+            .populate("instructor")
+            .populate("category")
+            .populate("ratingAndReviews")
+            .exec();
+            
+            recommendedCourses = [...recommendedCourses, ...byCategory];
+        }
+
+        // 3. Final Fallback: Just some latest published courses
+        if (recommendedCourses.length < 1) {
+            recommendedCourses = await courseModel.find({
+                _id: { $ne: courseId },
+                status: "Published"
+            })
+            .limit(10)
+            .populate("instructor")
+            .populate("category")
+            .populate("ratingAndReviews")
+            .sort({ createdAt: -1 })
+            .exec();
+        }
+
+        return res.status(200).json({
+            success: true,
+            recommendedCourses: recommendedCourses || []
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `Error: ${error.message}`
+        });
     }
 }
 
@@ -513,3 +613,46 @@ exports.getTopRatedCourses = async (req, res) => {
         });
     }
 }
+
+exports.updateCourseProgress = async (req, res) => {
+    try {
+        const { courseId, subsectionId } = req.body;
+        const userId = req.user.id;
+
+        if (!courseId || !subsectionId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing course or subsection information"
+            });
+        }
+
+        let progress = await courseProgressModel.findOne({
+            courseID: courseId,
+            userId: userId
+        });
+
+        if (!progress) {
+            progress = await courseProgressModel.create({
+                courseID: courseId,
+                userId: userId,
+                completedVideos: [subsectionId]
+            });
+        } else {
+            if (!progress.completedVideos.includes(subsectionId)) {
+                progress.completedVideos.push(subsectionId);
+                await progress.save();
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Progress updated successfully"
+        });
+    } catch (error) {
+        console.error("Error in updateCourseProgress:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}

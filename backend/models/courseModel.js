@@ -40,7 +40,7 @@ const courseSchema = new mongoose.Schema({
         required: true
     },
     whatyouwilllearn: {
-        type: String
+        type: [String]
     },
     status:{
         type: String,
@@ -59,6 +59,12 @@ const courseSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
+    instructions: {
+        type: [String],
+    },
+    tags: {
+        type: [String],
+    }
 })
 
 courseSchema.post("save", async function(doc,next){
