@@ -14,10 +14,10 @@ const Cart = () => {
                 
                 {/* Header Section */}
                 <div className="border-b border-rich-black-700 pb-6">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-300 tracking-tight mb-2">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-300 tracking-tight mb-2 pb-2">
                         Your Learning Cart
                     </h1>
-                    <p className="text-rich-black-300 text-lg flex items-center gap-2 font-medium">
+                    <p className="text-rich-black-300 text-lg mt-5 flex items-center gap-2 font-medium">
                         <span className="bg-rich-black-800 text-rich-black-50 px-3 py-1 rounded-full text-sm font-bold border border-rich-black-700 shadow-inner">
                             {totalItems}
                         </span> 
