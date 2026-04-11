@@ -351,7 +351,7 @@ exports.googleAuth = async (req, res) => {
             try {
                 userDetails = await userModel.create({
                     fName: googleUser.given_name,
-                    lName: googleUser.family_name || '', // Fallback if no last name
+                    lName: googleUser.family_name || '.',
                     email: email,
                     password: hashPassword,
                     role: role || 'Student', // Default to Student if role isn't passed
