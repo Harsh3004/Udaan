@@ -109,11 +109,17 @@ export const NavBar = () => {
                         (
                             <div className='flex items-center gap-6'>
                                 {
-                                    user && (
-                                        <div className='flex gap-5'>
-                                            {/* <IoSearch/> */}
-                                            <FaShoppingCart />
-                                        </div>
+                                    user && user?.role !== "Instructor" && (
+                                        <Link to="/dashboard/cart" className='relative flex items-center'>
+                                            <FaShoppingCart className='text-2xl text-rich-black-100 hover:text-rich-black-5 transition-colors duration-200' />
+                                            {
+                                                totalItems > 0 && (
+                                                    <span className='absolute -top-2 -right-2 bg-yellow-100 text-rich-black-900 text-[10px] font-bold px-1.5 rounded-full animate-bounce'>
+                                                        {totalItems}
+                                                    </span>
+                                                )
+                                            }
+                                        </Link>
                                     )
                                 }
                                 {

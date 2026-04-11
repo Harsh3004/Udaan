@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { width: 90%; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .header { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #DC3545; padding-bottom: 15px; }
+        .warning-text { font-size: 18px; color: #DC3545; margin: 20px 0; font-weight: bold; }
+        .course-title { font-size: 22px; font-weight: bold; color: #6C757D; padding: 10px; background-color: #f8f9fa; border-radius: 4px; text-align: center; }
+        .content { margin: 25px 0; }
+        .footer { font-size: 12px; color: #888; margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Udaan - Course Deleted</div>
+        <p>Hi {{INSTRUCTOR_NAME}},</p>
+        
+        <div class="warning-text">🗑️ Your course has been successfully deleted.</div>
+        
+        <div class="content">
+            <p>We're writing to confirm that your course has been permanently removed from the Udaan platform as per your request.</p>
+            
+            <div class="course-title">{{COURSE_NAME}}</div>
+            
+            <p>Please note that all associated content, including sections, subsections, and student progress records for this course, have also been removed. This action cannot be undone.</p>
+        </div>
+        
+        <p>If you have any questions or this was accidental, please contact our support team immediately.</p>
+        
+        <p>Best Regards,<br>- The Udaan Team</p>
+        
+        <div class="footer">
+            &copy; 2025 Udaan. All rights reserved.<br>
+            You are receiving this because you are an active instructor on Udaan.
+        </div>
+    </div>
+</body>
+</html>

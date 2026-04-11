@@ -9,6 +9,8 @@ const categoryModel = require('../models/categoryModel');
 const { default: mongoose } = require('mongoose');
 const sendMail = require('../utils/sendMail');
 const courseProgressModel = require('../models/courseProgressModel');
+const fs = require('fs');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -75,9 +77,27 @@ exports.createCourse = async (req, res) => {
             { new: true }
         );
 
-        // Post middleware:
-        // --> push course in instructor course array
-        // --> Send mail
+        // Fetch instructor details for email
+        const instructorDetails = await userModel.findById(user.id);
+
+        // Send mail
+        try {
+            const templatePath = path.join(__dirname, '../templates/course-created.html');
+            let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+            
+            emailTemplate = emailTemplate.replace('{{INSTRUCTOR_NAME}}', `${instructorDetails.fName} ${instructorDetails.lName}`);
+            emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', course.title);
+            emailTemplate = emailTemplate.replace('{{DASHBOARD_LINK}}', 'http://localhost:5173/dashboard/my-courses');
+
+            await sendMail(
+                instructorDetails.email,
+                'Udaan - Course Created Successfully',
+                `Congratulations! Your course ${course.title} has been created as a draft.`,
+                emailTemplate
+            );
+        } catch (mailError) {
+            console.error(`Failed to send course creation email: ${mailError.message}`);
+        }
 
         console.log('Course Created Successfully');
         return res.status(200).json({
@@ -157,11 +177,23 @@ exports.deleteCourse = async (req, res) => {
         temp = await courseModel.findByIdAndDelete(courseId);
         console.log(`Course deleted successfully: ${temp}`);
 
-        sendMail(
-            course.instructor.email,
-            'Course Deletion',
-            'Course Deleted Successfully..'
-        )
+        // Send mail using template
+        try {
+            const templatePath = path.join(__dirname, '../templates/course-deleted.html');
+            let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+            
+            emailTemplate = emailTemplate.replace('{{INSTRUCTOR_NAME}}', `${course.instructor.fName} ${course.instructor.lName}`);
+            emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', course.title);
+
+            await sendMail(
+                course.instructor.email,
+                'Udaan - Course Deletion',
+                `Your course ${course.title} has been deleted successfully.`,
+                emailTemplate
+            );
+        } catch (mailError) {
+            console.error(`Failed to send course deletion email: ${mailError.message}`);
+        }
 
         return res.status(201).json({
             success: true,
