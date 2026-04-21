@@ -191,6 +191,7 @@ exports.login = async (req,res) => {
             const token = jwt.sign(
                 payload,
                 process.env.SECRET_KEY,
+                { expiresIn: '7d' }
             );
 
             userDetails.token = token;
@@ -395,7 +396,8 @@ exports.googleAuth = async (req, res) => {
         
         const jwtToken = jwt.sign(
             payload,
-            process.env.SECRET_KEY
+            process.env.SECRET_KEY,
+            { expiresIn: '7d' }
         );
 
         // Convert to plain object to safely manipulate

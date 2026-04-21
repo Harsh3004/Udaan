@@ -26,6 +26,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
+import AiSidebar from '../components/ViewCourse/AiSidebar';
+import PersonalNotes from '../components/ViewCourse/PersonalNotes';
 
 const ViewCourse = () => {
   const { courseId } = useParams();
@@ -435,10 +437,12 @@ const ViewCourse = () => {
                                     </div>
                                 )}
                                 {activeTab === 'Personal Notes' && (
-                                    <div className="flex flex-col items-center justify-center gap-4 text-rich-black-300 py-10">
-                                        <FiEdit size={40} className="opacity-20" />
-                                        <p className="text-sm">You haven't taken any notes for this lesson yet.</p>
-                                    </div>
+                                    <PersonalNotes
+                                        courseId={courseId}
+                                        currentVideo={currentVideo}
+                                        token={token}
+                                        currentTime={currentTime}
+                                    />
                                 )}
                             </motion.div>
                         </AnimatePresence>
@@ -601,6 +605,15 @@ const ViewCourse = () => {
             </div>
         </div>
       </motion.div>
+
+      {/* AI Study Assistant — Floating */}
+      {currentVideo && (
+        <AiSidebar
+          courseId={courseId}
+          currentVideo={currentVideo}
+          token={token}
+        />
+      )}
 
     </div>
   );

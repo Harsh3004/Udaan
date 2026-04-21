@@ -8,6 +8,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const userRoutes = require('./routes/userRoutes');
 const contactRoute = require('./routes/contactRoute');
 const categoryRoutes = require('./routes/categoryRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google/Cloudflare DNS
@@ -53,6 +54,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/contact',contactRoute);
 app.use('/api/category', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/',(req,res) => {
     return res.json({

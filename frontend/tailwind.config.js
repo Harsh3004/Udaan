@@ -45,10 +45,30 @@ module.exports = {
         "input-shadow": "0px -1px 0px 0px #FFFFFF2E inset",
         "button-shadow": "-2px -2px 0px 0px #FFFFFF1A inset",
         "yellow-button-shadow": "-2px -2px 0px 0px #FFFFFF82 inset"
-
       },
       fontFamily: {
-        edu: ['"Edu SA Beginner"', 'cursive'], // add your Google font
+        edu: ['"Edu SA Beginner"', 'cursive'],
+        inter: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
+      keyframes: {
+        shimmer: {
+          '0%':   { backgroundPosition: '-600px 0' },
+          '100%': { backgroundPosition: '600px 0' },
+        },
+        fadeUp: {
+          '0%':   { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          '0%':   { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        shimmer:   'shimmer 1.6s infinite linear',
+        'fade-up': 'fadeUp 0.55s ease-out forwards',
+        'fade-in': 'fadeIn 0.3s ease-out forwards',
       },
     },
   },

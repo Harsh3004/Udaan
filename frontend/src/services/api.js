@@ -49,5 +49,11 @@ export const endpoints = {
 
     // Payments
     CREATE_ORDER_API: BASE_URL + "/payment/create-order",
-    VERIFY_PAYMENT: BASE_URL + "/payment/verify"
+    VERIFY_PAYMENT: BASE_URL + "/payment/verify",
+
+    // AI Assistant & Notes
+    AI_ASK_API: BASE_URL + "/ai/ask",
+    AI_SAVE_NOTE_API: BASE_URL + "/ai/notes",
+    AI_GET_NOTES_API: BASE_URL + "/ai/notes",
+    AI_DELETE_NOTE_API: BASE_URL + "/ai/notes",
 }

@@ -16,7 +16,7 @@ const sendEnrollmentMail = async (course,user) => {
         
         emailTemplate = emailTemplate.replace('{{STUDENT_NAME}}', user.fName);
         emailTemplate = emailTemplate.replace('{{COURSE_NAME}}', course.title);
-        emailTemplate = emailTemplate.replace('{{COURSE_LINK}}', 'http://localhost:5173/dashboard/enrolled-courses')
+        emailTemplate = emailTemplate.replace('{{COURSE_LINK}}', `${process.env.CLIENT_URL_PROD}/dashboard/enrolled-courses`)
 
         await sendMail(
             user.email,

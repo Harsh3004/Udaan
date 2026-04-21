@@ -17,6 +17,12 @@ const subsectionSchema = new mongoose.Schema({
     timeDuration: {
         type: String,
     },
+    // Optional instructor-provided context hint for the AI assistant
+    aiContext: {
+        type: String,
+        trim: true,
+        default: null
+    }
 })
 
 const subsectionModel = mongoose.model('subsection',subsectionSchema);

@@ -59,7 +59,7 @@ exports.addRatingReview = async (req,res) => {
             response
         })
 
-    }catch{error}{
+    } catch(error) {
         return res.status(500).json({
             success: false,
             message: `Error: ${error.message}`

@@ -1,137 +1,69 @@
-import { FaFacebook, FaTwitter, FaYoutube, FaGoogle } from "react-icons/fa";
-import CircularText from "../assets/preComponents.jsx/CircularText";
+import { FaGithub, FaTwitter, FaYoutube, FaLinkedin } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import logo from '../assets/U_logo1.ico';
+
+const footerSections = [
+  { title: 'Udaan', links: [{ label: 'About Us', to: '/about' }, { label: 'Careers', to: '#' }, { label: 'Contact', to: '/contact' }, { label: 'Affiliates', to: '#' }] },
+  { title: 'Resources', links: [{ label: 'Blog', to: '#' }, { label: 'Cheat Sheets', to: '#' }, { label: 'Code Challenges', to: '#' }, { label: 'Projects', to: '#' }, { label: 'Docs', to: '#' }] },
+  { title: 'Plans', links: [{ label: 'Paid Memberships', to: '#' }, { label: 'For Students', to: '#' }, { label: 'Business Solutions', to: '#' }, { label: 'Forums', to: '#' }, { label: 'Events', to: '#' }] },
+  { title: 'Subjects', links: [{ label: 'Web Development', to: '#' }, { label: 'Data Science', to: '#' }, { label: 'AI / ML', to: '#' }, { label: 'Cloud Computing', to: '#' }, { label: 'Cybersecurity', to: '#' }, { label: 'Mobile Dev', to: '#' }] },
+];
+
+const socialLinks = [
+  { icon: FaGithub, href: '#', label: 'GitHub' },
+  { icon: FaTwitter, href: '#', label: 'Twitter' },
+  { icon: FaLinkedin, href: '#', label: 'LinkedIn' },
+  { icon: FaYoutube, href: '#', label: 'YouTube' },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-rich-black-800 text-gray-400 py-10 px-6 border-t border-rich-black-600 hidden md:block">
-      <div className="mx-auto flex flex-row justify-between gap-8 border-b border-gray-700 pb-8 relative overflow-hidden">
-        
-        <div>
-          <h2 className="text-white text-lg font-semibold mb-4">Udaan</h2>
-          <p>Company</p>
-          <ul className="space-y-2">
-            <li><a href="#" className="hover:text-white">About</a></li>
-            <li><a href="#" className="hover:text-white">Careers</a></li>
-            <li><a href="#" className="hover:text-white">Affiliates</a></li>
-          </ul>
-          <div className="flex mt-4 space-x-4">
-            <a href="#"><FaFacebook size={20} /></a>
-            <a href="#"><FaGoogle size={20} /></a>
-            <a href="#"><FaTwitter size={20} /></a>
-            <a href="#"><FaYoutube size={20} /></a>
+    <footer className='bg-rich-black-800 text-rich-black-300 border-t border-rich-black-700'>
+      <div className='h-px w-full bg-gradient-to-r from-transparent via-yellow-50/30 to-transparent' />
+      <div className='w-11/12 max-w-7xl mx-auto py-12'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-8 pb-10 border-b border-rich-black-700'>
+          {/* Brand */}
+          <div className='col-span-2 sm:col-span-4 lg:col-span-1 flex flex-col gap-5'>
+            <Link to='/' className='flex items-center gap-2'>
+              <img src={logo} alt='Udaan' width={44} />
+              <span className='text-xl font-extrabold text-white tracking-tight'>Udaan</span>
+            </Link>
+            <p className='text-sm text-rich-black-400 leading-relaxed'>Empowering learners worldwide with cutting-edge coding skills and career-ready programs.</p>
+            <div className='flex gap-3 flex-wrap'>
+              {socialLinks.map(({ icon: Icon, href, label }) => (
+                <a key={label} href={href} aria-label={label}
+                  className='w-9 h-9 rounded-xl bg-rich-black-700 border border-rich-black-600 flex items-center justify-center text-rich-black-300 hover:text-yellow-50 hover:border-yellow-50/40 hover:bg-yellow-50/5 transition-all hover:scale-110'>
+                  <Icon size={16} />
+                </a>
+              ))}
+            </div>
           </div>
+
+          {/* Link columns */}
+          {footerSections.map((section) => (
+            <div key={section.title} className='flex flex-col gap-3'>
+              <h3 className='text-sm font-bold text-white uppercase tracking-widest'>{section.title}</h3>
+              <ul className='space-y-2'>
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link to={link.to} className='text-sm text-rich-black-400 hover:text-white transition-colors duration-150'>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Resources */}
-        <div>
-          <h3 className="text-white font-semibold mb-4">Resources</h3>
-          <ul className="space-y-2">
-            <li><a href="#">Articles</a></li>
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Chart Sheet</a></li>
-            <li><a href="#">Code challenges</a></li>
-            <li><a href="#">Docs</a></li>
-            <li><a href="#">Projects</a></li>
-            <li><a href="#">Videos</a></li>
-            <li><a href="#">Workspaces</a></li>
-          </ul>
+        <div className='flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-rich-black-500'>
+          <div className='flex items-center gap-4'>
+            <a href='#' className='hover:text-rich-black-200 transition-colors'>Privacy Policy</a>
+            <span className='text-rich-black-700'>|</span>
+            <a href='#' className='hover:text-rich-black-200 transition-colors'>Cookie Policy</a>
+            <span className='text-rich-black-700'>|</span>
+            <a href='#' className='hover:text-rich-black-200 transition-colors'>Terms of Service</a>
+          </div>
+          <p>Made with ❤️ &copy; {new Date().getFullYear()} Udaan. All rights reserved.</p>
         </div>
-
-        {/* Plans */}
-        <div>
-          <h3 className="text-white font-semibold mb-4">Plans</h3>
-          <ul className="space-y-2">
-            <li><a href="#">Paid memberships</a></li>
-            <li><a href="#">For students</a></li>
-            <li><a href="#">Business solutions</a></li>
-          </ul>
-
-          <h3 className="text-white font-semibold mt-6 mb-4">Community</h3>
-          <ul className="space-y-2">
-            <li><a href="#">Forums</a></li>
-            <li><a href="#">Chapters</a></li>
-            <li><a href="#">Events</a></li>
-          </ul>
-        </div>
-
-        {/* Subjects */}
-        <div>
-          <h3 className="text-white font-semibold mb-4">Subjects</h3>
-          <ul className="space-y-2">
-            <li>AI</li>
-            <li>Cloud Computing</li>
-            <li>Code Foundations</li>
-            <li>Computer Science</li>
-            <li>Cybersecurity</li>
-            <li>Data Analytics</li>
-            <li>Data Science</li>
-            <li>Data Visualization</li>
-            <li>Developer Tools</li>
-            <li>DevOps</li>
-            <li>Game Development</li>
-            <li>IT</li>
-            <li>Machine Learning</li>
-            <li>Math</li>
-            <li>Mobile Development</li>
-            <li>Web Design</li>
-            <li>Web Development</li>
-          </ul>
-        </div>
-
-        {/* Languages */}
-        <div>
-          <h3 className="text-white font-semibold mb-4">Languages</h3>
-          <ul className="space-y-2">
-            <li>Bash</li>
-            <li>C</li>
-            <li>C++</li>
-            <li>C#</li>
-            <li>Go</li>
-            <li>HTML & CSS</li>
-            <li>Java</li>
-            <li>JavaScript</li>
-            <li>Kotlin</li>
-            <li>PHP</li>
-            <li>Python</li>
-            <li>R</li>
-            <li>Ruby</li>
-            <li>SQL</li>
-            <li>Swift</li>
-          </ul>
-        </div>
-
-        {/* Career Building */}
-        <div>
-          <h3 className="text-white font-semibold mb-4">Career building</h3>
-          <ul className="space-y-2">
-            <li>Career paths</li>
-            <li>Career services</li>
-            <li>Interview prep</li>
-            <li>Professional certification</li>
-            <li>-</li>
-            <li>Full Catalog</li>
-            <li>Beta Content</li>
-          </ul>
-          
-          <CircularText
-              text="AAPKI*UDAAN*AAPKI*UDAAN*"
-              onHover="speedUp"
-              spinDuration={10}
-              className="mt-32 absolute top-10 text-rich-black-400 w-1/2 h-1/2"
-            />
-        </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 mt-6">
-        <div className="space-x-4">
-          <a href="#">Privacy Policy</a>
-          <span>|</span>
-          <a href="#">Cookie Policy</a>
-          <span>|</span>
-          <a href="#">Terms</a>
-        </div>
-        <p className="mt-4 md:mt-0">Made with ❤️ © 2025 Udaan</p>
       </div>
     </footer>
   );
