@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { FiPlayCircle, FiCheckCircle, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { request } from '../../services/operations/authApi';
 import { endpoints } from '../../services/api';
 import toast from 'react-hot-toast';
 
-const fetchEnrolledCourses = async(setEnrolledCourses) => {
+const fetchEnrolledCourses = async (setEnrolledCourses, token) => {
   try{
-    const response = await request(endpoints.GET_ENROLLED_COURSES,"GET");
+    const response = await request(endpoints.GET_ENROLLED_COURSES,"GET", null, token);
     if(!response.ok)
       throw new Error("Error while fetching Enrolled Courses");
 
@@ -22,10 +23,22 @@ const fetchEnrolledCourses = async(setEnrolledCourses) => {
 const EnrolledCourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState(null)
   const navigate = useNavigate()
+  const { token } = useSelector((state) => state.auth);
   
   useEffect(() => {
-    fetchEnrolledCourses(setEnrolledCourses);
-  }, [])
+    if(token) {
+      fetchEnrolledCourses(setEnrolledCourses, token);
+    }
+
+    const handleFocus = () => {
+      if(token) {
+        fetchEnrolledCourses(setEnrolledCourses, token);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [token])
 
   return (
     <div className='flex w-full min-h-screen flex-col p-8 text-rich-black-900 z-10'>

@@ -512,7 +512,7 @@ exports.getStudentEnrolledCourses = async (req, res) => {
             let totalVideos = 0;
             if (course.section) {
                 course.section.forEach(sec => {
-                    totalVideos += sec.subSection ? sec.subSection.length : 0;
+                    totalVideos += sec.subsection ? sec.subsection.length : 0;
                 });
             }
 

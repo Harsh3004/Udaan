@@ -16,7 +16,7 @@ exports.sendOtp = async (req,res) => {
         const data = req.body;
         const email = data?.email;
 
-        if(!email || email.split('@')[1] != 'gmail.com'){
+        if(!email){
             return res.status(404).json({
                 success: false,
                 message: `Invalid information`
@@ -26,9 +26,8 @@ exports.sendOtp = async (req,res) => {
         // generate otp
         const otp = crypto.randomInt(100000,999999).toString();
 
-        const otp_payload = await otpModel.create({
-            email,otp
-        });
+        const otp_payload = new otpModel({ email, otp });
+        await otp_payload.save();
 
         return res.status(200).json({
             success: true,
@@ -139,6 +138,7 @@ exports.signUp = async (req,res) => {
             let emailTemplate = fs.readFileSync(templatePath, 'utf8');
             
             emailTemplate = emailTemplate.replace('{{NAME}}', `${fName} ${lName}`);
+            emailTemplate = emailTemplate.replace('{{CLIENT_URL}}', process.env.CLIENT_URL_PROD || process.env.CLIENT_URL_DEV);
 
             await sendMail(
                 email,
@@ -380,6 +380,24 @@ exports.googleAuth = async (req, res) => {
                 });
                 
                 userDetails = await userModel.findById(userDetails._id).populate('additionalDetails').exec();
+                
+                // Send Welcome Email for new Google signups
+                try {
+                    const templatePath = path.join(__dirname, '../templates/welcome-email.html');
+                    let emailTemplate = fs.readFileSync(templatePath, 'utf8');
+                    
+                    emailTemplate = emailTemplate.replace('{{NAME}}', `${userDetails.fName} ${userDetails.lName}`);
+                    emailTemplate = emailTemplate.replace('{{CLIENT_URL}}', process.env.CLIENT_URL_PROD || process.env.CLIENT_URL_DEV);
+
+                    await sendMail(
+                        email,
+                        'Welcome to Udaan - Account Created Successfully',
+                        `Hi ${userDetails.fName}, Welcome to Udaan! Your account has been created successfully.`,
+                        emailTemplate
+                    );
+                } catch (mailError) {
+                    console.error(`Failed to send welcome email: ${mailError.message}`);
+                }
             } catch (error) {
                 await additionalDetails.findByIdAndDelete(profile._id);
                 throw error;
