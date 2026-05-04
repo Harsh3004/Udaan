@@ -8,6 +8,8 @@ export const endpoints = {
     GOOGLE_AUTH_API: BASE_URL + "/auth/google-auth",
     CHANGE_PASSWORD_API: BASE_URL + "/auth/changePassword",
 
+    DELETE_ACCOUNT_API: BASE_URL + "/auth/delete-account",
+
     FORGOT_PASSWORD_API: BASE_URL + "/auth/forgotPassword",
     RESET_PASSWORD_API: BASE_URL + "/auth/update-password",
 

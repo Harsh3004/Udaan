@@ -161,11 +161,7 @@ const Setting = () => {
   };
 
   const handleDeleteAccountConfirm = () => {
-    dispatch(deleteAccount(dispatch, navigate));
-
-    // No need to close the modal here, as the user will be navigated away.
-    // But since currently delete account feature is not developed yet closing it.
-
+    deleteAccount(dispatch, navigate);
     setIsDeleteModalOpen(false);
   };
 
@@ -177,12 +173,18 @@ const Setting = () => {
 
             {/* --- Section 1: Profile Picture --- */}
             <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-6 z-40">
-              <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-rich-black-600">
-                <img
-                  src={previewImage}
-                  alt="User profile"
-                  className="w-full h-full object-cover"
-                />
+               <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-rich-black-600">
+               <img
+                   src={previewImage}
+                   alt="User profile"
+                   className="w-full h-full object-cover"
+                   onError={(e) => {
+                       if (!e.target.dataset.fallback) {
+                           e.target.dataset.fallback = 'true';
+                           e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
+                       }
+                   }}
+                 />
                 <input
                   type="file"
                   id="profile-image-upload"

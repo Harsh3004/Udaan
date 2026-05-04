@@ -60,21 +60,20 @@ export const Login = () => {
     onSuccess: async (tokenResponse) => {
       const toastId = toast.loading("Verifying Google Auth...");
       try {
-        // Send the Google Access Token to your backend to verify and log the user in
         const res = await request(endpoints.GOOGLE_AUTH_API, "POST", { 
             token: tokenResponse.access_token,
-            role: role // Send the selected role in case they are creating a new account via Google
+            role: role
         });
         const data = await res.json();
 
         if (res.ok) {
-            localStorage.setItem("token",JSON.stringify(data.userDetails.token));
-            localStorage.setItem("user",JSON.stringify(data.userDetails));  
-            dispatch(setToken(data.userDetails.token));
-            dispatch(setUser(data.userDetails));
+            localStorage.setItem("token", JSON.stringify(data.token));
+            localStorage.setItem("user", JSON.stringify(data.user));
+            dispatch(setToken(data.token));
+            dispatch(setUser(data.user));
             toast.dismiss(toastId);
             toast.success("Login Successfully");
-            const redirectPath = data?.userDetails?.role === 'Student' ? '/browse' : '/dashboard/instructor';
+            const redirectPath = data?.user?.role === 'Student' ? '/browse' : '/dashboard/instructor';
             navigate(redirectPath);
         } else {
             throw new Error(data.message);

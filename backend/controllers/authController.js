@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const userModel = require('../models/userModel')
 const otpModel = require('../models/otpModel');
 const additionalDetails = require('../models/additionalDetails');
+const courseModel = require('../models/courseModel');
 const sendMail = require('../utils/sendMail');
 const fs = require('fs');
 const path = require('path');
@@ -117,20 +118,40 @@ exports.signUp = async (req,res) => {
             bio: null
         });
 
+        let userDetails;
         try{
-            const userDetails = await userModel.create({
+            userDetails = await userModel.create({
                 fName,
                 lName,
                 email,
                 password: hashPassword,
                 role,
-                profileImage: `https://avatar.iran.liara.run/username?username=${fName}+${lName}`,
+                profileImage: `https://api.dicebear.com/7.x/initials/png?seed=${fName}${lName}&size=128`,
                 additionalDetails: profile._id
             })
         }catch(error){
             await additionalDetails.findByIdAndDelete(profile._id);
             throw error;
         }
+
+        userDetails = await userModel.findById(userDetails._id).populate('additionalDetails').exec();
+        userDetails.password = undefined;
+
+        const payload = {email: userDetails.email, id: userDetails._id, role: userDetails.role};
+        const token = jwt.sign(
+            payload,
+            process.env.SECRET_KEY,
+            { expiresIn: '7d' }
+        );
+
+        userDetails.token = token;
+
+        const options = {
+            expires: new Date(Date.now() + 3*24*60*60*1000),
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+        };
 
         // Send Welcome Email
         try {
@@ -150,9 +171,10 @@ exports.signUp = async (req,res) => {
             console.error(`Failed to send welcome email: ${mailError.message}`);
         }
 
-        return res.status(200).json({
+        return res.cookie('token',token,options).status(200).json({
             success: true,
-            message: `SignUp successfully`
+            message: `SignUp successfully`,
+            userDetails
         })
     }   
     catch(err){
@@ -315,12 +337,64 @@ exports.changePassword = async (req,res) => {
     }
 }
 
+exports.deleteAccount = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findById(userId).populate('additionalDetails');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        if (user.role === 'Instructor') {
+            const courses = await courseModel.find({ instructor: userId });
+            const hasEnrolledStudents = courses.some(course => course.studentEnrolled && course.studentEnrolled.length > 0);
+
+            if (hasEnrolledStudents) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Cannot delete account. You have students enrolled in your courses. Please contact support.'
+                });
+            }
+        }
+
+        if (user.role === 'Student') {
+            await courseModel.updateMany(
+                { studentEnrolled: userId },
+                { $pull: { studentEnrolled: userId } }
+            );
+        }
+
+        if (user.additionalDetails) {
+            await additionalDetails.findByIdAndDelete(user.additionalDetails._id);
+        }
+
+        await userModel.findByIdAndDelete(userId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Account deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        return res.status(500).json({
+            success: false,
+            message: `Error deleting account: ${error.message}`
+        });
+    }
+}
+
 exports.googleAuth = async (req, res) => {
     try {
         console.log(`Starting Google Auth...`);
         const { token, role } = req.body;
 
         if (!token) {
+            console.log("Missing Google Token");
             return res.status(400).json({
                 success: false,
                 message: "Missing Google Token"
@@ -328,12 +402,15 @@ exports.googleAuth = async (req, res) => {
         }
 
         // 1. Fetch user data from Google
+        console.log("Fetching Google user info...");
         const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: { Authorization: `Bearer ${token}` }
         });
         const googleUser = await googleResponse.json();
+        console.log("Google user:", googleUser.email);
 
         if (!googleUser.email) {
+            console.log("Failed to verify Google Token");
             return res.status(400).json({
                 success: false,
                 message: "Failed to verify Google Token"
@@ -355,7 +432,7 @@ exports.googleAuth = async (req, res) => {
             try {
                 hashPassword = await bcrypt.hash(randomPassword, 10);
             } catch (err) {
-                console.log(`Error in Hashing Google User Password`);
+                console.log(`Error in Hashing Google User Password: ${err.message}`);
                 return res.status(500).json({ success: false, message: `error in hashing` });
             }
 
@@ -406,37 +483,54 @@ exports.googleAuth = async (req, res) => {
 
         // 4. Log them in (Generate JWT)
         console.log(`Generating JWT for Google User...`);
-        const payload = { 
-            email: userDetails.email, 
-            id: userDetails._id, 
-            role: userDetails.role 
-        };
+        console.log(`SECRET_KEY exists: ${!!process.env.SECRET_KEY}`);
+        console.log(`userDetails exists: ${!!userDetails}`);
+        if (userDetails) {
+            console.log(`userDetails.email: ${userDetails.email}`);
+            console.log(`userDetails._id: ${userDetails._id}`);
+            console.log(`userDetails.role: ${userDetails.role}`);
+        }
         
-        const jwtToken = jwt.sign(
-            payload,
-            process.env.SECRET_KEY,
-            { expiresIn: '7d' }
-        );
+        try {
+            const payload = { 
+                email: userDetails.email, 
+                id: userDetails._id, 
+                role: userDetails.role 
+            };
+            
+            const jwtToken = jwt.sign(
+                payload,
+                process.env.SECRET_KEY,
+                { expiresIn: '7d' }
+            );
 
-        // Convert to plain object to safely manipulate
-        userDetails = userDetails.toObject();
-        userDetails.token = jwtToken;
-        userDetails.password = undefined;
+            // Convert to plain object to safely manipulate
+            const userObj = userDetails.toObject();
+            userObj.token = jwtToken;
+            delete userObj.password;
 
-        // 5. Set Cookie exactly like your standard login
-        const options = {
-            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-            sameSite: 'none',
-            secure: true,
-        };
-
-        return res.cookie('token', jwtToken, options).status(200).json({
-            success: true,
-            message: `Google Login Successfully`,
-            userDetails
-        });
-
+            console.log("Sending simplified response...");
+            return res.status(200).json({
+                success: true,
+                message: `Google Login Successfully`,
+                token: jwtToken,
+                user: {
+                    id: userObj._id,
+                    email: userObj.email,
+                    role: userObj.role,
+                    fName: userObj.fName,
+                    lName: userObj.lName,
+                    profileImage: userObj.profileImage
+                }
+            });
+        } catch (jwtError) {
+            console.error(`JWT Error: ${jwtError.message}`);
+            console.error(`JWT Error stack: ${jwtError.stack}`);
+            return res.status(500).json({
+                success: false,
+                message: `JWT Error: ${jwtError.message}`
+            });
+        }
     } catch (error) {
         console.log(`Error during Google Auth: ${error.message}`);
         return res.status(500).json({

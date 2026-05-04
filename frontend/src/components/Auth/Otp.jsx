@@ -5,10 +5,14 @@ import { request } from '../../services/operations/authApi';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import OtpInput from 'react-otp-input';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../slices/profileSlice';
+import { setToken } from '../../slices/authSlice';
 
 export const Otp = () => {
   const location = useLocation();
   const {state} = location;
+  const dispatch = useDispatch();
   console.log(state);
 
   const [otp, setotp] = useState('');
@@ -31,8 +35,12 @@ export const Otp = () => {
     const res =  await request(endpoints.SIGN_UP_API,"POST",payload);
     const data = await res.json();
     if(res.ok){
-      navigate('/login')
+      dispatch(setUser(data.userDetails));
+      dispatch(setToken(data.userDetails.token));
+      localStorage.setItem("token", JSON.stringify(data.userDetails.token));
+      localStorage.setItem("user", JSON.stringify(data.userDetails));
       toast.success(`Your account created successfully`);
+      navigate(data.userDetails.role === 'Instructor' ? '/dashboard/instructor' : '/browse');
     }else
       toast.error(data?.message);
     

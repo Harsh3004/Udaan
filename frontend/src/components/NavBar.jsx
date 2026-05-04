@@ -247,7 +247,14 @@ export const NavBar = () => {
                                 ) : (
                                     <div className='flex flex-col gap-1'>
                                         <div className='flex items-center gap-3 px-4 py-3'>
-                                            <img src={user?.profileImage} alt='profile' width={36} className='rounded-full' referrerPolicy='no-referrer' />
+                                            <img src={user?.profileImage} alt='profile' width={36} className='rounded-full' 
+                                                onError={(e) => {
+                                                    if (!e.target.dataset.fallback) {
+                                                        e.target.dataset.fallback = 'true';
+                                                        e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
+                                                    }
+                                                }}
+                                            />
                                             <div>
                                                 <p className='text-sm font-semibold text-white'>{user?.fName} {user?.lName}</p>
                                                 <p className='text-[11px] text-rich-black-400'>{user?.role}</p>

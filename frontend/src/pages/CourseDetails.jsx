@@ -318,6 +318,12 @@ const CourseDetails = () => {
                                     <img 
                                         src={course.instructor?.profileImage} 
                                         alt={course.instructor?.fName} 
+                                        onError={(e) => {
+                                            if (!e.target.dataset.fallback) {
+                                                e.target.dataset.fallback = 'true';
+                                                e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${course.instructor?.fName || 'U'}${course.instructor?.lName || ''}&size=128`;
+                                            }
+                                        }}
                                         className='w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-rich-black-700 shadow-2xl'
                                     />
                                     <div className='absolute -bottom-2 -right-2 bg-yellow-50 p-2 rounded-full shadow-lg'>
@@ -354,7 +360,13 @@ const CourseDetails = () => {
                                             <div className='flex items-center gap-4'>
                                                 <img 
                                                     src={review.user?.profileImage} 
-                                                    alt={review.user?.fName} 
+                                                    alt={review.user?.fName}
+                                                    onError={(e) => {
+                                                        if (!e.target.dataset.fallback) {
+                                                            e.target.dataset.fallback = 'true';
+                                                            e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${review.user?.fName || 'U'}${review.user?.lName || ''}&size=128`;
+                                                        }
+                                                    }} 
                                                     className='w-12 h-12 rounded-full object-cover'
                                                 />
                                                 <div>

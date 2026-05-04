@@ -14,7 +14,18 @@ export const Profile = () => {
         <div className='text-white flex flex-col items-center justify-center mt-10 gap-2'>
             <div className='flex bg-rich-black-800 p-6 justify-between items-center rounded-lg border border-rich-black-700 w-3/4 z-40'>
                 <div className='flex items-center gap-5'>
-                    <img src={user?.profileImage} alt="profile_image" width={40} className='rounded-full'/>
+                    <img 
+                        src={user?.profileImage} 
+                        alt="profile_image" 
+                        width={40} 
+                        className='rounded-full'
+                        onError={(e) => {
+                            if (!e.target.dataset.fallback) {
+                                e.target.dataset.fallback = 'true';
+                                e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
+                            }
+                        }}
+                    />
                     <div>
                         <p className='font-semibold text-xl'>{user?.fName + " " + user?.lName}</p>
                         <p className='text-rich-black-200'>{user?.email}</p>

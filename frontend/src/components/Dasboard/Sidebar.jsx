@@ -27,8 +27,17 @@ export const Sidebar = () => {
         {/* ── User Identity Card ── */}
         {user && (
           <div className='flex items-center gap-3 px-5 py-5 border-b border-rich-black-700 bg-rich-black-900/40'>
-            <img src={user.profileImage} alt='avatar' referrerPolicy='no-referrer'
-              className='w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-yellow-50/20' />
+                <img 
+                    src={user.profileImage} 
+                    alt='avatar' 
+                    onError={(e) => {
+                        if (!e.target.dataset.fallback) {
+                            e.target.dataset.fallback = 'true';
+                            e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
+                        }
+                    }}
+                    className='w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-yellow-50/20' 
+                />
             <div className='min-w-0'>
               <p className='text-sm font-semibold text-rich-black-5 truncate'>{user.fName} {user.lName}</p>
               <span className={`inline-block mt-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleColor[user.role] ?? 'bg-rich-black-700 text-rich-black-300 border-rich-black-600'}`}>

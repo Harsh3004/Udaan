@@ -27,9 +27,22 @@ export const logout = async (dispatch,navigate,flag=true) => {
 }
 
 export const deleteAccount = (dispatch, navigate) => {
-    console.log(`Deleting Account`);
+    request(endpoints.DELETE_ACCOUNT_API, "DELETE")
+        .then(async (response) => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete account');
+            }
 
-    // Deleting Account API and backend functionality to be created... 
-
-    toast.error(`Coming Soon...`)
+            dispatch(setUser(null));
+            dispatch(resetCart());
+            dispatch(setToken(null));
+            localStorage.clear();
+            toast.success("Account deleted successfully");
+            navigate("/signup");
+        })
+        .catch(error => {
+            console.error("Delete account failed:", error);
+            toast.error(error.message || "Failed to delete account");
+        });
 }

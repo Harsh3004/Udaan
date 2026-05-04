@@ -1,7 +1,7 @@
 const express = require('express');
-const { sendOtp, signUp, login, changePassword, logout, googleAuth } = require('../controllers/authController');
-const { auth, isStudent, isInstructor, isAdmin } = require('../middlewares/Auth');
+const { sendOtp, signUp, login, changePassword, logout, googleAuth, deleteAccount } = require('../controllers/authController');
 const {resetPasswordToken, resetPassword} = require('../controllers/resetPassword');
+const { auth, isStudent, isInstructor, isAdmin } = require('../middlewares/Auth');
 const router = express.Router();
 
 // Auth routes
@@ -36,5 +36,7 @@ router.get('/admin', auth, isAdmin, (req, res) => res.json({
     success: true,
     message: 'Welcome Admin' 
 }));
+
+router.delete('/delete-account', auth, deleteAccount);
 
 module.exports = router;

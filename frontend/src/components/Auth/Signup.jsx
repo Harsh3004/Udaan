@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { endpoints } from "../../services/api";
 import { request } from "../../services/operations/authApi";
+import { setToken } from "../../slices/authSlice";
+import { setUser } from "../../slices/profileSlice";
 import { IoEyeOff} from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
 import education from '../../assets/Illustration/education.png'
@@ -25,6 +28,9 @@ export const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -35,31 +41,43 @@ export const Signup = () => {
       try {
         const res = await request(endpoints.GOOGLE_AUTH_API, "POST", { 
             token: tokenResponse.access_token,
-            role: userType // Pass the selected role!
+            role: userType
         });
-        const data = await res.json();
-
-        // If our backend treats Google Auth as a seamless login/signup (which it should):
+        const text = await res.text();
+        console.log("Google auth response status:", res.status);
+        console.log("Google auth response:", text);
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("Failed to parse JSON:", text);
+          throw new Error("Server returned invalid response: " + text.substring(0, 200));
+        }
+        
         if (res.ok) {
+            localStorage.setItem("token", JSON.stringify(data.token));
+            localStorage.setItem("user", JSON.stringify(data.user));
+            dispatch(setToken(data.token));
+            dispatch(setUser(data.user));
             toast.dismiss(toastId);
             toast.success("Account Created Successfully");
-            
-            navigate('/login'); 
+            navigate(data.user.role === 'Instructor' ? '/dashboard/instructor' : '/browse');
         } else {
-            throw new Error(data.message);
+            throw new Error(data.message || "Unknown error");
         }
       } catch (error) {
+          console.error("Google signup error:", error);
           toast.dismiss(toastId);
-          toast.error("Google Signup Failed");
+          toast.error(error.message || "Google Signup Failed");
       }
     },
-    onError: () => {
+    onError: (error) => {
+        console.error("Google login error:", error);
         toast.error("Google Signup Failed");
     }
   });
   
-  const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
