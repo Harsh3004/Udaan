@@ -1,12 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, resetCart } from '../../../slices/cartSlice';
 import { useNavigate } from 'react-router-dom';
+import { endpoints } from '../../../services/api';
+import { request } from '../../../services/operations/authApi';
 
 const Cart = () => {
     const { cart, total, totalItems } = useSelector((state) => state.cart);
+    const { token } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set());
+
+    useEffect(() => {
+        if (!token) return;
+        const loadEnrolledCourses = async () => {
+            try {
+                const res = await request(endpoints.GET_ENROLLED_COURSES, 'GET');
+                const data = await res.json();
+                if (res.ok && data.courses) {
+                    setEnrolledCourseIds(new Set(data.courses.map((c) => c._id)));
+                }
+            } catch (error) {
+                console.error('Failed to load enrolled courses', error);
+            }
+        };
+        loadEnrolledCourses();
+    }, [token]);
 
     return (
         <div className="w-full min-h-[calc(100vh-3.5rem)] text-white bg-rich-black-900 font-inter py-10 px-4 md:px-8 xl:px-16 overflow-y-auto">
@@ -43,10 +63,16 @@ const Cart = () => {
                                         <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-[2rem] pointer-events-none"></div>
 
                                         {/* Image Section */}
-                                        <div 
-                                            className="w-full sm:w-[260px] aspect-video rounded-2xl overflow-hidden shrink-0 cursor-pointer relative shadow-inner"
-                                            onClick={() => navigate(`/course/${course._id}`)}
-                                        >
+                                         <div 
+                                             className="w-full sm:w-[260px] aspect-video rounded-2xl overflow-hidden shrink-0 cursor-pointer relative shadow-inner"
+                                             onClick={() => {
+                                                 if (token && enrolledCourseIds.has(course._id)) {
+                                                     navigate(`/view-course/${course._id}`);
+                                                 } else {
+                                                     navigate(`/course/${course._id}`);
+                                                 }
+                                             }}
+                                         >
                                             <img src={cover} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
                                             {/* Gradient overlay on image */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-rich-black-900/80 via-rich-black-900/20 to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-300"></div>
@@ -56,10 +82,16 @@ const Cart = () => {
                                         <div className="flex-1 flex flex-col justify-between py-1 z-10">
                                             <div>
                                                 <div className="flex justify-between items-start gap-4">
-                                                    <h2 
-                                                        className="text-2xl font-bold text-rich-black-5 group-hover:text-yellow-50 cursor-pointer transition-colors duration-300 leading-tight line-clamp-2"
-                                                        onClick={() => navigate(`/course/${course._id}`)}
-                                                    >
+                                                <h2 
+                                                     className="text-2xl font-bold text-rich-black-5 group-hover:text-yellow-50 cursor-pointer transition-colors duration-300 leading-tight line-clamp-2"
+                                                     onClick={() => {
+                                                         if (token && enrolledCourseIds.has(course._id)) {
+                                                             navigate(`/view-course/${course._id}`);
+                                                         } else {
+                                                             navigate(`/course/${course._id}`);
+                                                         }
+                                                     }}
+                                                 >
                                                         {course.title}
                                                     </h2>
                                                     <div className="text-3xl font-extrabold text-yellow-50 whitespace-nowrap drop-shadow-md">

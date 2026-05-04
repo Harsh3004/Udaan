@@ -14,6 +14,7 @@ const CourseDetails = () => {
     const [loading, setLoading] = useState(false);
     const [course, setCourse] = useState(null);
     const [recommendedCourses, setRecommendedCourses] = useState([]);
+    const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set());
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -34,32 +35,54 @@ const CourseDetails = () => {
         }
     };
 
-    const fetchCourse = async () => {
-        if (!courseId) return;
-        setLoading(true);
-        try {
-            const url = `${endpoints.GET_COURSE_DETAILS_API}/${courseId}`;
-            const res = await request(url, 'GET');
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Unable to fetch course');
-            }
-            const fetchedCourse = data.courseDetails || data.course || null;
-            setCourse(fetchedCourse);
-            
-            // Fetch recommendations
-            fetchRecommendedCourses(courseId);
-        } catch (error) {
-            toast.error(error.message || 'Failed to load course');
-            setCourse(null);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchCourse = async () => {
+            if (!courseId) return;
+            setLoading(true);
+            try {
+                const url = `${endpoints.GET_COURSE_DETAILS_API}/${courseId}`;
+                const res = await request(url, 'GET');
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.message || 'Unable to fetch course');
+                }
+                const fetchedCourse = data.courseDetails || data.course || null;
+                setCourse(fetchedCourse);
+                
+                if (fetchedCourse) {
+                    fetchRecommendedCourses(courseId);
+                }
+            } catch (error) {
+                toast.error(error.message || 'Failed to load course');
+                setCourse(null);
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchCourse();
     }, [courseId]);
+
+    useEffect(() => {
+        if (!token) return;
+        const loadEnrolledCourses = async () => {
+            try {
+                const res = await request(endpoints.GET_ENROLLED_COURSES, 'GET');
+                const data = await res.json();
+                if (res.ok && data.courses) {
+                    setEnrolledCourseIds(new Set(data.courses.map((c) => c._id)));
+                }
+            } catch (error) {
+                console.error('Failed to load enrolled courses', error);
+            }
+        };
+        loadEnrolledCourses();
+    }, [token]);
+
+    useEffect(() => {
+        if (course && token && enrolledCourseIds.has(courseId)) {
+            navigate(`/view-course/${courseId}`, { replace: true });
+        }
+    }, [course, courseId, token, enrolledCourseIds, navigate]);
 
     const handleBuyCourse = () => {
         if (!token) {
@@ -298,7 +321,7 @@ const CourseDetails = () => {
                                         className='w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-rich-black-700 shadow-2xl'
                                     />
                                     <div className='absolute -bottom-2 -right-2 bg-yellow-50 p-2 rounded-full shadow-lg'>
-                                        <svg className="w-5 h-5 text-rich-black-900" fill="currentColor" viewBox="0 0 20 20"><path d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                                        <svg className="w-5 h-5 text-rich-black-900" fill="currentColor" viewBox="0 0 20 20"><path d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
                                     </div>
                                 </div>
                                 <div className='space-y-4 flex-1 text-center md:text-left'>
@@ -313,7 +336,7 @@ const CourseDetails = () => {
                                     </p>
                                     <div className='flex flex-wrap justify-center md:justify-start gap-4 pt-2'>
                                         <div className='flex items-center gap-2 text-rich-black-300 text-sm'>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332-4.5 1.253"></path></svg>
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                                             {course.instructor?.courses?.length || 0} Courses
                                         </div>
                                     </div>
@@ -376,7 +399,11 @@ const CourseDetails = () => {
                                                         rating={avgRating}
                                                         reviewsCount={recCourse.ratingAndReviews?.length}
                                                         onClick={() => {
-                                                            navigate(`/course/${recCourse._id}`);
+                                                            if (token && enrolledCourseIds.has(recCourse._id)) {
+                                                                navigate(`/view-course/${recCourse._id}`);
+                                                            } else {
+                                                                navigate(`/course/${recCourse._id}`);
+                                                            }
                                                             window.scrollTo(0, 0);
                                                         }}
                                                     />
@@ -420,7 +447,6 @@ const CourseDetails = () => {
                                 {cover && (
                                     <div className='relative aspect-video group'>
                                         <img src={cover} alt={course.title} className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
-
                                     </div>
                                 )}
                                 <div className='p-8 space-y-6'>
@@ -440,10 +466,8 @@ const CourseDetails = () => {
                                         </button>
                                     </div>
 
-
                                 </div>
                             </div>
-
 
                         </div>
                     </div>

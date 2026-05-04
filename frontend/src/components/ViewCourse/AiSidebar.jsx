@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSend, FiLoader, FiX, FiCpu, FiUser, FiBookmark, FiChevronDown } from 'react-icons/fi';
-import { useSelector } from 'react-redux';
+import { FiSend, FiLoader, FiCpu, FiUser, FiBookmark, FiChevronDown, FiMic, FiMicOff, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { endpoints } from '../../services/api';
 import { request } from '../../services/operations/authApi';
@@ -11,9 +10,7 @@ const renderMarkdown = (text) => {
   if (!text) return null;
   const lines = text.split('\n');
   return lines.map((line, i) => {
-    // Code blocks
     if (line.startsWith('```')) return null;
-    // Bullet points
     if (line.match(/^[-*]\s/)) {
       const content = line.replace(/^[-*]\s/, '');
       return (
@@ -22,17 +19,14 @@ const renderMarkdown = (text) => {
         </li>
       );
     }
-    // Headings
     if (line.startsWith('### ')) return <p key={i} className="font-bold text-white text-sm mt-3">{line.slice(4)}</p>;
     if (line.startsWith('## ')) return <p key={i} className="font-bold text-white text-sm mt-3">{line.slice(3)}</p>;
-    // Empty line
     if (line.trim() === '') return <br key={i} />;
     return <p key={i} className="text-sm text-rich-black-100 leading-relaxed">{renderInline(line)}</p>;
   });
 };
 
 const renderInline = (text) => {
-  // Bold
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
@@ -45,7 +39,7 @@ const renderInline = (text) => {
   });
 };
 
-const MessageBubble = ({ message, onSaveNote }) => {
+const MessageBubble = ({ message, onSaveNote, onSpeak }) => {
   const isAI = message.role === 'ai';
   return (
     <motion.div
@@ -53,7 +47,6 @@ const MessageBubble = ({ message, onSaveNote }) => {
       animate={{ opacity: 1, y: 0 }}
       className={`flex gap-3 ${isAI ? 'items-start' : 'items-start flex-row-reverse'}`}
     >
-      {/* Avatar */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isAI ? 'bg-yellow-50/10 text-yellow-50' : 'bg-blue-500/20 text-blue-400'}`}>
         {isAI ? <FiCpu size={16} /> : <FiUser size={16} />}
       </div>
@@ -71,16 +64,26 @@ const MessageBubble = ({ message, onSaveNote }) => {
           )}
         </div>
 
-        {/* Save as Note button for AI responses */}
-        {isAI && onSaveNote && (
-          <button
-            onClick={() => onSaveNote(message.content)}
-            className="mt-1.5 ml-1 flex items-center gap-1.5 text-[11px] text-rich-black-400 hover:text-yellow-50 transition-colors"
-          >
-            <FiBookmark size={11} />
-            Save as Note
-          </button>
-        )}
+        <div className="flex items-center gap-3 mt-1">
+          {isAI && onSpeak && (
+            <button
+              onClick={() => onSpeak(message.content)}
+              className="flex items-center gap-1.5 text-[11px] text-rich-black-400 hover:text-yellow-50 transition-colors"
+            >
+              <FiVolume2 size={11} />
+              Listen
+            </button>
+          )}
+          {isAI && onSaveNote && (
+            <button
+              onClick={() => onSaveNote(message.content)}
+              className="flex items-center gap-1.5 text-[11px] text-rich-black-400 hover:text-yellow-50 transition-colors"
+            >
+              <FiBookmark size={11} />
+              Save as Note
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -91,24 +94,64 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
   const [messages, setMessages] = useState([
     {
       role: 'ai',
-      content: `👋 Hi! I'm your AI study assistant for this course. Ask me anything about **${currentVideo?.topic || 'this lesson'}** and I'll help you understand it better.`
+      content: `Hi! I'm your AI study assistant for this course. Ask me anything about **${currentVideo?.topic || 'this lesson'}** and I'll help you understand it better.`
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [saveNoteLoading, setSaveNoteLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        if (event.error !== 'not-allowed') {
+          toast.error('Voice recognition failed. Please try again.');
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   // Update greeting when video changes
   useEffect(() => {
     if (currentVideo?.topic) {
       setMessages([{
         role: 'ai',
-        content: `👋 Hi! I'm your AI study assistant. Ask me anything about **${currentVideo.topic}** and I'll explain it clearly.`
+        content: `Hi! I'm your AI study assistant. Ask me anything about **${currentVideo.topic}** and I'll explain it clearly.`
       }]);
     }
-  }, [currentVideo?._id]);
+  }, [currentVideo?._id, currentVideo?.topic]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -117,6 +160,43 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
   }, [isOpen]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      toast.error('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.abort();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error('Failed to start recognition:', error);
+      }
+    }
+  };
+
+  const speakText = (text) => {
+    if (!isAudioEnabled) return;
+
+    window.speechSynthesis.cancel();
+
+    const cleanText = text.replace(/\*\*/g, '').replace(/`/g, '').replace(/#{1,3}\s/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   const sendMessage = async () => {
     const question = input.trim();
@@ -135,7 +215,12 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
       const data = await res.json();
 
       if (data.success) {
-        setMessages(prev => [...prev, { role: 'ai', content: data.answer }]);
+        const aiMessage = { role: 'ai', content: data.answer };
+        setMessages(prev => [...prev, aiMessage]);
+
+        if (isAudioEnabled) {
+          setTimeout(() => speakText(data.answer), 300);
+        }
       } else {
         toast.error(data.message || 'AI failed to respond. Please try again.');
         setMessages(prev => [...prev, { role: 'ai', content: `Sorry, I encountered an error: ${data.message}` }]);
@@ -182,7 +267,6 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
 
   return (
     <>
-      {/* Floating Trigger Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -198,7 +282,6 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
         )}
       </AnimatePresence>
 
-      {/* Slide-up Chat Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -222,12 +305,27 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-rich-black-800 rounded-xl transition-colors text-rich-black-400 hover:text-white"
-              >
-                <FiChevronDown size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setIsAudioEnabled(!isAudioEnabled);
+                    if (isSpeaking) {
+                      window.speechSynthesis.cancel();
+                      setIsSpeaking(false);
+                    }
+                  }}
+                  className={`p-2 rounded-xl transition-colors ${isAudioEnabled ? 'text-yellow-50 bg-yellow-50/10' : 'text-rich-black-400 hover:text-white hover:bg-rich-black-800'}`}
+                  title={isAudioEnabled ? 'Disable audio responses' : 'Enable audio responses'}
+                >
+                  {isAudioEnabled ? <FiVolume2 size={16} /> : <FiVolumeX size={16} />}
+                </button>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 hover:bg-rich-black-800 rounded-xl transition-colors text-rich-black-400 hover:text-white"
+                >
+                  <FiChevronDown size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -237,6 +335,7 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
                   key={idx}
                   message={msg}
                   onSaveNote={msg.role === 'ai' ? handleSaveAsNote : null}
+                  onSpeak={msg.role === 'ai' ? speakText : null}
                 />
               ))}
 
@@ -266,7 +365,7 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Questions (shown when only greeting is visible) */}
+            {/* Suggested Questions */}
             {messages.length === 1 && (
               <div className="px-4 pb-2 flex flex-wrap gap-2">
                 {suggestedQuestions.map((q, i) => (
@@ -284,12 +383,23 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
             {/* Input Area */}
             <div className="px-4 py-4 border-t border-rich-black-800 bg-[#000814]">
               <div className="flex items-end gap-3">
+                <button
+                  onClick={toggleListening}
+                  className={`flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-rich-black-800 text-rich-black-300 hover:text-yellow-50 hover:bg-rich-black-700'
+                  }`}
+                  title={isListening ? 'Stop listening' : 'Start voice input'}
+                >
+                  {isListening ? <FiMicOff size={18} /> : <FiMic size={18} />}
+                </button>
                 <textarea
                   ref={inputRef}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask about this lesson…"
+                  placeholder={isListening ? "Listening..." : "Ask about this lesson…"}
                   rows={1}
                   className="flex-1 bg-rich-black-800 border border-rich-black-700 rounded-2xl px-4 py-3 text-sm text-rich-black-50 placeholder:text-rich-black-500 focus:border-yellow-50/50 focus:ring-1 focus:ring-yellow-50/20 outline-none transition-all resize-none"
                   style={{ minHeight: '44px', maxHeight: '100px' }}
@@ -308,7 +418,10 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
                   {isLoading ? <FiLoader size={18} className="animate-spin" /> : <FiSend size={18} />}
                 </motion.button>
               </div>
-              <p className="text-[10px] text-rich-black-600 mt-2 text-center">Press Enter to send · Shift+Enter for new line</p>
+              <p className="text-[10px] text-rich-black-600 mt-2 text-center">
+                {isListening ? 'Listening... Click mic to stop' : 'Press Enter to send · Shift+Enter for new line'}
+                {isAudioEnabled && ' · Audio responses enabled'}
+              </p>
             </div>
           </motion.div>
         )}

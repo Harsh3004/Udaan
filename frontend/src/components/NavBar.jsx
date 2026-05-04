@@ -119,7 +119,10 @@ export const NavBar = () => {
                     ) : (
                         <div className='flex items-center gap-5'>
                             {user && (
-                                <button className='relative text-rich-black-200 hover:text-white transition-colors'>
+                                <button 
+                                    onClick={() => navigate('/dashboard/cart')}
+                                    className='relative text-rich-black-200 hover:text-white transition-colors'
+                                >
                                     <FaShoppingCart size={20} />
                                     {totalItems > 0 && (
                                         <span className='absolute -top-2 -right-2 w-4 h-4 bg-yellow-50 text-rich-black-900 text-[10px] font-bold rounded-full flex items-center justify-center'>

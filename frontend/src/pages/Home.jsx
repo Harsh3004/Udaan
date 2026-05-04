@@ -128,7 +128,7 @@ export const Home = () => {
                 <source src={video2} type='video/mp4' />
               </video>
               <div className='absolute inset-0 w-full h-full bg-gradient-blue rounded-full blur-2xl opacity-30 pointer-events-none' />
-              <div className='absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] glass-card rounded-2xl flex z-20 border border-rich-black-600/50'>
+              <div className='absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] glass-card rounded-2xl flex z-20 border border-rich-black-600/50 pointer-events-none'>
                 <div className='flex flex-col items-center justify-center flex-1 py-4 border-r border-rich-black-700'>
                   <p className='font-bold text-3xl text-white'>10+</p>
                   <p className='text-xs text-rich-black-300 uppercase tracking-wide mt-1'>Years Experience</p>
@@ -148,11 +148,12 @@ export const Home = () => {
             <p className='font-bold text-3xl md:text-4xl text-white'>Your swiss knife for <HighlightedText color='bg-gradient-05 text-transparent bg-clip-text'>learning any language</HighlightedText></p>
             <p className='text-rich-black-300 max-w-xl mx-auto'>With 20+ language tracks, realistic voice-over, progress tracking, custom schedules and more — all in one place.</p>
           </FadeUp>
-          <div className='relative flex flex-col lg:flex-row gap-10 w-11/12 max-w-5xl mx-auto py-2 justify-center items-center'>
-            <FadeUp delay={0}><img src={card3} alt='' className='object-contain aspect-square z-30 w-48 md:w-64' /></FadeUp>
-            <FadeUp delay={0.1}><img src={card2} alt='' className='object-contain aspect-square z-30 w-48 md:w-64' /></FadeUp>
-            <FadeUp delay={0.2}><img src={card1} alt='' className='object-contain aspect-square z-30 w-48 md:w-64' /></FadeUp>
+          <div className='relative flex flex-col lg:flex-row gap-10 w-9/12 mx-auto py-2'>
+            <img src={card3} alt="" className='object-contain aspect-square z-30'/>
+            <img src={card2} alt="" className='lg:ml-64 object-contain aspect-square lg:absolute z-30'/>
+            <img src={card1} alt="" className='lg:ml-20 object-contain aspect-square z-30'/>
           </div>
+            
           <div className='flex justify-center mt-12'>
             <motion.div whileHover={{ scale: 1.04 }}><Button active={1} className='glow-yellow'>Learn More</Button></motion.div>
           </div>

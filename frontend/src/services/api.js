@@ -56,4 +56,5 @@ export const endpoints = {
     AI_SAVE_NOTE_API: BASE_URL + "/ai/notes",
     AI_GET_NOTES_API: BASE_URL + "/ai/notes",
     AI_DELETE_NOTE_API: BASE_URL + "/ai/notes",
+    AI_GENERATE_QUIZ_API: BASE_URL + "/ai/generate-quiz",
 }

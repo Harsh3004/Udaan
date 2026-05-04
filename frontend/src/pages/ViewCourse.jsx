@@ -20,7 +20,8 @@ import {
   FiPlay,
   FiPause,
   FiChevronRight,
-  FiChevronLeft
+  FiChevronLeft,
+  FiX
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -51,6 +52,16 @@ const ViewCourse = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const videoRef = useRef(null);
+
+  // Quiz state
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizScore, setQuizScore] = useState(null);
+  const [quizError, setQuizError] = useState(null);
+  const [quizResults, setQuizResults] = useState([]);
 
   const fetchCourseData = async () => {
     setLoading(true);
@@ -147,10 +158,132 @@ const ViewCourse = () => {
       if (data.success) {
         setCompletedVideos(prev => [...prev, currentVideo._id]);
         toast.success("Progress saved!");
+        
+        // Generate quiz after video ends
+        generateQuiz();
       }
     } catch (err) {
       console.error("Error updating progress:", err);
     }
+  };
+
+   const generateQuiz = async () => {
+    setQuizLoading(true);
+    setShowQuiz(true);
+    setQuizSubmitted(false);
+    setQuizAnswers({});
+    setQuizScore(null);
+    setQuizError(null);
+    
+    try {
+      const response = await request(endpoints.AI_GENERATE_QUIZ_API, 'POST', {
+        topic: currentVideo?.topic || 'this lesson',
+        courseId,
+        subsectionId: currentVideo._id,
+        numQuestions: 5
+      }, token);
+      
+      const data = await response.json();
+      
+      if (data.success && data.quiz && data.quiz.questions?.length > 0) {
+        setQuizQuestions(data.quiz.questions);
+      } else {
+        // Fallback: Generate questions using AI ask endpoint
+        try {
+          const questionPrompt = `Generate 5 multiple choice questions based on the topic "${currentVideo?.topic}". Return ONLY a valid JSON object with "questions" array. Each question must have: "question" (string), "options" (array of exactly 4 strings), "correctAnswer" (integer 0-3).`;
+          
+          const aiResponse = await request(endpoints.AI_ASK_API, 'POST', {
+            question: questionPrompt,
+            courseId,
+            subsectionId: currentVideo._id
+          }, token);
+          
+          const aiData = await aiResponse.json();
+          
+          if (aiData.success && aiData.answer) {
+            try {
+              // Try to extract JSON from the response
+              const jsonMatch = aiData.answer.match(/\{[\s\S]*\}/);
+              const jsonString = jsonMatch ? jsonMatch[0] : aiData.answer;
+              const parsed = JSON.parse(jsonString);
+              
+              if (parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+                // Validate question format
+                const validQuestions = parsed.questions.filter(q => 
+                  q.question && 
+                  Array.isArray(q.options) && 
+                  q.options.length === 4 && 
+                  typeof q.correctAnswer === 'number' && 
+                  q.correctAnswer >= 0 && q.correctAnswer <= 3
+                );
+                
+                if (validQuestions.length > 0) {
+                  setQuizQuestions(validQuestions);
+                } else {
+                  throw new Error('Invalid question format');
+                }
+              } else {
+                throw new Error('No valid questions in response');
+              }
+            } catch (parseErr) {
+              console.error('Failed to parse AI response as JSON:', parseErr);
+              setQuizError('Failed to generate quiz. AI returned invalid format.');
+              setQuizLoading(false);
+              return;
+            }
+          } else {
+            setQuizError('Failed to generate quiz. AI service unavailable.');
+            setQuizLoading(false);
+            return;
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback quiz generation failed:', fallbackErr);
+          setQuizError('Failed to generate quiz. Please try again.');
+          setQuizLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("Error generating quiz:", err);
+      setQuizError(`Error: ${err.message || 'Failed to generate quiz'}`);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleQuizAnswer = (questionIndex, answerIndex) => {
+    setQuizAnswers(prev => ({
+      ...prev,
+      [questionIndex]: answerIndex
+    }));
+  };
+
+  const handleQuizSubmit = () => {
+    let correct = 0;
+    const quizResults = quizQuestions.map((q, idx) => {
+      const isCorrect = quizAnswers[idx] === q.correctAnswer;
+      if (isCorrect) correct++;
+      return {
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        studentAnswer: quizAnswers[idx] !== undefined ? quizAnswers[idx] : null,
+        isCorrect
+      };
+    });
+    
+    const score = Math.round((correct / quizQuestions.length) * 100);
+    setQuizScore(score);
+    setQuizSubmitted(true);
+    setQuizResults(quizResults);
+  };
+
+  const closeQuiz = () => {
+    setShowQuiz(false);
+    setQuizQuestions([]);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizScore(null);
   };
 
   const formatTime = (time) => {
@@ -337,10 +470,125 @@ const ViewCourse = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                 </div>
+             </div>
 
-            {/* Title and Status Area */}
+              {/* AI Quiz Section */}
+              {showQuiz && (
+                  <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-rich-black-800/50 backdrop-blur-md rounded-3xl border border-rich-black-700 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+                  >
+                      <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-2xl font-bold text-yellow-50 flex items-center gap-3">
+                              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                              </svg>
+                              Quiz: {currentVideo?.topic}
+                          </h3>
+                          <button
+                              onClick={closeQuiz}
+                              className="p-2 hover:bg-rich-black-700 rounded-xl transition-colors text-rich-black-400 hover:text-white"
+                          >
+                              <FiX size={20} />
+                          </button>
+                      </div>
+
+                      {quizError ? (
+                          <div className="text-center py-12">
+                              <div className="w-16 h-16 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-8 h-8 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                  </svg>
+                              </div>
+                              <p className="text-rich-black-100 mb-2">Failed to generate quiz</p>
+                              <p className="text-sm text-rich-black-400 mb-6">{quizError}</p>
+                              <button
+                                  onClick={() => { setQuizError(null); generateQuiz(); }}
+                                  className="px-6 py-3 bg-yellow-50 text-rich-black-900 font-bold rounded-xl hover:scale-105 transition-transform"
+                              >
+                                  Try Again
+                              </button>
+                          </div>
+                      ) : quizLoading ? (
+                          <div className="flex flex-col items-center justify-center py-12 gap-4">
+                              <div className="w-12 h-12 border-4 border-yellow-50 border-t-transparent rounded-full animate-spin"></div>
+                              <p className="text-rich-black-200">Generating quiz based on the video...</p>
+                          </div>
+                      ) : quizQuestions.length > 0 ? (
+                          <>
+                              {!quizSubmitted ? (
+                                  <div className="space-y-6">
+                                      {quizQuestions.map((q, qIdx) => (
+                                          <div key={qIdx} className="bg-rich-black-900/50 rounded-2xl p-6 border border-rich-black-700">
+                                              <p className="text-white font-semibold mb-4">
+                                                  {qIdx + 1}. {q.question}
+                                              </p>
+                                              <div className="space-y-3">
+                                                  {q.options?.map((option, oIdx) => (
+                                                      <button
+                                                          key={oIdx}
+                                                          onClick={() => handleQuizAnswer(qIdx, oIdx)}
+                                                          className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
+                                                              quizAnswers[qIdx] === oIdx
+                                                                  ? 'bg-yellow-50/20 border-yellow-50 text-yellow-50 border'
+                                                                  : 'bg-rich-black-800 border-rich-black-700 text-rich-black-100 hover:border-rich-black-500'
+                                                          }`}
+                                                      >
+                                                          <span className="font-medium">{String.fromCharCode(65 + oIdx)}.</span> {option}
+                                                      </button>
+                                                  ))}
+                                              </div>
+                                          </div>
+                                      ))}
+
+                                      <div className="flex items-center justify-between pt-4">
+                                          <p className="text-sm text-rich-black-400">
+                                              {Object.keys(quizAnswers).length} of {quizQuestions.length} answered
+                                          </p>
+                                          <button
+                                              onClick={handleQuizSubmit}
+                                              disabled={Object.keys(quizAnswers).length < quizQuestions.length}
+                                              className="px-6 py-3 bg-yellow-50 text-rich-black-900 font-bold rounded-xl hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                                          >
+                                              Submit Quiz
+                                          </button>
+                                      </div>
+                                  </div>
+                              ) : (
+                                  <div className="text-center py-8">
+                                      <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${
+                                          quizScore >= 80 ? 'bg-greenish-500/20 text-greenish-300' :
+                                          quizScore >= 60 ? 'bg-yellow-50/20 text-yellow-50' :
+                                          'bg-pink-500/20 text-pink-300'
+                                      }`}>
+                                          <span className="text-3xl font-bold">{quizScore}%</span>
+                                      </div>
+                                      <h4 className="text-xl font-bold text-white mb-2">
+                                          {quizScore >= 80 ? 'Excellent!' : quizScore >= 60 ? 'Good Job!' : 'Keep Practicing!'}
+                                      </h4>
+                                      <p className="text-rich-black-300 mb-6">
+                                          You got {Math.round((quizScore / 100) * quizQuestions.length)} out of {quizQuestions.length} questions correct
+                                      </p>
+                                      <button
+                                          onClick={closeQuiz}
+                                          className="px-6 py-3 bg-rich-black-800 text-rich-black-100 font-medium rounded-xl hover:bg-rich-black-700 transition-colors"
+                                      >
+                                          Continue Learning
+                                      </button>
+                                  </div>
+                              )}
+                          </>
+                      ) : (
+                          <div className="text-center py-12">
+                              <p className="text-rich-black-300">No questions generated. Please try again.</p>
+                          </div>
+                      )}
+                  </motion.div>
+              )}
+
+             {/* Title and Status Area */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 h-fit">
                 <div className="space-y-3 flex-1">
                     <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
@@ -374,7 +622,7 @@ const ViewCourse = () => {
                 <div className="lg:col-span-8 flex flex-col gap-8">
                     {/* Tab Navigation */}
                     <div className="flex items-center gap-10 border-b border-rich-black-800">
-                        {['Discussion', 'Resources', 'Personal Notes'].map((tab) => (
+                        {['Discussion', 'Resources', 'Personal Notes', 'Quiz Results'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -385,6 +633,7 @@ const ViewCourse = () => {
                                 {tab === 'Discussion' && <span className="flex items-center gap-2"><FiMessageSquare /> Discussion</span>}
                                 {tab === 'Resources' && <span className="flex items-center gap-2"><FiFileText /> Resources</span>}
                                 {tab === 'Personal Notes' && <span className="flex items-center gap-2"><FiEdit /> Personal Notes</span>}
+                                {tab === 'Quiz Results' && <span className="flex items-center gap-2"><FiCheckCircle /> Quiz Results</span>}
                                 
                                 {activeTab === tab && (
                                     <motion.div 
@@ -443,6 +692,98 @@ const ViewCourse = () => {
                                         token={token}
                                         currentTime={currentTime}
                                     />
+                                )}
+                                {activeTab === 'Quiz Results' && quizResults.length > 0 && (
+                                    <div className="space-y-6">
+                                        {/* Score Summary */}
+                                        <div className="bg-rich-black-800/50 rounded-2xl p-6 border border-rich-black-700">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h4 className="text-xl font-bold text-white">Quiz Results</h4>
+                                                <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                                                    quizScore >= 80 ? 'bg-greenish-500/20 text-greenish-300' :
+                                                    quizScore >= 60 ? 'bg-yellow-50/20 text-yellow-50' :
+                                                    'bg-pink-500/20 text-pink-300'
+                                                }`}>
+                                                    {quizScore}%
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-rich-black-300">
+                                                You answered {quizResults.filter(r => r.isCorrect).length} out of {quizResults.length} questions correctly
+                                            </p>
+                                        </div>
+
+                                        {/* Detailed Results */}
+                                        <div className="space-y-4">
+                                            {quizResults.map((result, idx) => (
+                                                <div key={idx} className={`p-6 rounded-2xl border ${
+                                                    result.isCorrect 
+                                                        ? 'bg-greenish-500/5 border-greenish-500/20' 
+                                                        : 'bg-pink-500/5 border-pink-500/20'
+                                                }`}>
+                                                    <div className="flex items-start gap-3 mb-4">
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                            result.isCorrect ? 'bg-greenish-500/20 text-greenish-300' : 'bg-pink-500/20 text-pink-300'
+                                                        }`}>
+                                                            {result.isCorrect ? <FiCheckCircle size={16} /> : <FiX size={16} />}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-white font-semibold mb-3">
+                                                                {idx + 1}. {result.question}
+                                                            </p>
+
+                                                            {/* Student's Answer */}
+                                                            <div className="mb-3">
+                                                                <p className="text-[10px] font-bold text-rich-black-400 uppercase tracking-widest mb-1.5">Your Answer</p>
+                                                                <p className={`text-sm ${
+                                                                    result.isCorrect ? 'text-greenish-300' : 'text-pink-300'
+                                                                }`}>
+                                                                    {result.studentAnswer !== null 
+                                                                        ? `${String.fromCharCode(65 + result.studentAnswer)}. ${result.options[result.studentAnswer]}`
+                                                                        : 'Not answered'
+                                                                    }
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Correct Answer */}
+                                                            <div className="mb-3">
+                                                                <p className="text-[10px] font-bold text-rich-black-400 uppercase tracking-widest mb-1.5">Correct Answer</p>
+                                                                <p className="text-sm text-greenish-300">
+                                                                    {String.fromCharCode(65 + result.correctAnswer)}. {result.options[result.correctAnswer]}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Result Status */}
+                                                            <div className={`text-xs font-semibold ${
+                                                                result.isCorrect ? 'text-greenish-400' : 'text-pink-400'
+                                                            }`}>
+                                                                {result.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex items-center gap-4 pt-4">
+                                            <button
+                                                onClick={() => {
+                                                    setQuizSubmitted(false);
+                                                    setQuizResults([]);
+                                                    generateQuiz();
+                                                }}
+                                                className="px-6 py-3 bg-yellow-50 text-rich-black-900 font-bold rounded-xl hover:scale-105 transition-transform"
+                                            >
+                                                Retake Quiz
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveTab('Discussion')}
+                                                className="px-6 py-3 bg-rich-black-800 text-rich-black-100 font-medium rounded-xl hover:bg-rich-black-700 transition-colors"
+                                            >
+                                                Back to Discussion
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </motion.div>
                         </AnimatePresence>

@@ -14,11 +14,13 @@ import { motion } from 'framer-motion';
 
 const Browse = () => {
   const user = useSelector((state) => state.profile?.user);
+  const token = useSelector((state) => state.auth?.token);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set());
 
   const categories = useMemo(() => {
     const cats = courses.map((c) => c.category?.name).filter(Boolean);
@@ -60,6 +62,21 @@ const Browse = () => {
   };
 
   useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    if (!token) return;
+    const loadEnrolledCourses = async () => {
+      try {
+        const res = await request(endpoints.GET_ENROLLED_COURSES, 'GET');
+        const data = await res.json();
+        if (res.ok && data.courses) {
+          setEnrolledCourseIds(new Set(data.courses.map((c) => c._id)));
+        }
+      } catch (error) {
+        console.error('Failed to load enrolled courses', error);
+      }
+    };
+    loadEnrolledCourses();
+  }, [token]);
 
   return (
     <div className='bg-rich-black-900 min-h-screen text-white flex flex-col'>
@@ -150,7 +167,13 @@ const Browse = () => {
                     thumbnail={course.thumbnail}
                     price={course.price}
                     instructor={course.instructor}
-                    onClick={() => navigate(`/course/${course._id}`)}
+                    onClick={() => {
+                      if (token && enrolledCourseIds.has(course._id)) {
+                        navigate(`/view-course/${course._id}`);
+                      } else {
+                        navigate(`/course/${course._id}`);
+                      }
+                    }}
                   />
                 </motion.div>
               ))}
