@@ -1,6 +1,5 @@
 1. Using same gmail id we are not able to create different roles account
-2. Mail templates
-3. When user changing thumbnail instead of uploading change uploaded file
+2. When user changing thumbnail instead of uploading change uploaded file
 
 6. Currently only able to send mail with 'gmail.com'
 7. Testing login using header for token

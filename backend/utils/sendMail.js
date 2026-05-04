@@ -52,8 +52,8 @@ const sendMail = async (email, subject, text, html) => {
         return response.data;
         
     } catch (err) {
-        console.error(`CRITICAL: Error while sending mail over HTTP: ${err.message}`);
-        throw err; 
+        console.error(`Failed to send mail (non-fatal): ${err.message}`);
+        return null; // Email failure must NEVER crash the caller
     }
 };
 

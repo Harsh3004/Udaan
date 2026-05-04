@@ -26,7 +26,7 @@ import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
 import ViewCourse from "./pages/ViewCourse"
 import Cart from "./components/Dasboard/Cart/Cart"
 
-// NEW: Import the Google OAuth Provider
+// Import the Google OAuth Provider
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function App() {

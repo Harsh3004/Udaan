@@ -2,6 +2,7 @@ import React from 'react'
 import * as icons from "react-icons/vsc"
 import { useDispatch } from 'react-redux';
 import { matchPath, NavLink, useLocation } from 'react-router-dom';
+import { resetCourseState } from '../../slices/courseSlice';
 
 export const SidebarLink = ({data}) => {
     const Icon = icons[data.icon];
@@ -12,9 +13,17 @@ export const SidebarLink = ({data}) => {
       return matchPath({path: route}, location.pathname);
     }
 
+    const handleClick = () => {
+      // Reset course state when clicking on Add Course link
+      if (data.path === "/dashboard/add-course") {
+        dispatch(resetCourseState());
+      }
+    };
+
     return (
       <NavLink  
         to={data.path}
+        onClick={handleClick}
         className={`relative flex ${matchRoute(data.path) ? "bg-yellow-50 text-rich-black-900 " : "bg-opacity-0"}`}
       >
         <span className={`absolute left-0 top-0 h-full w-[0.5rem] bg-yellow-600 ${matchRoute(data.path) ? "opacity-100" : "opacity-0"}`}>

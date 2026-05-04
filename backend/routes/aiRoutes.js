@@ -1,6 +1,7 @@
 const express = require('express');
-const { auth } = require('../middlewares/Auth');
+const { auth, isInstructor } = require('../middlewares/Auth');
 const { askAI, saveNote, getNotes, deleteNote, generateQuiz } = require('../controllers/aiController');
+const { dhruvChat } = require('../controllers/dhruvController');
 
 const router = express.Router();
 
@@ -14,5 +15,8 @@ router.post('/generate-quiz', auth, generateQuiz);
 router.post('/notes', auth, saveNote);
 router.get('/notes/:subsectionId', auth, getNotes);
 router.delete('/notes/:noteId', auth, deleteNote);
+
+// Dhruv — AI course creation agent (streaming SSE)
+router.post('/dhruv', auth, dhruvChat);
 
 module.exports = router;
