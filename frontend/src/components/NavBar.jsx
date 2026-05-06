@@ -9,8 +9,10 @@ import { logout } from '../services/functions/auth'
 import { RiLogoutBoxRLine } from "react-icons/ri"
 import { CgProfile } from "react-icons/cg"
 import { VscBook, VscSettingsGear } from "react-icons/vsc"
-import { FiMenu, FiX } from 'react-icons/fi'
+import { FiMenu, FiX, FiMessageCircle } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { endpoints } from '../services/api'
+import { request } from '../services/operations/authApi'
 
 export const NavBar = () => {
     const { token } = useSelector((state) => state.auth)
@@ -19,6 +21,8 @@ export const NavBar = () => {
     const [profileOpen, setProfileOpen] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const [unreadMessages, setUnreadMessages] = useState(0)
+    const [messagesOpen, setMessagesOpen] = useState(false)
 
     const location = useLocation()
     const dispatch = useDispatch()
@@ -44,6 +48,32 @@ export const NavBar = () => {
     }, [])
 
     useEffect(() => { setMobileOpen(false) }, [location.pathname])
+
+    // Fetch unread messages count
+    useEffect(() => {
+        const fetchUnreadMessages = async () => {
+            if (!token || !user) return;
+            try {
+                const endpoint = user.role === 'Instructor'
+                    ? endpoints.CHAT_INSTRUCTOR_CONVERSATIONS
+                    : endpoints.CHAT_STUDENT_CONVERSATIONS;
+                const res = await request(endpoint, 'GET', null, token);
+                const data = await res.json();
+                if (data.success && data.conversations) {
+                    const totalUnread = data.conversations.reduce((sum, conv) => {
+                        return sum + (user.role === 'Instructor' ? conv.instructorUnreadCount : conv.studentUnreadCount);
+                    }, 0);
+                    setUnreadMessages(totalUnread);
+                }
+            } catch (error) {
+                console.error('Error fetching unread messages:', error);
+            }
+        };
+
+        fetchUnreadMessages();
+        const interval = setInterval(fetchUnreadMessages, 30000);
+        return () => clearInterval(interval);
+    }, [token, user]);
 
     const logoutHandler = () => {
         setProfileOpen(false)
@@ -119,7 +149,7 @@ export const NavBar = () => {
                     ) : (
                         <div className='flex items-center gap-5'>
                             {user && (
-                                <button 
+                                <button
                                     onClick={() => navigate('/dashboard/cart')}
                                     className='relative text-rich-black-200 hover:text-white transition-colors'
                                 >
@@ -127,6 +157,20 @@ export const NavBar = () => {
                                     {totalItems > 0 && (
                                         <span className='absolute -top-2 -right-2 w-4 h-4 bg-yellow-50 text-rich-black-900 text-[10px] font-bold rounded-full flex items-center justify-center'>
                                             {totalItems}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
+
+                            {user && (
+                                <button
+                                    onClick={() => navigate('/dashboard/messages')}
+                                    className='relative text-rich-black-200 hover:text-white transition-colors'
+                                >
+                                    <FiMessageCircle size={22} />
+                                    {unreadMessages > 0 && (
+                                        <span className='absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse'>
+                                            {unreadMessages > 9 ? '9+' : unreadMessages}
                                         </span>
                                     )}
                                 </button>

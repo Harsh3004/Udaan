@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { 
-  FiPlayCircle, 
-  FiCheckCircle, 
-  FiChevronDown, 
-  FiVideo, 
-  FiArrowLeft, 
-  FiLock, 
-  FiDownload, 
+import {
+  FiPlayCircle,
+  FiCheckCircle,
+  FiChevronDown,
+  FiVideo,
+  FiArrowLeft,
+  FiLock,
+  FiDownload,
   FiExternalLink,
   FiSettings,
   FiMaximize,
@@ -21,14 +21,18 @@ import {
   FiPause,
   FiChevronRight,
   FiChevronLeft,
-  FiX
+  FiX,
+  FiStar
 } from 'react-icons/fi';
+import { FaStar } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { endpoints } from '../services/api';
 import { request } from '../services/operations/authApi';
 import AiSidebar from '../components/ViewCourse/AiSidebar';
 import PersonalNotes from '../components/ViewCourse/PersonalNotes';
+import RatingModal from '../components/RatingModal';
+import InstructorChat from '../components/InstructorChat';
 
 const ViewCourse = () => {
   const { courseId } = useParams();
@@ -62,6 +66,36 @@ const ViewCourse = () => {
   const [quizScore, setQuizScore] = useState(null);
   const [quizError, setQuizError] = useState(null);
   const [quizResults, setQuizResults] = useState([]);
+
+  // Reviews state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [userReview, setUserReview] = useState(null);
+
+  // Chat state
+  const [showChat, setShowChat] = useState(false);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+
+  // Check for chat unread messages
+  useEffect(() => {
+    const checkChatStatus = async () => {
+      if (!courseId || !token) return;
+      try {
+        const res = await request(`${endpoints.CHAT_CHECK_EXISTS}/${courseId}`, 'GET', null, token);
+        const data = await res.json();
+        if (data.success) {
+          setChatUnreadCount(data.unreadCount || 0);
+        }
+      } catch (error) {
+        console.error('Error checking chat status:', error);
+      }
+    };
+
+    checkChatStatus();
+    const interval = setInterval(checkChatStatus, 30000);
+    return () => clearInterval(interval);
+  }, [courseId, token]);
 
   const fetchCourseData = async () => {
     setLoading(true);
@@ -285,6 +319,44 @@ const ViewCourse = () => {
     setQuizSubmitted(false);
     setQuizScore(null);
   };
+
+  const { user } = useSelector((state) => state.profile);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await request(
+        `${endpoints.GET_COURSE_DETAILS_API}/${courseId}/rating`,
+        'GET',
+        null,
+        token
+      );
+      const data = await res.json();
+      if (res.ok && data.ratingAndReviews) {
+        setReviews(data.ratingAndReviews);
+        const avg = data.ratingAndReviews.length > 0
+          ? (data.ratingAndReviews.reduce((acc, r) => acc + r.rating, 0) / data.ratingAndReviews.length).toFixed(1)
+          : 0;
+        setAverageRating(avg);
+
+        const myReview = data.ratingAndReviews.find(
+          (r) => r.user?._id === user?.id || r.user === user?.id
+        );
+        setUserReview(myReview || null);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
+
+  const handleReviewSubmitted = () => {
+    fetchReviews();
+  };
+
+  useEffect(() => {
+    if (courseId && token) {
+      fetchReviews();
+    }
+  }, [courseId, token, user]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -622,7 +694,7 @@ const ViewCourse = () => {
                 <div className="lg:col-span-8 flex flex-col gap-8">
                     {/* Tab Navigation */}
                     <div className="flex items-center gap-10 border-b border-rich-black-800">
-                        {['Discussion', 'Resources', 'Personal Notes', 'Quiz Results'].map((tab) => (
+                        {['Discussion', 'Resources', 'Personal Notes', 'Reviews', 'Quiz Results'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -633,10 +705,11 @@ const ViewCourse = () => {
                                 {tab === 'Discussion' && <span className="flex items-center gap-2"><FiMessageSquare /> Discussion</span>}
                                 {tab === 'Resources' && <span className="flex items-center gap-2"><FiFileText /> Resources</span>}
                                 {tab === 'Personal Notes' && <span className="flex items-center gap-2"><FiEdit /> Personal Notes</span>}
+                                {tab === 'Reviews' && <span className="flex items-center gap-2"><FaStar /> Reviews</span>}
                                 {tab === 'Quiz Results' && <span className="flex items-center gap-2"><FiCheckCircle /> Quiz Results</span>}
-                                
+
                                 {activeTab === tab && (
-                                    <motion.div 
+                                    <motion.div
                                         layoutId="tab-underline"
                                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-50 rounded-full"
                                     />
@@ -783,6 +856,99 @@ const ViewCourse = () => {
                                                 Back to Discussion
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+                                {activeTab === 'Reviews' && (
+                                    <div className="space-y-8">
+                                        {/* Rating Summary */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-3 bg-rich-black-900/50 px-5 py-3 rounded-2xl border border-rich-black-700">
+                                                    <span className="text-3xl font-bold text-yellow-50">{averageRating}</span>
+                                                    <div className="flex flex-col">
+                                                        <div className="flex gap-0.5">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <FaStar key={i} size={14} className={i < Math.round(averageRating) ? 'fill-yellow-50 text-yellow-50' : 'fill-rich-black-600 text-rich-black-600'} />
+                                                            ))}
+                                                        </div>
+                                                        <span className="text-xs text-rich-black-400 mt-1">{reviews.length} reviews</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {!userReview ? (
+                                                <motion.button
+                                                    onClick={() => setShowRatingModal(true)}
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-50 to-yellow-100 text-rich-black-900 font-bold rounded-xl hover:shadow-[0_4px_20px_rgba(255,214,10,0.4)] transition-all"
+                                                >
+                                                    <FaStar size={16} />
+                                                    Write a Review
+                                                </motion.button>
+                                            ) : (
+                                                <div className="flex items-center gap-2 bg-pastelGreen-500/10 px-4 py-2 rounded-full border border-pastelGreen-500/20">
+                                                    <FaStar size={14} className="fill-pastelGreen-400 text-pastelGreen-400" />
+                                                    <span className="text-sm text-pastelGreen-400 font-medium">You rated {userReview.rating}/5</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Reviews List */}
+                                        {reviews.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {reviews.map((review, idx) => (
+                                                    <motion.div
+                                                        key={review._id || idx}
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: idx * 0.05 }}
+                                                        className="bg-rich-black-900/40 p-5 rounded-2xl border border-rich-black-700/50 hover:border-yellow-50/20 transition-all"
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <img
+                                                                src={review.user?.profileImage}
+                                                                alt={review.user?.fName}
+                                                                onError={(e) => {
+                                                                    if (!e.target.dataset.fallback) {
+                                                                        e.target.dataset.fallback = 'true';
+                                                                        e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${review.user?.fName || 'U'}${review.user?.lName || ''}&size=128`;
+                                                                    }
+                                                                }}
+                                                                className="w-10 h-10 rounded-full object-cover ring-2 ring-rich-black-700"
+                                                            />
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <span className="text-sm font-semibold text-rich-black-5">
+                                                                        {review.user?.fName} {review.user?.lName}
+                                                                    </span>
+                                                                    <div className="flex gap-0.5">
+                                                                        {[...Array(5)].map((_, i) => (
+                                                                            <FaStar key={i} size={12} className={i < review.rating ? 'fill-yellow-50 text-yellow-50' : 'fill-rich-black-600 text-rich-black-600'} />
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                                {review.review && (
+                                                                    <p className="text-sm text-rich-black-300 leading-relaxed">{review.review}</p>
+                                                                )}
+                                                                {review.createdAt && (
+                                                                    <p className="text-xs text-rich-black-500 mt-2">
+                                                                        {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-10">
+                                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-rich-black-800/50 flex items-center justify-center">
+                                                    <FaStar size={24} className="text-rich-black-500" />
+                                                </div>
+                                                <p className="text-rich-black-300 font-medium">No reviews yet</p>
+                                                <p className="text-sm text-rich-black-500">Be the first to review this course!</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </motion.div>
@@ -955,6 +1121,45 @@ const ViewCourse = () => {
           token={token}
         />
       )}
+
+      {/* Chat with Instructor — Floating Button */}
+      <motion.button
+        onClick={() => setShowChat(true)}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="fixed right-6 bottom-28 z-50 w-14 h-14 bg-gradient-to-br from-violet-500 to-violet-600 rounded-full shadow-[0_4px_20px_rgba(139,92,246,0.5)] flex items-center justify-center hover:shadow-[0_6px_30px_rgba(139,92,246,0.6)] transition-all"
+      >
+        <div className="relative">
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          {chatUnreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+              {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+            </span>
+          )}
+        </div>
+      </motion.button>
+
+      {/* Instructor Chat Modal */}
+      <InstructorChat
+        courseId={courseId}
+        courseTitle={course?.title}
+        instructor={course?.instructor}
+        isOpen={showChat}
+        onClose={() => setShowChat(false)}
+      />
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        courseId={courseId}
+        courseName={course?.title}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
 
     </div>
   );

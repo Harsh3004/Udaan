@@ -274,7 +274,7 @@ const AiSidebar = ({ courseId, currentVideo, token }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-8 right-8 z-50 flex items-center gap-2.5 px-5 py-3.5 bg-yellow-50 text-rich-black-900 rounded-2xl font-bold text-sm shadow-[0_8px_30px_rgba(255,214,10,0.4)] hover:scale-105 transition-transform"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3.5 bg-yellow-50 text-rich-black-900 rounded-2xl font-bold text-sm shadow-[0_8px_30px_rgba(255,214,10,0.4)] hover:scale-105 transition-transform"
           >
             <FiCpu size={18} />
             Ask AI

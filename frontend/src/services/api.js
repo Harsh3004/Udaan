@@ -62,4 +62,14 @@ export const endpoints = {
 
     // Dhruv — AI course creation agent
     DHRUV_API: BASE_URL + "/ai/dhruv",
+
+    // Chat with Instructor
+    CHAT_SEND_MESSAGE: BASE_URL + "/chat/send",
+    CHAT_GET_MESSAGES: BASE_URL + "/chat/messages",
+    CHAT_STUDENT_CONVERSATIONS: BASE_URL + "/chat/conversations/student",
+    CHAT_INSTRUCTOR_CONVERSATIONS: BASE_URL + "/chat/conversations/instructor",
+    CHAT_MARK_READ: BASE_URL + "/chat/read",
+    CHAT_CHECK_EXISTS: BASE_URL + "/chat/check",
+    CHAT_DELETE_MESSAGE: BASE_URL + "/chat/message",
+    CHAT_DELETE: BASE_URL + "/chat",
 }
