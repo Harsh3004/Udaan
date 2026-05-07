@@ -64,40 +64,6 @@ function initSocket(server) {
             }
         });
 
-        // Handle new message (real-time broadcast)
-        socket.on('send_message', ({ courseId, message }) => {
-            if (socket.userId && courseId) {
-                // Broadcast to all users in the course chat room INCLUDING sender
-                io.to(`course:${courseId}`).emit('new_message', {
-                    courseId,
-                    message,
-                    senderId: socket.userId
-                });
-            }
-        });
-
-        // Handle message delete
-        socket.on('delete_message', ({ courseId, messageId }) => {
-            if (socket.userId && courseId) {
-                io.to(`course:${courseId}`).emit('message_deleted', {
-                    courseId,
-                    messageId,
-                    deletedBy: socket.userId
-                });
-            }
-        });
-
-        // Handle message read status
-        socket.on('mark_read', ({ courseId }) => {
-            if (socket.userId && courseId) {
-                // Notify the other person that messages were read
-                socket.to(`course:${courseId}`).emit('messages_read', {
-                    courseId,
-                    readBy: socket.userId
-                });
-            }
-        });
-
         socket.on('disconnect', () => {
             console.log('Client disconnected:', socket.id);
         });
@@ -111,16 +77,18 @@ function emitNewMessage(courseId, message) {
     if (io) {
         io.to(`course:${courseId}`).emit('new_message', {
             courseId,
-            message
+            message,
+            senderId: message.sender?._id || message.sender
         });
     }
 }
 
-function emitMessageDeleted(courseId, messageId) {
+function emitMessageDeleted(courseId, messageId, deletedBy) {
     if (io) {
         io.to(`course:${courseId}`).emit('message_deleted', {
             courseId,
-            messageId
+            messageId,
+            deletedBy
         });
     }
 }

@@ -20,6 +20,8 @@
         }
     });
 
+    otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
+
     async function sendVerificationEmail(email,otp) {
         try{
             const text = `Your verification OTP for Udaan is: ${otp}. It will expire in 5 minutes.`;

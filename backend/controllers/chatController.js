@@ -115,12 +115,9 @@ exports.sendMessage = async (req, res) => {
             .populate('instructor', 'fName lName profileImage')
             .populate('messages.sender', 'fName lName profileImage');
 
-        // Emit socket event for real-time update
+        // Emit socket event for real-time update with properly populated message
         const lastMessage = updatedChat.messages[updatedChat.messages.length - 1];
-        emitNewMessage(courseId, {
-            ...lastMessage.toObject(),
-            sender: { _id: senderId, role: senderRole }
-        });
+        emitNewMessage(courseId, lastMessage.toObject());
 
         return res.status(201).json({
             success: true,
@@ -287,6 +284,9 @@ exports.markAsRead = async (req, res) => {
 
         await chat.save();
 
+        // Emit socket event for real-time update
+        emitMessagesRead(courseId, userId);
+
         return res.status(200).json({
             success: true,
             message: 'Messages marked as read'
@@ -310,6 +310,14 @@ exports.checkChatExists = async (req, res) => {
             .select('_id messages studentUnreadCount instructorUnreadCount');
 
         if (!chat) {
+            return res.status(200).json({
+                success: true,
+                exists: false,
+                unreadCount: 0
+            });
+        }
+
+        if (!chat.student) {
             return res.status(200).json({
                 success: true,
                 exists: false,
@@ -389,7 +397,7 @@ exports.deleteMessage = async (req, res) => {
         await chat.save();
 
         // Emit socket event for real-time update
-        emitMessageDeleted(courseId, messageId);
+        emitMessageDeleted(courseId, messageId, userId);
 
         return res.status(200).json({
             success: true,

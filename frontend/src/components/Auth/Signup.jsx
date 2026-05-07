@@ -44,8 +44,6 @@ export const Signup = () => {
             role: userType
         });
         const text = await res.text();
-        console.log("Google auth response status:", res.status);
-        console.log("Google auth response:", text);
         
         let data;
         try {

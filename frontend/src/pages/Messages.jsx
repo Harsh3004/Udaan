@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageCircle, FiSearch, FiArrowLeft, FiTrash2, FiMoreVertical, FiX } from 'react-icons/fi';
 import { FaPaperPlane } from 'react-icons/fa';
@@ -12,7 +11,7 @@ import socketService from '../services/socketService';
 const Messages = () => {
     const { token } = useSelector((state) => state.auth);
     const { user } = useSelector((state) => state.profile);
-    const navigate = useNavigate();
+    void motion;
 
     const [conversations, setConversations] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
@@ -23,6 +22,7 @@ const Messages = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [messageMenuOpen, setMessageMenuOpen] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const currentCourseIdRef = useRef(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -30,37 +30,47 @@ const Messages = () => {
     useEffect(() => {
         if (token && user?._id) {
             socketService.connect(token);
-            socketService.authenticate(token);
         }
     }, [token, user?._id]);
 
     useEffect(() => {
         fetchConversations();
-        const pollInterval = setInterval(fetchConversations, 15000);
-        return () => clearInterval(pollInterval);
     }, [token, user]);
 
     useEffect(() => {
         if (selectedChat && token) {
-            fetchMessages(selectedChat.course._id);
-            socketService.joinCourseChat(selectedChat.course._id);
-            markMessagesAsRead(selectedChat.course._id);
+            const courseId = selectedChat.course._id;
+            currentCourseIdRef.current = courseId;
+
+            fetchMessages(courseId);
+            socketService.joinCourseChat(courseId);
+            markMessagesAsRead(courseId);
 
             const handleNewMessage = (data) => {
-                if (data.courseId === selectedChat.course._id && data.senderId !== user?._id) {
-                    fetchMessages(selectedChat.course._id);
+                if (data.courseId === currentCourseIdRef.current) {
+                    const newMsg = data.message;
+                    if (newMsg && newMsg._id) {
+                        setMessages(prev => {
+                            const exists = prev.some(m => m._id === newMsg._id);
+                            if (exists) return prev;
+                            return [...prev, newMsg];
+                        });
+                    }
+                    if (data.message?.sender?._id !== user?._id) {
+                        scrollToBottom();
+                    }
                 }
             };
 
             const handleMessageDeleted = (data) => {
-                if (data.courseId === selectedChat.course._id) {
-                    fetchMessages(selectedChat.course._id);
+                if (data.courseId === currentCourseIdRef.current && data.messageId) {
+                    setMessages(prev => prev.filter(m => m._id !== data.messageId));
                 }
             };
 
             const handleMessagesRead = (data) => {
-                if (data.courseId === selectedChat.course._id) {
-                    fetchMessages(selectedChat.course._id);
+                if (data.courseId === currentCourseIdRef.current) {
+                    setMessages(prev => prev.map(m => ({ ...m, read: true })));
                 }
             };
 
@@ -71,7 +81,7 @@ const Messages = () => {
             }
 
             return () => {
-                socketService.leaveCourseChat(selectedChat.course._id);
+                socketService.leaveCourseChat(courseId);
                 if (socketService.socket) {
                     socketService.socket.off('new_message', handleNewMessage);
                     socketService.socket.off('message_deleted', handleMessageDeleted);
@@ -84,7 +94,6 @@ const Messages = () => {
     const markMessagesAsRead = async (courseId) => {
         try {
             await request(`${endpoints.CHAT_MARK_READ}/${courseId}`, 'PUT', null, token);
-            socketService.markAsRead(courseId);
         } catch (error) {
             console.error('Error marking messages as read:', error);
         }
@@ -135,8 +144,20 @@ const Messages = () => {
 
         setIsSending(true);
         const messageContent = newMessage.trim();
+        const tempId = `temp_${Date.now()}`;
+        const optimisticMessage = {
+            _id: tempId,
+            content: messageContent,
+            sender: user,
+            createdAt: new Date(),
+            read: false,
+            isOptimistic: true
+        };
+
         setNewMessage('');
+        setMessages(prev => [...prev, optimisticMessage]);
         socketService.sendTypingIndicator(selectedChat.course._id, false);
+        scrollToBottom();
 
         try {
             const res = await request(endpoints.CHAT_SEND_MESSAGE, 'POST', {
@@ -145,21 +166,25 @@ const Messages = () => {
             }, token);
 
             const data = await res.json();
-            if (data.success) {
+            if (data.success && data.chat?.messages) {
+                const lastMsg = data.chat.messages[data.chat.messages.length - 1];
                 setMessages(prev => {
-                    const lastMsg = data.chat?.messages?.[data.chat?.messages?.length - 1];
-                    const exists = prev.some(m => m._id === lastMsg?._id);
-                    if (exists) return prev;
-                    return data.chat?.messages || [];
+                    const filtered = prev.filter(m => m._id !== tempId);
+                    if (lastMsg && !filtered.some(m => m._id === lastMsg._id)) {
+                        return [...filtered, lastMsg];
+                    }
+                    return filtered;
                 });
                 fetchConversations();
             } else {
                 toast.error(data.message || 'Failed to send message');
+                setMessages(prev => prev.filter(m => m._id !== tempId));
                 setNewMessage(messageContent);
             }
         } catch (error) {
             console.error('Error sending message:', error);
             toast.error('Failed to send message');
+            setMessages(prev => prev.filter(m => m._id !== tempId));
             setNewMessage(messageContent);
         } finally {
             setIsSending(false);
@@ -188,6 +213,10 @@ const Messages = () => {
     };
 
     const deleteMessage = async (messageId) => {
+        const previousMessages = messages;
+        setMessages(prev => prev.filter(m => m._id !== messageId));
+        setMessageMenuOpen(null);
+
         try {
             const res = await request(endpoints.CHAT_DELETE_MESSAGE, 'DELETE', {
                 courseId: selectedChat.course._id,
@@ -195,16 +224,16 @@ const Messages = () => {
             }, token);
 
             const data = await res.json();
-            if (data.success) {
-                setMessages(data.chat?.messages || []);
-                setMessageMenuOpen(null);
-                toast.success('Message deleted');
-            } else {
+            if (!data.success) {
                 toast.error(data.message || 'Failed to delete message');
+                setMessages(previousMessages);
+            } else {
+                toast.success('Message deleted');
             }
         } catch (error) {
             console.error('Error deleting message:', error);
             toast.error('Failed to delete message');
+            setMessages(previousMessages);
         }
     };
 
@@ -569,6 +598,7 @@ const Messages = () => {
                                                             )
                                                         )}
                                                     </div>
+                                                </div>
                                             </div>
                                         );
                                     })}

@@ -31,7 +31,6 @@ import Messages from "./pages/Messages"
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function App() {
-  console.log("VITE_BASE_URL =", import.meta.env.VITE_BASE_URL);
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (

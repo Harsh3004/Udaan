@@ -8,17 +8,25 @@ class SocketService {
     constructor() {
         this.socket = null;
         this.isConnected = false;
+        this.isAuthenticated = false;
         this.currentCourseId = null;
-        this.authenticateCallback = null;
+        this.authToken = null;
     }
 
     connect(token) {
-        if (this.socket?.connected) {
+        if (token) {
+            this.authToken = token;
+        }
+
+        if (this.socket) {
+            if (this.authToken) {
+                this.socket.auth = { token: this.authToken };
+            }
             return this.socket;
         }
 
         this.socket = io(SOCKET_URL, {
-            auth: { token },
+            auth: { token: this.authToken },
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 5,
@@ -28,15 +36,16 @@ class SocketService {
         this.socket.on('connect', () => {
             console.log('Socket connected:', this.socket.id);
             this.isConnected = true;
-            if (this.authenticateCallback) {
-                this.authenticateCallback();
-                this.authenticateCallback = null;
+            this.isAuthenticated = false;
+            if (this.authToken) {
+                this.socket.emit('authenticate', this.authToken);
             }
         });
 
         this.socket.on('disconnect', () => {
             console.log('Socket disconnected');
             this.isConnected = false;
+            this.isAuthenticated = false;
         });
 
         this.socket.on('connect_error', (error) => {
@@ -46,6 +55,11 @@ class SocketService {
 
         this.socket.on('authenticated', (data) => {
             console.log('Socket authenticated:', data);
+            this.isAuthenticated = true;
+
+            if (this.currentCourseId) {
+                this.socket.emit('join_course_chat', { courseId: this.currentCourseId });
+            }
         });
 
         this.socket.on('auth_error', (data) => {
@@ -81,21 +95,22 @@ class SocketService {
         return this.socket;
     }
 
-    authenticate(token) {
-        if (this.socket?.connected) {
-            this.socket.emit('authenticate', token);
-        } else {
-            this.authenticateCallback = () => {
-                if (this.socket?.connected) {
-                    this.socket.emit('authenticate', token);
-                }
-            };
-        }
-    }
-
     joinCourseChat(courseId) {
-        if (this.socket?.connected && courseId) {
-            this.currentCourseId = courseId;
+        if (!courseId) {
+            return;
+        }
+
+        this.currentCourseId = courseId;
+
+        const token = this.authToken || store.getState().auth.token;
+        if (!this.socket && token) {
+            this.connect(token);
+        } else if (this.socket && token) {
+            this.socket.auth = { token };
+            this.authToken = token;
+        }
+
+        if (this.socket?.connected && this.isAuthenticated) {
             this.socket.emit('join_course_chat', { courseId });
         }
     }
@@ -103,6 +118,9 @@ class SocketService {
     leaveCourseChat(courseId) {
         if (this.socket?.connected) {
             this.socket.emit('leave_course_chat', { courseId });
+        }
+
+        if (!courseId || this.currentCourseId === courseId) {
             this.currentCourseId = null;
         }
     }
@@ -135,8 +153,12 @@ class SocketService {
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
-            this.isConnected = false;
         }
+
+        this.isConnected = false;
+        this.isAuthenticated = false;
+        this.currentCourseId = null;
+        this.authToken = null;
     }
 
     isSocketConnected() {
