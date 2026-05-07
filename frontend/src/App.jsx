@@ -25,12 +25,12 @@ import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
 import ViewCourse from "./pages/ViewCourse"
 import Cart from "./components/Dasboard/Cart/Cart"
+import Messages from "./pages/Messages"
 
 // Import the Google OAuth Provider
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export default function App() {
-  console.log("VITE_BASE_URL =", import.meta.env.VITE_BASE_URL);
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   return (
@@ -81,6 +81,12 @@ export default function App() {
             <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
             <Route path="/dashboard/setting" element={<Setting/>}/>
           </Route>
+
+          <Route path="/dashboard/messages" element={
+            <ProtectedRoute>
+              <Messages/>
+            </ProtectedRoute>
+          }/>
 
           <Route path="/view-course/:courseId" element={
             <ProtectedRoute>

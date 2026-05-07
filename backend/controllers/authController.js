@@ -90,6 +90,9 @@ exports.signUp = async (req,res) => {
                     message: `Invalid Otp`
                 })
             }
+
+            // Delete OTP after successful verification to prevent replay attacks
+            await otpModel.deleteMany({ email });
         }catch(err){
             console.log(`Error while matching otp`);
             return res.status(400).json({

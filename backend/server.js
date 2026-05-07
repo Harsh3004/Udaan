@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require('http');
 const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
@@ -9,9 +10,10 @@ const userRoutes = require('./routes/userRoutes');
 const contactRoute = require('./routes/contactRoute');
 const categoryRoutes = require('./routes/categoryRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const dns = require('node:dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google/Cloudflare DNS
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 require('dotenv').config();
@@ -39,7 +41,6 @@ app.use(cors({
 app.use(fileUpload({
     useTempFiles : true,
     tempFileDir : '/tmp/',
-    // limits: { fileSize: 100 * 1024 * 1024 } //Since cloudinary allow upto 100mb for free tier
 }));
 
 const cloudinaryConnect = require('./config/cloudinary');
@@ -55,6 +56,7 @@ app.use('/api/contact',contactRoute);
 app.use('/api/category', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/',(req,res) => {
     return res.json({
@@ -64,6 +66,13 @@ app.get('/',(req,res) => {
 })
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, ()=>{
+
+// Create HTTP server and integrate Socket.io
+const server = http.createServer(app);
+const { initSocket } = require('./config/socket');
+initSocket(server);
+
+server.listen(PORT, ()=>{
     console.log(`Server start successfully at PORT: ${PORT}`);
+    console.log(`Socket.io is ready for real-time messaging`);
 })

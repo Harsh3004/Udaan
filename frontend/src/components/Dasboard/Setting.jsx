@@ -141,19 +141,16 @@ const Setting = () => {
 
     try {
       const res = await request(endpoints.UPDATE_PROFILE_API, "PUT", formPayload);
-      console.log(res);
       if (!res.ok)
         throw new Error(res.message);
 
       const response = await res.json();
-      console.log(response.userObject);
       dispatch(setUser(response.userObject));
       localStorage.setItem("token", JSON.stringify(response.userObject.token));
       localStorage.setItem("user", JSON.stringify(response.userObject));
 
       toast.dismiss(toastId);
       toast.success(`Profile Updated Successfully.`);
-      console.log('Profile updated successfully!', res.ok);
     } catch (error) {
       toast.dismiss(toastId);
       toast.error(error.message);

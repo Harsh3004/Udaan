@@ -104,6 +104,14 @@ exports.verifyPayment = async (req,res) => {
         console.log(`Verifying Payment`);
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
         const order = await razorpayInstance.orders.fetch(razorpay_order_id);
+        
+        if (!order?.notes?.userId || !order?.notes?.courseId) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid order notes"
+            });
+        }
+        
         const { userId, courseId } = order.notes;
         if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature){
             return res.status(400).json({
