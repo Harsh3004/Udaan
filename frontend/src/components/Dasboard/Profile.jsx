@@ -90,6 +90,43 @@ export const Profile = () => {
                     </div>
             </div>
 
+            {user.role === 'Instructor' && (
+              <div className='bg-rich-black-800 px-6 py-2 rounded-lg border border-rich-black-700 w-3/4'>
+                      <div className='flex justify-between items-center'>
+                          <p className='font-semibold text-lg'>Bank Account Details</p>
+                          <NavLink to='/dashboard/setting' className='bg-yellow-50 px-4 py-2 text-rich-black-900 flex items-center gap-2 rounded-lg'>
+                              <FaRegEdit/>
+                              Edit
+                          </NavLink>
+                      </div>
+
+                      <div className='pt-5 grid grid-rows-2 grid-cols-2 space-y-2'>
+                          <div>
+                              <p className='font-normal text-sm text-rich-black-600 pt-5'>Account Holder Name</p>
+                              <p>{user.additionalDetails.accountHolderName ? user.additionalDetails.accountHolderName : "Add Account Holder Name"}</p>
+                          </div>
+                          <div>
+                              <p className='font-normal text-sm text-rich-black-600'>Account Number</p>
+                              <p>{user.additionalDetails.accountNumber ? user.additionalDetails.accountNumber : "Add Account Number"}</p>
+                          </div>
+                          <div>
+                              <p className='font-normal text-sm text-rich-black-600'>Bank Name</p>
+                              <p>{user.additionalDetails.bankName ? user.additionalDetails.bankName : "Add Bank Name"}</p>
+                          </div>
+                          <div>
+                              <p className='font-normal text-sm text-rich-black-600'>IFSC Code</p>
+                              <p>{user.additionalDetails.ifscCode ? user.additionalDetails.ifscCode : "Add IFSC Code"}</p>
+                          </div>
+                          {user.additionalDetails.branchName && (
+                            <div>
+                                <p className='font-normal text-sm text-rich-black-600'>Branch Name</p>
+                                <p>{user.additionalDetails.branchName}</p>
+                            </div>
+                          )}
+                      </div>
+              </div>
+            )}
+
         </div>
     )
 }

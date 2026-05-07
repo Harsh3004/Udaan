@@ -129,7 +129,7 @@ export const InstructorDashboard = () => {
             {recentCourses.map((course, i) => (
               <motion.div key={course._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
                 className='flex flex-col md:flex-row gap-5 py-5 hover:bg-rich-black-700/30 rounded-xl px-3 transition-all cursor-pointer group'
-                onClick={() => navigate(`/dashboard/edit-course/${course._id}`)}>
+                onClick={() => navigate(`/dashboard/manage-course/${course._id}`)}>
                 <img src={course.thumbnail?.url} alt={course.title} className='w-full md:w-[200px] h-[110px] object-cover rounded-xl flex-shrink-0 group-hover:brightness-110 transition-all' />
                 <div className='flex flex-col justify-center flex-1 gap-2'>
                   <div className='flex items-start justify-between gap-3'>

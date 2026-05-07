@@ -1,19 +1,88 @@
+import React, { useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../services/functions/auth';
-import { SidebarLink } from './SidebarLink';
-import { sidebarLinks } from '../../data/sidebar';
+import { resetCourseState } from '../../slices/courseSlice';
 import { Modal } from '../Modal';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { VscSignOut } from 'react-icons/vsc';
+import { motion } from 'framer-motion';
+import {
+  VscAccount, VscBook, VscAdd, VscHome, VscSettingsGear,
+  VscSignOut, VscChevronRight, VscMail
+} from 'react-icons/vsc';
 
-export const Sidebar = () => {
+const iconMap = {
+  VscAccount, VscBook, VscAdd, VscHome, VscSettingsGear,
+  VscSignOut, VscMail
+};
+
+const instructorLinks = [
+  { id: 'dashboard', name: 'Dashboard', path: '/dashboard/instructor', icon: 'VscHome' },
+  { id: 'my-courses', name: 'My Courses', path: '/dashboard/my-courses', icon: 'VscBook' },
+  { id: 'add-course', name: 'Create Course', path: '/dashboard/add-course', icon: 'VscAdd' },
+  { id: 'messages', name: 'Messages', path: '/dashboard/messages', icon: 'VscMail' },
+];
+
+const studentLinks = [
+  { id: 'dashboard', name: 'Dashboard', path: '/dashboard/instructor', icon: 'VscHome' },
+  { id: 'enrolled', name: 'My Learning', path: '/dashboard/enrolled-courses', icon: 'VscBook' },
+  { id: 'messages', name: 'Messages', path: '/dashboard/messages', icon: 'VscMail' },
+];
+
+const bottomLinks = [
+  { id: 'settings', name: 'Settings', path: '/dashboard/setting', icon: 'VscSettingsGear' },
+  { id: 'my-profile', name: 'My Profile', path: '/dashboard/my-profile', icon: 'VscAccount' },
+];
+
+export const SidebarLink = ({ data, onClick }) => {
+  const Icon = iconMap[data.icon] || VscAccount;
+  const dispatch = useDispatch();
+
+  const handleClick = () => {
+    if (data.path === '/dashboard/add-course') {
+      dispatch(resetCourseState());
+    }
+    if (onClick) onClick();
+  };
+
+  return (
+    <NavLink
+      to={data.path}
+      onClick={handleClick}
+      className={({ isActive }) =>
+        `group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+          isActive
+            ? 'bg-yellow-50 text-rich-black-900 shadow-[0_4px_15px_rgba(255,214,10,0.25)]'
+            : 'text-rich-black-300 hover:text-white hover:bg-rich-black-700/50'
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span className={`${isActive ? 'text-rich-black-900' : 'text-rich-black-400 group-hover:text-yellow-50'} transition-colors`}>
+            <Icon size={20} />
+          </span>
+          <span className="flex-1">{data.name}</span>
+          {isActive && (
+            <motion.span
+              layoutId="sidebar-active-dot"
+              className="w-2 h-2 rounded-full bg-rich-black-900"
+            />
+          )}
+        </>
+      )}
+    </NavLink>
+  );
+};
+
+export const Sidebar = ({ onClose }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.profile);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const handleLogoutConfirm = () => { dispatch(logout(dispatch, navigate)); };
+  const handleLogoutConfirm = () => {
+    dispatch(logout(dispatch, navigate));
+  };
 
   const roleColor = {
     Student: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
@@ -21,55 +90,100 @@ export const Sidebar = () => {
     Admin: 'bg-red-500/15 text-red-400 border-red-500/20',
   };
 
+  const navLinks = user?.role === 'Instructor' ? instructorLinks : studentLinks;
+
+  const handleLinkClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
     <>
-      <div className='flex flex-col min-w-[222px] border-r border-rich-black-700 bg-rich-black-800 z-40 h-full'>
-        {/* ── User Identity Card ── */}
-        {user && (
-          <div className='flex items-center gap-3 px-5 py-5 border-b border-rich-black-700 bg-rich-black-900/40'>
-                <img 
-                    src={user.profileImage} 
-                    alt='avatar' 
-                    onError={(e) => {
-                        if (!e.target.dataset.fallback) {
-                            e.target.dataset.fallback = 'true';
-                            e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
-                        }
-                    }}
-                    className='w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-yellow-50/20' 
+      {/* Sidebar Container */}
+      <aside className="w-[280px] flex flex-col bg-rich-black-800 border-r border-rich-black-700 h-screen sticky top-0">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-rich-black-700">
+          <img
+            src={user?.profileImage}
+            alt={user?.fName}
+            onError={(e) => {
+              if (!e.target.dataset.fallback) {
+                e.target.dataset.fallback = 'true';
+                e.target.src = `https://api.dicebear.com/7.x/initials/png?seed=${user?.fName || 'U'}${user?.lName || ''}&size=128`;
+              }
+            }}
+            className="w-11 h-11 rounded-xl object-cover ring-2 ring-yellow-50/30"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-white truncate">
+              {user?.fName} {user?.lName}
+            </p>
+            <span className={`inline-block mt-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleColor[user?.role] || 'bg-rich-black-700 text-rich-black-300 border-rich-black-600'}`}>
+              {user?.role}
+            </span>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-rich-black-700 text-rich-black-400 hover:text-white transition-colors"
+            >
+              <VscChevronRight size={18} />
+            </button>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+          <div>
+            <p className="px-4 text-[10px] font-bold text-rich-black-500 uppercase tracking-widest mb-2">
+              Main Menu
+            </p>
+            <div className="space-y-1">
+              {navLinks.map((link) => (
+                <SidebarLink
+                  key={link.id}
+                  data={link}
+                  onClick={handleLinkClick}
                 />
-            <div className='min-w-0'>
-              <p className='text-sm font-semibold text-rich-black-5 truncate'>{user.fName} {user.lName}</p>
-              <span className={`inline-block mt-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${roleColor[user.role] ?? 'bg-rich-black-700 text-rich-black-300 border-rich-black-600'}`}>
-                {user.role}
-              </span>
+              ))}
             </div>
           </div>
-        )}
 
-        {/* ── Nav Links ── */}
-        <div className='flex flex-col flex-1 pt-4 overflow-y-auto'>
-          <div className='w-full'>
-            {sidebarLinks.map((link) => {
-              if (link.type && user?.role !== link.type) return null;
-              return <SidebarLink key={link.id} data={link} />;
-            })}
+          <div>
+            <p className="px-4 text-[10px] font-bold text-rich-black-500 uppercase tracking-widest mb-2">
+              Settings
+            </p>
+            <div className="space-y-1">
+              {bottomLinks.map((link) => (
+                <SidebarLink
+                  key={link.id}
+                  data={link}
+                  onClick={handleLinkClick}
+                />
+              ))}
+            </div>
           </div>
-          <div className='w-5/6 mx-auto my-4 h-px bg-rich-black-700 rounded-full' />
-          <div className='w-full pb-4'>
-            <SidebarLink data={{ name: 'Setting', icon: 'VscSettingsGear', path: '/dashboard/setting' }} />
-            <button onClick={() => setIsLogoutModalOpen(true)}
-              className='w-full flex items-center gap-3 px-6 py-3 text-sm font-medium text-rich-black-400 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200 group'>
-              <VscSignOut className='text-lg group-hover:text-red-400 transition-colors' />
-              <span>Logout</span>
-            </button>
-          </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-rich-black-700">
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-rich-black-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group"
+          >
+            <VscSignOut className="text-lg group-hover:text-red-400 transition-colors" />
+            <span>Logout</span>
+          </button>
         </div>
-      </div>
+      </aside>
 
-      <Modal isOpen={isLogoutModalOpen} onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogoutConfirm} title='Are you sure?' confirmText='Logout'>
-        <p>You will be logged out of your account.</p>
+      {/* Logout Modal */}
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
+        title="Logout"
+      >
+        <p>Are you sure you want to logout? You will need to sign in again to access your account.</p>
       </Modal>
     </>
   );

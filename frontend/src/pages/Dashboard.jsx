@@ -1,42 +1,40 @@
 import React, { useState } from 'react'
 import { Sidebar } from '../components/Dasboard/Sidebar'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 export const Dashboard = () => {
-  //Here we can add loading functionality..
-  const [showSidebar, setShowSidebar] = useState(true);
-  const location = useLocation();
-  
-  const hideSidebar = location.pathname === '/dashboard/instructor' || location.pathname === '/dashboard/my-courses';
-  const isSidebarVisible = showSidebar && !hideSidebar;
+  const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className='relative flex text-white transition-all duration-200 min-h-screen bg-rich-black-900'>
-      {isSidebarVisible && (
-        <div className='hidden md:block w-2/12 min-w-[220px] border-r border-rich-black-700 bg-rich-black-800'>
-          <Sidebar />
-        </div>
+    <div className='relative flex text-white min-h-screen bg-rich-black-900'>
+      {/* Sidebar - Always visible on desktop */}
+      <div className='hidden md:block'>
+        <Sidebar />
+      </div>
+
+      {/* Mobile Sidebar Drawer with Overlay */}
+      {showSidebar && (
+        <>
+          <div
+            className='fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden'
+            onClick={() => setShowSidebar(false)}
+          />
+          <div className='fixed inset-y-0 left-0 z-50 md:hidden'>
+            <Sidebar onClose={() => setShowSidebar(false)} />
+          </div>
+        </>
       )}
 
-      {(!showSidebar && !hideSidebar) && (
-        <button
-          className='fixed top-4 left-4 z-40 px-3 py-2 rounded-md border border-rich-black-700 text-sm text-rich-black-25 bg-rich-black-800 hover:bg-rich-black-700'
-          onClick={() => setShowSidebar(true)}
-        >
-          Open Menu
-        </button>
-      )}
+      {/* Mobile Menu Toggle Button */}
+      <button
+        className='fixed top-4 left-4 z-30 p-2.5 rounded-xl bg-rich-black-800 border border-rich-black-700 text-white shadow-lg hover:bg-rich-black-700 transition-colors md:hidden'
+        onClick={() => setShowSidebar(!showSidebar)}
+      >
+        {showSidebar ? '✕' : '☰'}
+      </button>
 
-      {isSidebarVisible && (
-        <button
-          className='fixed top-4 left-4 z-40 px-3 py-2 rounded-md border border-rich-black-700 text-sm text-rich-black-25 bg-rich-black-800 hover:bg-rich-black-700 md:hidden'
-          onClick={() => setShowSidebar(false)}
-        >
-          Close
-        </button>
-      )}
-
-      <div className='flex-1 w-full'>
+      {/* Main Content */}
+      <div className='flex-1 w-full min-w-0'>
         <Outlet/>
       </div>
     </div>

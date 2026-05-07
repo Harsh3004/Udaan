@@ -72,4 +72,16 @@ export const endpoints = {
     CHAT_CHECK_EXISTS: BASE_URL + "/chat/check",
     CHAT_DELETE_MESSAGE: BASE_URL + "/chat/message",
     CHAT_DELETE: BASE_URL + "/chat",
+
+    // Discussion
+    DISCUSSION_CREATE: BASE_URL + "/discussion/create",
+    DISCUSSION_GET: BASE_URL + "/discussion",
+    DISCUSSION_UPDATE: BASE_URL + "/discussion/update",
+    DISCUSSION_DELETE: BASE_URL + "/discussion/delete",
+
+    // Course Resources
+    RESOURCE_UPLOAD: BASE_URL + "/resource/upload",
+    RESOURCE_GET: BASE_URL + "/resource",
+    RESOURCE_DELETE: BASE_URL + "/resource/delete",
+    RESOURCE_DOWNLOADS: BASE_URL + "/resource/downloads",
 }

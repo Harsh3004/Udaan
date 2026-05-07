@@ -11,6 +11,8 @@ const contactRoute = require('./routes/contactRoute');
 const categoryRoutes = require('./routes/categoryRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const discussionRoutes = require('./routes/discussionRoutes');
+const resourceRoutes = require('./routes/resourceRoutes');
 
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -57,6 +59,8 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/discussion', discussionRoutes);
+app.use('/api/resource', resourceRoutes);
 
 app.get('/',(req,res) => {
     return res.json({

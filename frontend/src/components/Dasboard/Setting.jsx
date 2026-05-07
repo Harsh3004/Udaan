@@ -1,6 +1,5 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '../Button';
 import { useState } from 'react';
 import { IoEyeOff } from "react-icons/io5";
 import { PiEyeDuotone } from "react-icons/pi";
@@ -15,12 +14,6 @@ import { useNavigate } from 'react-router-dom';
 const CalendarIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-rich-black-400">
     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18" />
-  </svg>
-);
-
-const EyeSlashIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-rich-black-400 cursor-pointer">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L6.228 6.228" />
   </svg>
 );
 
@@ -40,23 +33,28 @@ const Setting = () => {
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [data, setData] = useState({ password: '', newPassword: '' })
-  const [formData, setFormData] = useState({
+  const [data, setData] = useState({ password: '', newPassword: '' });
+  
+  const initialFormData = {
     displayName: user.fName + " " + user.lName,
     profession: 'Developer',
     dob: '',
     gender: '',
     phone: '',
     about: '',
-  });
+    accountHolderName: user.additionalDetails?.accountHolderName || '',
+    accountNumber: user.additionalDetails?.accountNumber || '',
+    bankName: user.additionalDetails?.bankName || '',
+    ifscCode: user.additionalDetails?.ifscCode || '',
+    branchName: user.additionalDetails?.branchName || '',
+  };
 
-  const [modal, setModal] = useState(null);
+  const [formData, setFormData] = useState(initialFormData);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Creating a temporary URL for the selected file to display a preview
       const imageUrl = URL.createObjectURL(file);
       setprofileImageFile(file);
       setPreviewImage(imageUrl);
@@ -68,18 +66,26 @@ const Setting = () => {
     setprofileImageFile(null);
   };
 
+  const handleCancel = () => {
+    setFormData(initialFormData);
+    setPreviewImage(user.profileImage);
+    setprofileImageFile(null);
+  };
+
   const changePasswordHandler = async (e) => {
     e.preventDefault();
-    console.log(`Change Password Request...`);
     const toastId = toast.loading(`Changing Password`);
     try {
       data.userId = user._id;
       const res = await request(endpoints.CHANGE_PASSWORD_API, "PUT", data);
-      if (!res.ok)
-        throw new Error(response.message);
+      
+      if (!res.ok) {
+        throw new Error(res.message || res.statusText || "Failed to change password");
+      }
 
       toast.dismiss(toastId);
       toast.success(`Password Changed Successfully`);
+      setData({ password: '', newPassword: '' });
     } catch (err) {
       toast.dismiss(toastId);
       toast.error(err.message);
@@ -111,38 +117,33 @@ const Setting = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    const toastId = toast.loading(`Changing Password`);
+    const toastId = toast.loading(`Updating Profile`);
     const formPayload = new FormData();
-    if (profileImageFile)
-      formPayload.append('file', profileImageFile);
+    
+    if (profileImageFile) formPayload.append('file', profileImageFile);
 
     if (formData.displayName !== (user.fName + " " + user.lName)) {
       const name = formData.displayName.split(' ');
       formPayload.append('fName', name[0]);
-      formPayload.append('lName', name.at(-1));
+      formPayload.append('lName', name.slice(1).join(' '));
     }
 
-    if (formData.profession)
-      formPayload.append('profession', formData.profession);
-
-    if (formData.dob !== '')
-      formPayload.append('dob', formData.dob);
-
-    if (formData.gender !== '')
-      formPayload.append('gender', formData.gender);
-
-    if (formData.phone !== '')
-      formPayload.append('mobile', formData.phone);
-
-    if (formData.about !== '')
-      formPayload.append('bio', formData.about);
+    if (formData.profession) formPayload.append('profession', formData.profession);
+    if (formData.dob !== '') formPayload.append('dob', formData.dob);
+    if (formData.gender !== '') formPayload.append('gender', formData.gender);
+    if (formData.phone !== '') formPayload.append('mobile', formData.phone);
+    if (formData.about !== '') formPayload.append('bio', formData.about);
+    if (formData.accountHolderName !== '') formPayload.append('accountHolderName', formData.accountHolderName);
+    if (formData.accountNumber !== '') formPayload.append('accountNumber', formData.accountNumber);
+    if (formData.bankName !== '') formPayload.append('bankName', formData.bankName);
+    if (formData.ifscCode !== '') formPayload.append('ifscCode', formData.ifscCode.toUpperCase());
+    if (formData.branchName !== '') formPayload.append('branchName', formData.branchName);
 
     formPayload.append('user', user._id);
 
     try {
       const res = await request(endpoints.UPDATE_PROFILE_API, "PUT", formPayload);
-      if (!res.ok)
-        throw new Error(res.message);
+      if (!res.ok) throw new Error(res.message);
 
       const response = await res.json();
       dispatch(setUser(response.userObject));
@@ -211,156 +212,232 @@ const Setting = () => {
             </div>
 
             {/* --- Section 2: Profile Information --- */}
-            <div>
-              <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl p-6 z-40">
-                <h2 className="text-lg font-semibold text-rich-black-5 mb-6">Profile Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Display Name */}
-                  <div className="flex flex-col space-y-2">
-                    <label htmlFor="displayName" className="text-sm font-medium text-rich-black-400">Display Name</label>
+            <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl p-6 z-40">
+              <h2 className="text-lg font-semibold text-rich-black-5 mb-6">Profile Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Display Name */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="displayName" className="text-sm font-medium text-rich-black-400">Display Name</label>
+                  <input
+                    type="text"
+                    id="displayName"
+                    value={formData.displayName}
+                    onChange={handleChange}
+                    placeholder="Enter your name"
+                    className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Name entered above will be used for all issued certificates.
+                  </p>
+                </div>
+
+                {/* Profession */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="profession" className="text-sm font-medium text-rich-black-400">Profession</label>
+                  <select
+                    id="profession"
+                    value={formData.profession}
+                    onChange={handleChange}
+                    className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option>Developer</option>
+                    <option>Designer</option>
+                    <option>Manager</option>
+                  </select>
+                </div>
+
+                {/* Date of Birth */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="dob" className="text-sm font-medium text-rich-black-400">Date of Birth</label>
+                  <div className="relative">
                     <input
                       type="text"
-                      id="displayName"
-                      value={formData.displayName}
+                      id="dob"
+                      value={formData.dob}
                       onChange={handleChange}
-                      placeholder="Enter your name"
+                      placeholder="dd/mm/yyyy"
+                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                      <CalendarIcon />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gender */}
+                <div className="flex flex-col space-y-2">
+                  <label className="text-sm font-medium text-rich-black-400">Gender</label>
+                  <div className="flex items-center gap-x-6 pt-2">
+                    <label htmlFor="male" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
+                      <input
+                        type="radio"
+                        name="gender"
+                        id="male"
+                        checked={formData.gender === 'male'}
+                        onChange={handleGenderChange}
+                        className="hidden peer"
+                      />
+                      <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
+                        <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
+                      </span>
+                      Male
+                    </label>
+                    <label htmlFor="female" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
+                      <input
+                        type="radio"
+                        name="gender"
+                        id="female"
+                        checked={formData.gender === 'female'}
+                        onChange={handleGenderChange}
+                        className="hidden peer"
+                      />
+                      <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
+                        <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
+                      </span>
+                      Female
+                    </label>
+                    <label htmlFor="other" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
+                      <input
+                        type="radio"
+                        name="gender"
+                        id="other"
+                        checked={formData.gender === 'other'}
+                        onChange={handleGenderChange}
+                        className="hidden peer"
+                      />
+                      <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
+                        <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
+                      </span>
+                      Other
+                    </label>
+                  </div>
+                </div>
+
+                {/* Phone Number */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="phone" className="text-sm font-medium text-rich-black-400">Phone Number</label>
+                  <div className="flex gap-2">
+                    <select
+                      id="countryCode"
+                      className="bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option>+91</option>
+                      <option>+1</option>
+                    </select>
+                    <input
+                      type="tel"
+                      id="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="12345 67890"
+                      className="flex-grow bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* About */}
+                <div className="flex flex-col space-y-2">
+                  <label htmlFor="about" className="text-sm font-medium text-rich-black-400">About</label>
+                  <textarea
+                    id="about"
+                    value={formData.about}
+                    onChange={handleChange}
+                    className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  </textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* --- Bank Account Details (Instructors Only) --- */}
+            {user.role === 'Instructor' && (
+              <div className="bg-rich-black-800 border border-rich-black-700 rounded-xl mt-6 p-6 z-40">
+                <h2 className="text-lg font-semibold text-rich-black-5 mb-6">Bank Account Details</h2>
+                <p className="text-sm text-rich-black-400 mb-6">Add your bank account information to receive payments for your courses.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Account Holder Name */}
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="accountHolderName" className="text-sm font-medium text-rich-black-400">Account Holder Name</label>
+                    <input
+                      type="text"
+                      id="accountHolderName"
+                      value={formData.accountHolderName}
+                      onChange={handleChange}
+                      placeholder="Enter account holder name"
                       className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-xs text-slate-500">
-                      Name entered above will be used for all issued certificates.
-                    </p>
                   </div>
 
-                  {/* Profession */}
+                  {/* Account Number */}
                   <div className="flex flex-col space-y-2">
-                    <label htmlFor="profession" className="text-sm font-medium text-rich-black-400">Profession</label>
-                    <select
-                      id="profession"
-                      value={formData.profession}
+                    <label htmlFor="accountNumber" className="text-sm font-medium text-rich-black-400">Account Number</label>
+                    <input
+                      type="text"
+                      id="accountNumber"
+                      value={formData.accountNumber}
                       onChange={handleChange}
-                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option>Developer</option>
-                      <option>Designer</option>
-                      <option>Manager</option>
-                    </select>
+                      placeholder="Enter account number"
+                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
 
-                  {/* Date of Birth */}
+                  {/* Bank Name */}
                   <div className="flex flex-col space-y-2">
-                    <label htmlFor="dob" className="text-sm font-medium text-rich-black-400">Date of Birth</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="dob"
-                        value={formData.dob}
-                        onChange={handleChange}
-                        placeholder="dd/mm/yyyy"
-                        className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md pl-3 pr-10 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {/* Calendar icon component would go here */}
-                    </div>
-                  </div>
-
-                  {/* Gender */}
-                  <div className="flex flex-col space-y-2">
-                    <label className="text-sm font-medium text-rich-black-400">Gender</label>
-                    <div className="flex items-center gap-x-6 pt-2">
-                      <label htmlFor="male" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
-                        <input
-                          type="radio"
-                          name="gender"
-                          id="male"
-                          checked={formData.gender === 'male'}
-                          onChange={handleGenderChange}
-                          className="hidden peer"
-                        />
-                        <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
-                          <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
-                        </span>
-                        Male
-                      </label>
-                      <label htmlFor="female" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
-                        <input
-                          type="radio"
-                          name="gender"
-                          id="female"
-                          checked={formData.gender === 'female'}
-                          onChange={handleGenderChange}
-                          className="hidden peer"
-                        />
-                        <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
-                          <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
-                        </span>
-                        Female
-                      </label>
-                      <label htmlFor="other" className="flex items-center gap-2 cursor-pointer text-sm text-slate-200">
-                        <input
-                          type="radio"
-                          name="gender"
-                          id="other"
-                          checked={formData.gender === 'other'}
-                          onChange={handleGenderChange}
-                          className="hidden peer"
-                        />
-                        <span className="w-5 h-5 border-2 border-slate-500 rounded-full peer-checked:border-amber-400 relative flex items-center justify-center">
-                          <span className="w-2.5 h-2.5 bg-amber-400 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></span>
-                        </span>
-                        Other
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Phone Number */}
-                  <div className="flex flex-col space-y-2">
-                    <label htmlFor="phone" className="text-sm font-medium text-rich-black-400">Phone Number</label>
-                    <div className="flex gap-2">
-                      <select
-                        id="countryCode"
-                        className="bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option>+91</option>
-                        <option>+1</option>
-                      </select>
-                      <input
-                        type="tel"
-                        id="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="12345 67890"
-                        className="flex-grow bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* About */}
-                  <div className="flex flex-col space-y-2">
-                    <label htmlFor="about" className="text-sm font-medium text-rich-black-400">About</label>
-                    <textarea
-                      id="about"
-                      value={formData.about}
+                    <label htmlFor="bankName" className="text-sm font-medium text-rich-black-400">Bank Name</label>
+                    <input
+                      type="text"
+                      id="bankName"
+                      value={formData.bankName}
                       onChange={handleChange}
-                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                    </textarea>
+                      placeholder="Enter bank name"
+                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* IFSC Code */}
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="ifscCode" className="text-sm font-medium text-rich-black-400">IFSC Code</label>
+                    <input
+                      type="text"
+                      id="ifscCode"
+                      value={formData.ifscCode}
+                      onChange={handleChange}
+                      placeholder="Enter IFSC code"
+                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{textTransform: 'uppercase'}}
+                    />
+                  </div>
+
+                  {/* Branch Name */}
+                  <div className="flex flex-col space-y-2 md:col-span-2">
+                    <label htmlFor="branchName" className="text-sm font-medium text-rich-black-400">Branch Name (Optional)</label>
+                    <input
+                      type="text"
+                      id="branchName"
+                      value={formData.branchName}
+                      onChange={handleChange}
+                      placeholder="Enter branch name"
+                      className="w-full bg-rich-black-800 border border-rich-black-600 rounded-md px-3 py-2 text-rich-black-100 placeholder-rich-black-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="mt-3 flex flex-row-reverse gap-3">
-                <button
-                  type="submit"
-                  className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+            <div className="mt-6 flex flex-row-reverse gap-3">
+              <button
+                type="submit"
+                className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </form>
 
@@ -377,6 +454,7 @@ const Setting = () => {
                   <input
                     type={showCurrentPassword ? 'text' : 'password'}
                     onChange={handleInputChange}
+                    value={data.password}
                     name='password'
                     id="currentPassword"
                     placeholder="Enter current password"
@@ -387,7 +465,7 @@ const Setting = () => {
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className="absolute inset-y-0 right-3 flex items-center"
                   >
-                    {showCurrentPassword ? <PiEyeDuotone /> : <IoEyeOff />}
+                    {showCurrentPassword ? <PiEyeDuotone className="text-rich-black-400" /> : <IoEyeOff className="text-rich-black-400" />}
                   </button>
                 </div>
               </div>
@@ -397,6 +475,7 @@ const Setting = () => {
                   <input
                     type={showNewPassword ? 'text' : 'password'}
                     onChange={handleInputChange}
+                    value={data.newPassword}
                     name='newPassword'
                     id="changePassword"
                     placeholder="Enter new password"
@@ -407,7 +486,7 @@ const Setting = () => {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute inset-y-0 right-3 flex items-center"
                   >
-                    {showNewPassword ? <PiEyeDuotone /> : <IoEyeOff />}
+                    {showNewPassword ? <PiEyeDuotone className="text-rich-black-400" /> : <IoEyeOff className="text-rich-black-400" />}
                   </button>
                 </div>
               </div>
@@ -418,9 +497,6 @@ const Setting = () => {
                   className="bg-amber-400 text-rich-black-900 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-amber-300 transition-colors">
                   Change Password
                 </button>
-                {/* <button className="bg-rich-black-700 text-rich-black-100 font-semibold px-4 py-1.5 rounded-md text-sm hover:bg-slate-500 transition-colors">
-                Cancel
-              </button> */}
               </div>
             </form>
           </div>

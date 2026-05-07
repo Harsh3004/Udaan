@@ -25,6 +25,10 @@ export const MyCourses = () => {
   const handleEditCourse = (courseId) => {
     navigate(`/dashboard/edit-course/${courseId}`);
   };
+
+  const handleManageCourse = (courseId) => {
+    navigate(`/dashboard/manage-course/${courseId}`);
+  };
   
   const handleDeleteBtnClick = (courseId) => {
     setCourseToDelete(courseId);
@@ -121,7 +125,7 @@ export const MyCourses = () => {
 
           <Tbody>
             {courses.map((course) => (
-              <Tr key={course._id}>
+              <Tr key={course._id} className="cursor-pointer" onClick={() => handleManageCourse(course._id)}>
                 
                 <Td className='p-4 bg-rich-black-800 shadow-md rounded-l-lg align-top'>
                   <div className='flex items-start space-x-5'>
@@ -160,15 +164,21 @@ export const MyCourses = () => {
                   </span>
                 </Td>
 
-                <Td className='p-4 bg-rich-black-800 shadow-md rounded-r-lg align-top'>
+<Td className='p-4 bg-rich-black-800 shadow-md rounded-r-lg align-top'>
                   <div className='flex items-center space-x-4'>
                     <button className='text-rich-black-50 hover:text-blue-600 transition-colors' title="Edit"
-                    onClick={() => handleEditCourse(course._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditCourse(course._id);
+                    }}
                     >
                       <FaPencilAlt />
                     </button>
                     <button className='text-rich-black-50 hover:text-red-600 transition-colors' title="Delete"
-                    onClick={() => handleDeleteBtnClick(course._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteBtnClick(course._id);
+                    }}
                     >
                       <FaTrash />
                     </button>

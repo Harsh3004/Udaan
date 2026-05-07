@@ -23,6 +23,7 @@ import AddCourse from "./components/Dasboard/AddCourse/AddCourse"
 import { MyCourses } from "./components/Dasboard/MyCourses"
 import { InstructorDashboard } from "./components/Dasboard/InstructorDashboard"
 import EditCourse from "./components/Dasboard/AddCourse/EditCourse"
+import InstructorCourseManagement from "./components/Dasboard/InstructorCourseManagement"
 import ViewCourse from "./pages/ViewCourse"
 import Cart from "./components/Dasboard/Cart/Cart"
 import Messages from "./pages/Messages"
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/dashboard/my-courses" element={<MyCourses/>}/>
             <Route path="/dashboard/add-course" element={<AddCourse/>}/>
             <Route path="/dashboard/edit-course/:courseId" element={<EditCourse/>}/>
+            <Route path="/dashboard/manage-course/:courseId" element={<InstructorCourseManagement/>}/>
             <Route path="/dashboard/enrolled-courses" element={<EnrolledCourses/>}/>
             <Route path="/dashboard/cart" element={<Cart />} />
             <Route path="/dashboard/purchase-history" element={<PurschasedHistory/>}/>
