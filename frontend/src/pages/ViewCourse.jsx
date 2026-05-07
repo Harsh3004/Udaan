@@ -394,223 +394,23 @@ const ViewCourse = () => {
   const progressPercentage = totalLectures > 0 ? Math.round((completedVideos.length / totalLectures) * 100) : 0;
 
 return (
-    <div className="min-h-screen bg-[#000814] text-rich-black-5 flex flex-col lg:flex-row shadow-inner overflow-hidden relative">
+    <div className="h-screen bg-[#000814] text-rich-black-5 flex flex-col lg:flex-row shadow-inner overflow-hidden relative">
 
-      {/* Curriculum Sidebar - Desktop */}
-      <motion.div
-        initial={false}
-        animate={{ width: isSidebarCollapsed ? 0 : 400 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden lg:flex bg-[#000814] sidebar-gradient border-l border-rich-black-800 flex-col h-screen sticky top-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden relative group/sidebar"
-      >
-        {/* Collapse Button (Internal) */}
-        <button
-            onClick={() => setIsSidebarCollapsed(true)}
-            className="absolute left-4 top-8 z-50 p-2 bg-rich-black-800 border border-rich-black-700 rounded-xl text-rich-black-100 hover:text-yellow-50 transition-all"
-            title="Collapse Sidebar"
-        >
-            <FiChevronRight size={20} />
-        </button>
-
-        <div className="min-w-[400px] flex flex-col h-full pl-10">
-            {/* Progress Card */}
-            <div className="p-8 border-b border-rich-black-800 space-y-6">
-                <h3 className="text-xl font-bold flex items-center justify-between">
-                    <span>Course Curriculum</span>
-                    <span className="text-xs text-rich-black-400 font-medium">{completedVideos.length} / {totalLectures} Lessons</span>
-                </h3>
-                <div className="w-full h-2 bg-rich-black-800 rounded-full relative overflow-hidden group/sbar">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progressPercentage}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className="absolute top-0 left-0 h-full bg-greenish-500 rounded-full shadow-[0_0_15px_rgba(5,167,123,0.5)]"
-                    />
-                </div>
-            </div>
-
-            {/* Sections List */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {course.section.map((section, idx) => (
-                    <div key={section._id} className="border-b border-rich-black-800 last:border-0 overflow-hidden">
-                        <button
-                            onClick={() => toggleSection(section._id)}
-                            className={`w-full p-6 flex justify-between items-center transition-all bg-opacity-30 ${openSections[section._id] ? 'bg-rich-black-800/50' : 'hover:bg-rich-black-800/30'}`}
-                        >
-                            <span className="text-xs font-bold text-rich-black-400 uppercase tracking-widest flex items-center gap-3">
-                                <span className="text-rich-black-600">SECTION {idx + 1 < 10 ? `0${idx + 1}` : idx+1}:</span>
-                                {section.title}
-                            </span>
-                            <div className="flex items-center gap-3">
-                                {!openSections[section._id] && <FiLock className="text-rich-black-600" size={12} />}
-                                <FiChevronDown className={`transition-transform duration-300 text-rich-black-400 ${openSections[section._id] ? 'rotate-180' : ''}`} />
-                            </div>
-                        </button>
-
-                        <AnimatePresence>
-                            {openSections[section._id] && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden bg-[#000B1C]/30"
-                                >
-                                    {section.subsection.map((sub) => {
-                                        const isCompleted = completedVideos.includes(sub._id);
-                                        const isActive = currentVideo?._id === sub._id;
-                                        const isLocked = false;
-
-                                        return (
-                                            <div
-                                                key={sub._id}
-                                                onClick={() => !isLocked && setCurrentVideo(sub)}
-                                                className={`relative group flex justify-between items-center px-8 py-5 cursor-pointer border-t border-rich-black-800/50 transition-all ${
-                                                    isActive ? 'bg-yellow-50/5' : 'hover:bg-white/5'
-                                                } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                {isActive && (
-                                                    <motion.div
-                                                        layoutId="active-lesson-indicator"
-                                                        className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-50 shadow-[0_0_20px_rgba(255,214,10,0.8)]"
-                                                    />
-                                                )}
-
-                                                <div className="flex flex-col gap-1 pr-4">
-                                                    <span className={`text-sm font-semibold transition-colors ${isActive ? 'text-yellow-50' : 'text-rich-black-50 group-hover:text-white'}`}>
-                                                        {sub.topic}
-                                                    </span>
-                                                    <span className="text-[10px] text-rich-black-400 font-medium">
-                                                        {sub.timeDuration}
-                                                    </span>
-                                                </div>
-
-                                                <div className="flex items-center gap-4">
-                                                    {isCompleted ? (
-                                                        <div className="w-5 h-5 bg-greenish-500/20 text-greenish-300 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(5,167,123,0.3)]">
-                                                            <FiCheckCircle size={14} />
-                                                        </div>
-                                                    ) : isActive ? (
-                                                        <div className="w-5 h-5 bg-yellow-50/20 text-yellow-50 rounded-full flex items-center justify-center ring-2 ring-yellow-50/20">
-                                                            <FiPlayCircle size={14} />
-                                                        </div>
-                                                    ) : isLocked ? (
-                                                        <FiLock className="text-rich-black-600" size={16} />
-                                                    ) : (
-                                                        <div className="w-5 h-5 rounded-full border-2 border-rich-black-700 group-hover:border-rich-black-500 transition-colors" />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                ))}
-            </div>
-
-            {/* Syllabus Download Footer */}
-            <div className="p-8 border-t border-rich-black-800 bg-[#000814]">
-                <button className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-rich-black-800 border border-rich-black-700 text-sm font-bold text-rich-black-200 hover:text-white hover:bg-rich-black-700 hover:border-rich-black-600 transition-all group">
-                    <FiDownload className="group-hover:translate-y-0.5 transition-transform" />
-                    Download Syllabus
-                </button>
-            </div>
-        </div>
-      </motion.div>
-
-      {/* Mobile Curriculum Drawer */}
-      {showCurriculum && (
-        <>
-          <div
-            className='fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden'
-            onClick={() => setShowCurriculum(false)}
-          />
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm lg:hidden bg-[#000814] sidebar-gradient border-l border-rich-black-800 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.5)]"
-          >
-            <div className="flex items-center justify-between p-4 border-b border-rich-black-800">
-              <h3 className="text-lg font-bold text-white">Course Curriculum</h3>
-              <button
-                onClick={() => setShowCurriculum(false)}
-                className="p-2 hover:bg-rich-black-700 rounded-lg text-rich-black-400 hover:text-white transition-colors"
-              >
-                <FiX size={20} />
-              </button>
-            </div>
-            <div className="p-4 border-b border-rich-black-800">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-rich-black-400">{completedVideos.length} / {totalLectures} Lessons</span>
-                <span className="text-xs text-yellow-50 font-medium">{progressPercentage}% Complete</span>
-              </div>
-              <div className="w-full h-2 bg-rich-black-800 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercentage}%` }}
-                  className="h-full bg-greenish-500 rounded-full"
-                />
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {course.section.map((section, idx) => (
-                <div key={section._id} className="border-b border-rich-black-800 last:border-0">
-                  <button
-                    onClick={() => toggleSection(section._id)}
-                    className={`w-full p-4 flex justify-between items-center ${openSections[section._id] ? 'bg-rich-black-800/50' : ''}`}
-                  >
-                    <span className="text-xs font-bold text-rich-black-400 uppercase tracking-wider flex items-center gap-2">
-                      <span>{idx + 1}.</span>
-                      <span className="truncate">{section.title}</span>
-                    </span>
-                    <FiChevronDown className={`transition-transform ${openSections[section._id] ? 'rotate-180' : ''}`} />
-                  </button>
-                  {openSections[section._id] && (
-                    <div className="bg-[#000B1C]/30">
-                      {section.subsection.map((sub) => {
-                        const isCompleted = completedVideos.includes(sub._id);
-                        const isActive = currentVideo?._id === sub._id;
-                        return (
-                          <div
-                            key={sub._id}
-                            onClick={() => {
-                              setCurrentVideo(sub);
-                              setShowCurriculum(false);
-                            }}
-                            className={`flex items-center gap-3 px-4 py-3 border-t border-rich-black-800/50 cursor-pointer ${
-                              isActive ? 'bg-yellow-50/10 border-l-2 border-l-yellow-50' : ''
-                            }`}
-                          >
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
-                              {isCompleted ? (
-                                <FiCheckCircle className="text-greenish-400" size={16} />
-                              ) : isActive ? (
-                                <FiPlayCircle className="text-yellow-50" size={16} />
-                              ) : (
-                                <div className="w-4 h-4 rounded-full border-2 border-rich-black-600" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm truncate ${isActive ? 'text-yellow-50 font-medium' : 'text-rich-black-200'}`}>
-                                {sub.topic}
-                              </p>
-                              <p className="text-[10px] text-rich-black-500">{sub.timeDuration}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </>
-      )}
+      {/* Sidebar Toggle Button (Floating when collapsed) - Desktop Only */}
+      <AnimatePresence>
+        {isSidebarCollapsed && (
+            <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onClick={() => setIsSidebarCollapsed(false)}
+                className="hidden lg:block absolute right-6 top-8 z-[60] w-12 h-12 bg-yellow-50 text-rich-black-900 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,214,10,0.4)] hover:scale-110 transition-transform"
+                title="Expand Curriculum"
+            >
+                <FiChevronLeft size={24} />
+            </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar transition-all duration-300 pb-24 lg:pb-0">
@@ -901,11 +701,103 @@ return (
               </div>
             </button>
 
+      {/* Mobile Curriculum Drawer */}
+      {showCurriculum && (
+        <>
+          <div
+            className='fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden'
+            onClick={() => setShowCurriculum(false)}
+          />
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-y-0 right-0 z-50 w-[85%] max-w-sm lg:hidden bg-[#000814] sidebar-gradient border-l border-rich-black-800 flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.5)]"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-rich-black-800">
+              <h3 className="text-lg font-bold text-white">Course Curriculum</h3>
+              <button
+                onClick={() => setShowCurriculum(false)}
+                className="p-2 hover:bg-rich-black-700 rounded-lg text-rich-black-400 hover:text-white transition-colors"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+            <div className="p-4 border-b border-rich-black-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-rich-black-400">{completedVideos.length} / {totalLectures} Lessons</span>
+                <span className="text-xs text-yellow-50 font-medium">{progressPercentage}% Complete</span>
+              </div>
+              <div className="w-full h-2 bg-rich-black-800 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  className="h-full bg-greenish-500 rounded-full"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {course.section.map((section, idx) => (
+                <div key={section._id} className="border-b border-rich-black-800 last:border-0">
+                  <button
+                    onClick={() => toggleSection(section._id)}
+                    className={`w-full p-4 flex justify-between items-center ${openSections[section._id] ? 'bg-rich-black-800/50' : ''}`}
+                  >
+                    <span className="text-xs font-bold text-rich-black-400 uppercase tracking-wider flex items-center gap-2">
+                      <span>{idx + 1}.</span>
+                      <span className="truncate">{section.title}</span>
+                    </span>
+                    <FiChevronDown className={`transition-transform ${openSections[section._id] ? 'rotate-180' : ''}`} />
+                  </button>
+                  {openSections[section._id] && (
+                    <div className="bg-[#000B1C]/30">
+                      {section.subsection.map((sub) => {
+                        const isCompleted = completedVideos.includes(sub._id);
+                        const isActive = currentVideo?._id === sub._id;
+                        return (
+                          <div
+                            key={sub._id}
+                            onClick={() => {
+                              setCurrentVideo(sub);
+                              setShowCurriculum(false);
+                            }}
+                            className={`flex items-center gap-3 px-4 py-3 border-t border-rich-black-800/50 cursor-pointer ${
+                              isActive ? 'bg-yellow-50/10 border-l-2 border-l-yellow-50' : ''
+                            }`}
+                          >
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                              {isCompleted ? (
+                                <FiCheckCircle className="text-greenish-400" size={16} />
+                              ) : isActive ? (
+                                <FiPlayCircle className="text-yellow-50" size={16} />
+                              ) : (
+                                <div className="w-4 h-4 rounded-full border-2 border-rich-black-600" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm truncate ${isActive ? 'text-yellow-50 font-medium' : 'text-rich-black-200'}`}>
+                                {sub.topic}
+                              </p>
+                              <p className="text-[10px] text-rich-black-500">{sub.timeDuration}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </>
+      )}
+
             <hr className="border-rich-black-800" />
 
             {/* Tabs and Bottom Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-10">
-                <div className="xl:col-span-8 flex flex-col gap-6 xl:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+                <div className="lg:col-span-8 flex flex-col gap-6 lg:gap-8">
                     {/* Tab Navigation - Horizontal Scroll on Mobile */}
                     <div className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
                         <div className="flex items-center gap-4 md:gap-8 min-w-max border-b border-rich-black-800">
@@ -917,11 +809,11 @@ return (
                                         activeTab === tab ? 'text-yellow-50' : 'text-rich-black-200 hover:text-white'
                                     }`}
                                 >
-                                    {tab === 'Discussion' && <span className="flex items-center gap-1.5 md:gap-2"><FiMessageSquare size={14} /> <span className="hidden xs:inline">Discussion</span></span>}
-                                    {tab === 'Resources' && <span className="flex items-center gap-1.5 md:gap-2"><FiFileText size={14} /> <span className="hidden xs:inline">Resources</span></span>}
-                                    {tab === 'Personal Notes' && <span className="flex items-center gap-1.5 md:gap-2"><FiEdit size={14} /> <span className="hidden sm:inline">Notes</span></span>}
-                                    {tab === 'Reviews' && <span className="flex items-center gap-1.5 md:gap-2"><FaStar size={14} /> <span className="hidden xs:inline">Reviews</span></span>}
-                                    {tab === 'Quiz Results' && <span className="flex items-center gap-1.5 md:gap-2"><FiCheckCircle size={14} /> <span className="hidden md:inline">Quiz Results</span></span>}
+                                    {tab === 'Discussion' && <span className="flex items-center gap-1.5"><FiMessageSquare size={14} /> <span>Discussion</span></span>}
+                                    {tab === 'Resources' && <span className="flex items-center gap-1.5"><FiFileText size={14} /> <span>Resources</span></span>}
+                                    {tab === 'Personal Notes' && <span className="flex items-center gap-1.5"><FiEdit size={14} /> <span>Notes</span></span>}
+                                    {tab === 'Reviews' && <span className="flex items-center gap-1.5"><FaStar size={14} /> <span>Reviews</span></span>}
+                                    {tab === 'Quiz Results' && <span className="flex items-center gap-1.5"><FiCheckCircle size={14} /> <span>Quiz Results</span></span>}
 
                                     {activeTab === tab && (
                                         <motion.div
@@ -1150,14 +1042,14 @@ return (
                     </div>
                 </div>
 
-                {/* Essential Tools - Hidden on Mobile, Visible on Large Screens */}
-                <div className="hidden xl:block xl:col-span-4 flex flex-col gap-4">
+                {/* Essential Tools - Hidden on Mobile, Visible on Desktop */}
+                <div className="hidden lg:block lg:col-span-4 flex flex-col gap-4">
                     <span className="text-xs font-bold text-rich-black-400 uppercase tracking-widest">Essential Tools</span>
-                    <div className="flex flex-col gap-3 md:gap-4">
-                        <div className="flex items-center justify-between p-4 md:p-5 bg-rich-black-800/40 border border-rich-black-700 rounded-2xl group cursor-pointer hover:bg-rich-black-800 transition-all">
-                            <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-greenish-500/10 text-greenish-300 rounded-xl flex items-center justify-center">
-                                    <FiFileText size={20} md:size={24} />
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between p-4 bg-rich-black-800/40 border border-rich-black-700 rounded-2xl group cursor-pointer hover:bg-rich-black-800 transition-all">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-greenish-500/10 text-greenish-300 rounded-xl flex items-center justify-center">
+                                    <FiFileText size={20} />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-semibold">Architecture_Spec.pdf</span>
@@ -1166,10 +1058,10 @@ return (
                             </div>
                             <FiDownload className="text-rich-black-400 group-hover:text-yellow-50" />
                         </div>
-                        <div className="flex items-center justify-between p-4 md:p-5 bg-rich-black-800/40 border border-rich-black-700 rounded-2xl group cursor-pointer hover:bg-rich-black-800 transition-all">
-                            <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center">
-                                    <FiVideo size={20} md:size={24} />
+                        <div className="flex items-center justify-between p-4 bg-rich-black-800/40 border border-rich-black-700 rounded-2xl group cursor-pointer hover:bg-rich-black-800 transition-all">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center">
+                                    <FiVideo size={20} />
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-semibold">Source_Repo_Module_4</span>
@@ -1183,6 +1075,130 @@ return (
             </div>
         </div>
       </div>
+
+      {/* Right Sidebar - Curriculum (Desktop) */}
+      <motion.div
+        initial={false}
+        animate={{ width: isSidebarCollapsed ? 0 : 400 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="hidden lg:flex bg-[#000814] sidebar-gradient border-l border-rich-black-800 flex-col h-screen sticky top-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] overflow-hidden relative group/sidebar"
+      >
+        {/* Collapse Button (Internal) */}
+        <button
+            onClick={() => setIsSidebarCollapsed(true)}
+            className="absolute left-4 top-8 z-50 p-2 bg-rich-black-800 border border-rich-black-700 rounded-xl text-rich-black-100 hover:text-yellow-50 transition-all"
+            title="Collapse Sidebar"
+        >
+            <FiChevronRight size={20} />
+        </button>
+
+        <div className="min-w-[400px] flex flex-col h-full pl-10">
+            {/* Progress Card */}
+            <div className="p-8 border-b border-rich-black-800 space-y-6">
+                <h3 className="text-xl font-bold flex items-center justify-between">
+                    <span>Course Curriculum</span>
+                    <span className="text-xs text-rich-black-400 font-medium">{completedVideos.length} / {totalLectures} Lessons</span>
+                </h3>
+                <div className="w-full h-2 bg-rich-black-800 rounded-full relative overflow-hidden group/sbar">
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPercentage}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="absolute top-0 left-0 h-full bg-greenish-500 rounded-full shadow-[0_0_15px_rgba(5,167,123,0.5)]"
+                    />
+                </div>
+            </div>
+
+            {/* Sections List */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {course.section.map((section, idx) => (
+                    <div key={section._id} className="border-b border-rich-black-800 last:border-0 overflow-hidden">
+                        <button
+                            onClick={() => toggleSection(section._id)}
+                            className={`w-full p-6 flex justify-between items-center transition-all bg-opacity-30 ${openSections[section._id] ? 'bg-rich-black-800/50' : 'hover:bg-rich-black-800/30'}`}
+                        >
+                            <span className="text-xs font-bold text-rich-black-400 uppercase tracking-widest flex items-center gap-3">
+                                <span className="text-rich-black-600">SECTION {idx + 1 < 10 ? `0${idx + 1}` : idx+1}:</span>
+                                {section.title}
+                            </span>
+                            <div className="flex items-center gap-3">
+                                {!openSections[section._id] && <FiLock className="text-rich-black-600" size={12} />}
+                                <FiChevronDown className={`transition-transform duration-300 text-rich-black-400 ${openSections[section._id] ? 'rotate-180' : ''}`} />
+                            </div>
+                        </button>
+
+                        <AnimatePresence>
+                            {openSections[section._id] && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="overflow-hidden bg-[#000B1C]/30"
+                                >
+                                    {section.subsection.map((sub) => {
+                                        const isCompleted = completedVideos.includes(sub._id);
+                                        const isActive = currentVideo?._id === sub._id;
+                                        const isLocked = false;
+
+                                        return (
+                                            <div
+                                                key={sub._id}
+                                                onClick={() => !isLocked && setCurrentVideo(sub)}
+                                                className={`relative group flex justify-between items-center px-8 py-5 cursor-pointer border-t border-rich-black-800/50 transition-all ${
+                                                    isActive ? 'bg-yellow-50/5' : 'hover:bg-white/5'
+                                                } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="active-lesson-indicator"
+                                                        className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-50 shadow-[0_0_20px_rgba(255,214,10,0.8)]"
+                                                    />
+                                                )}
+
+                                                <div className="flex flex-col gap-1 pr-4">
+                                                    <span className={`text-sm font-semibold transition-colors ${isActive ? 'text-yellow-50' : 'text-rich-black-50 group-hover:text-white'}`}>
+                                                        {sub.topic}
+                                                    </span>
+                                                    <span className="text-[10px] text-rich-black-400 font-medium">
+                                                        {sub.timeDuration}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-4">
+                                                    {isCompleted ? (
+                                                        <div className="w-5 h-5 bg-greenish-500/20 text-greenish-300 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(5,167,123,0.3)]">
+                                                            <FiCheckCircle size={14} />
+                                                        </div>
+                                                    ) : isActive ? (
+                                                        <div className="w-5 h-5 bg-yellow-50/20 text-yellow-50 rounded-full flex items-center justify-center ring-2 ring-yellow-50/20">
+                                                            <FiPlayCircle size={14} />
+                                                        </div>
+                                                    ) : isLocked ? (
+                                                        <FiLock className="text-rich-black-600" size={16} />
+                                                    ) : (
+                                                        <div className="w-5 h-5 rounded-full border-2 border-rich-black-700 group-hover:border-rich-black-500 transition-colors" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                ))}
+            </div>
+
+            {/* Syllabus Download Footer */}
+            <div className="p-8 border-t border-rich-black-800 bg-[#000814]">
+                <button className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-rich-black-800 border border-rich-black-700 text-sm font-bold text-rich-black-200 hover:text-white hover:bg-rich-black-700 hover:border-rich-black-600 transition-all group">
+                    <FiDownload className="group-hover:translate-y-0.5 transition-transform" />
+                    Download Syllabus
+                </button>
+            </div>
+        </div>
+      </motion.div>
 
       {/* AI Study Assistant — Floating */}
       {currentVideo && (

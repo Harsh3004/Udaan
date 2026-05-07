@@ -148,7 +148,7 @@ export const NavBar = () => {
                         </div>
                     ) : (
                         <div className='flex items-center gap-5'>
-                            {user && (
+                            {user && user.role !== 'Instructor' && (
                                 <button
                                     onClick={() => navigate('/dashboard/cart')}
                                     className='relative text-rich-black-200 hover:text-white transition-colors'
