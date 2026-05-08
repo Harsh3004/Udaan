@@ -1,7 +1,6 @@
 import { request } from "./authApi"
 import { endpoints } from "../api"
 import toast from "react-hot-toast"
-import { Navigate, useNavigate } from "react-router-dom"
 
 export const loadScript = (src) => {
   return new Promise((resolve) => {
@@ -36,9 +35,39 @@ async function verifyPayment(bodyData,navigate){
     }
 }
 
+async function enrollFreeCourse(course, navigate) {
+  const toastId = toast.loading("Enrolling in course");
+
+  try {
+    const response = await request(endpoints.ENROLL_FREE_COURSE_API, "POST", {
+      courseId: course._id,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Failed to enroll in course");
+    }
+
+    toast.dismiss(toastId);
+    toast.success(data.message || "Course enrolled successfully");
+    navigate(`/view-course/${course._id}`);
+  } catch (error) {
+    toast.dismiss(toastId);
+    toast.error(error.message || "Failed to enroll in course");
+    console.log("Error enrolling in free course: ", error);
+  }
+}
+
 export const buyCourse = async(course,navigate) => {
   console.log("Payment Testing...");
   console.log("course: ",course);
+
+  if (Number(course?.price) <= 0) {
+    await enrollFreeCourse(course, navigate);
+    return;
+  }
+
   try{
       const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
     

@@ -52,6 +52,7 @@ export const endpoints = {
     // Payments
     CREATE_ORDER_API: BASE_URL + "/payment/create-order",
     VERIFY_PAYMENT: BASE_URL + "/payment/verify",
+    ENROLL_FREE_COURSE_API: BASE_URL + "/payment/enroll-free",
 
     // AI Assistant & Notes
     AI_ASK_API: BASE_URL + "/ai/ask",
