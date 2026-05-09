@@ -144,6 +144,13 @@ exports.deleteCourse = async (req, res) => {
             })
         }
 
+        if (course.studentEnrolled && course.studentEnrolled.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Students are enrolled in this course, so it cannot be deleted."
+            })
+        }
+
         if (course.thumbnail?.public_id) {
             try {
                 await cloudinary.uploader.destroy(course.thumbnail.public_id);

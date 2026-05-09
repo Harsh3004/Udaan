@@ -164,7 +164,7 @@ export const MyCourses = () => {
                   </span>
                 </Td>
 
-<Td className='p-4 bg-rich-black-800 shadow-md rounded-r-lg align-top'>
+                <Td className='p-4 bg-rich-black-800 shadow-md rounded-r-lg align-top'>
                   <div className='flex items-center space-x-4'>
                     <button className='text-rich-black-50 hover:text-blue-600 transition-colors' title="Edit"
                     onClick={(e) => {
@@ -174,11 +174,18 @@ export const MyCourses = () => {
                     >
                       <FaPencilAlt />
                     </button>
-                    <button className='text-rich-black-50 hover:text-red-600 transition-colors' title="Delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteBtnClick(course._id);
-                    }}
+                    <button 
+                      className={`${
+                        course.studentEnrolled?.length > 0 
+                          ? 'text-rich-black-500 cursor-not-allowed' 
+                          : 'text-rich-black-50 hover:text-red-600'
+                      } transition-colors`} 
+                      title={course.studentEnrolled?.length > 0 ? "Cannot delete course with enrolled students" : "Delete"}
+                      disabled={course.studentEnrolled?.length > 0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteBtnClick(course._id);
+                      }}
                     >
                       <FaTrash />
                     </button>
