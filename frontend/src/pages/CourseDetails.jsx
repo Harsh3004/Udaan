@@ -116,6 +116,7 @@ const CourseDetails = () => {
     };
 
     const isInCart = cart ? cart.some((item) => item._id === course?._id) : false;
+    const isFreeCourse = Number(course?.price) <= 0;
 
     const checkUserReview = async () => {
         if (!token || !isEnrolled) return;
@@ -583,7 +584,7 @@ const CourseDetails = () => {
                                     <div className='flex flex-col gap-3'>
                                         <button className='w-full bg-yellow-50 text-rich-black-900 font-bold py-4 rounded-xl hover:bg-yellow-400 transition-all duration-300 shadow-[0_4px_20px_0_rgba(255,193,7,0.4)]'
                                             onClick={handleBuyCourse}>
-                                            Buy Now
+                                            {isFreeCourse ? 'Enroll Now' : 'Buy Now'}
                                         </button>
                                         <button className='w-full bg-rich-black-900 font-bold py-4 rounded-xl hover:bg-rich-black-800 transition-all duration-300 border border-rich-black-700'
                                             onClick={isInCart ? () => navigate('/dashboard/cart') : handleAddToCart}>

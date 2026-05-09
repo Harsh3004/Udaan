@@ -665,6 +665,27 @@ exports.updateCourseProgress = async (req, res) => {
             });
         }
 
+        const course = await courseModel.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found"
+            });
+        }
+
+        const userIdString = userId.toString();
+        const isEnrolled = (course.studentEnrolled || []).some(
+            (studentId) => studentId.toString() === userIdString
+        );
+        const isInstructor = course.instructor?.toString() === userIdString;
+
+        if (!isEnrolled && !isInstructor) {
+            return res.status(403).json({
+                success: false,
+                message: "You must be enrolled to update progress"
+            });
+        }
+
         let progress = await courseProgressModel.findOne({
             courseID: courseId,
             userId: userId
@@ -694,4 +715,4 @@ exports.updateCourseProgress = async (req, res) => {
             message: "Internal server error"
         });
     }
-}
+}

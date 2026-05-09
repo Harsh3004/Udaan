@@ -1,8 +1,6 @@
-const razorpay = require('razorpay');
 const {razorpayInstance} = require('../config/razorpay');
 const courseModel = require('../models/courseModel');
 const userModel = require('../models/userModel');
-const { default: mongoose } = require('mongoose');
 const crypto = require("crypto");
 const fs = require('fs');
 const path = require('path');
@@ -31,6 +29,71 @@ const sendEnrollmentMail = async (course,user) => {
     }
 }
 
+const isUserEnrolledInCourse = (courseDetails, userId) => {
+    if (!courseDetails || !userId) return false;
+
+    const userIdString = userId.toString();
+    return (courseDetails.studentEnrolled || []).some((studentId) => studentId.toString() === userIdString);
+};
+
+const completeEnrollment = async (courseDetails, userId) => {
+    const userDetails = await userModel.findById(userId);
+
+    if (!userDetails) {
+        return {
+            success: false,
+            status: 404,
+            message: 'User Not Found'
+        };
+    }
+
+    if (isUserEnrolledInCourse(courseDetails, userId)) {
+        return {
+            success: true,
+            alreadyEnrolled: true,
+            userDetails,
+            courseDetails
+        };
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+        userId,
+        { $addToSet: { courses: courseDetails._id } },
+        { new: true }
+    );
+
+    if (!updatedUser) {
+        return {
+            success: false,
+            status: 404,
+            message: 'User Not Found'
+        };
+    }
+
+    const updatedCourse = await courseModel.findByIdAndUpdate(
+        courseDetails._id,
+        { $addToSet: { studentEnrolled: userId } },
+        { new: true }
+    );
+
+    if (!updatedCourse) {
+        return {
+            success: false,
+            status: 404,
+            message: 'Course Not Found'
+        };
+    }
+
+    sendEnrollmentMail(updatedCourse, updatedUser);
+
+    return {
+        success: true,
+        alreadyEnrolled: false,
+        userDetails: updatedUser,
+        courseDetails: updatedCourse
+    };
+};
+
 exports.capturePayment = async (req,res) => {
     console.log("Create Order API Triggered...");
     try{
@@ -56,8 +119,7 @@ exports.capturePayment = async (req,res) => {
 
         console.log(`Checking for valid student`);
 
-        const uid = new mongoose.Types.ObjectId(userId);
-        if(courseDetails.studentEnrolled.includes(uid)){
+        if (isUserEnrolledInCourse(courseDetails, userId)) {
             return res.status(200).json({
                 success: false,
                 message: "Student is Already Enrolled"
@@ -99,6 +161,53 @@ exports.capturePayment = async (req,res) => {
     }
 }
 
+exports.enrollFreeCourse = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const courseId = req.body.courseId;
+
+        if (!userId || !courseId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing Information'
+            });
+        }
+
+        const courseDetails = await courseModel.findById(courseId);
+        if (!courseDetails) {
+            return res.status(404).json({
+                success: false,
+                message: 'Course Not Found'
+            });
+        }
+
+        if (Number(courseDetails.price) > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'This course requires payment'
+            });
+        }
+
+        const enrollmentResult = await completeEnrollment(courseDetails, userId);
+        if (!enrollmentResult.success) {
+            return res.status(enrollmentResult.status || 500).json({
+                success: false,
+                message: enrollmentResult.message || 'Unable to enroll in course'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: enrollmentResult.alreadyEnrolled ? 'Student is Already Enrolled' : 'Course Enrolled Successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `Error while enrolling in free course: ${error.message}`
+        });
+    }
+};
+
 exports.verifyPayment = async (req,res) => {
     try{
         console.log(`Verifying Payment`);
@@ -128,31 +237,23 @@ exports.verifyPayment = async (req,res) => {
 
         if (expectedSignature === razorpay_signature){
             console.log("Signature Verified");
-            const updatedUser = await userModel.findByIdAndUpdate(userId,
-                {$push: {courses: courseId}},
-                {new: true}
-            );
+            const courseDetails = await courseModel.findById(courseId);
 
-            if(!updatedUser){
+            if (!courseDetails) {
                 return res.status(404).json({
                     success: false,
-                    message: "User Not Found"
+                    message: 'Course Not Found'
                 });
             }
 
-            const updatedCourse = await courseModel.findByIdAndUpdate(courseId,
-                {$push: {studentEnrolled: userId}},
-                {new: true}
-            );
+            const enrollmentResult = await completeEnrollment(courseDetails, userId);
 
-            if(!updatedCourse){
-                return res.status(404).json({
+            if (!enrollmentResult.success) {
+                return res.status(enrollmentResult.status || 500).json({
                     success: false,
-                    message: "Course Not Found"
+                    message: enrollmentResult.message || 'Unable to complete enrollment'
                 });
             }
-
-            sendEnrollmentMail(updatedCourse,updatedUser);
 
             return res.status(200).json({
                 success: true,
