@@ -64,6 +64,12 @@ const courseSchema = new mongoose.Schema({
     },
     tags: {
         type: [String],
+    },
+    aiReview: {
+        score: { type: Number },
+        summary: { type: String },
+        strengths: { type: [String] },
+        weaknesses: { type: [String] }
     }
 })
 

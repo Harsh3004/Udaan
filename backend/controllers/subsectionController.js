@@ -58,6 +58,16 @@ exports.createsubSection = async (req,res) => {
 
         console.log("Adding subsection id in section")
 
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        // Find courseId from sectionId
+        courseModel.findOne({ section: sectionId }).then(course => {
+            if (course) {
+                aiController.generateCourseReview({ courseId: course._id })
+                    .catch((err) => console.error(`AI Review update failed for course ${course._id}:`, err));
+            }
+        });
+
         return res.status(200).json({
             success: true,
             message: `Sub-section created successfully`,
@@ -135,6 +145,12 @@ exports.updatesubSection = async (req,res) => {
         );
         
         console.log(`Subsection updated successfully`);
+
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        aiController.generateCourseReview({ courseId: courseId })
+            .catch((err) => console.error(`AI Review update failed for course ${courseId}:`, err));
+
         return res.status(200).json({
             success: true,
             message: `subsection updated successfully`
@@ -205,6 +221,11 @@ exports.deletesubSection = async (req,res) => {
                 message: `Section Not Found`
             })
         }
+
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        aiController.generateCourseReview({ courseId: courseId })
+            .catch((err) => console.error(`AI Review update failed for course ${courseId}:`, err));
 
         return res.status(200).json({
             success: true,

@@ -365,3 +365,159 @@ exports.generateQuiz = async (req, res) => {
         });
     }
 };
+
+/**
+ * POST /api/ai/review-course
+ * Generates an AI review for a course based on its structure and video content.
+ * Can be called as an Express route handler or internally (if req is passed).
+ */
+exports.generateCourseReview = async (req, res) => {
+    try {
+        const courseId = req.body?.courseId || req.courseId;
+
+        if (!courseId) {
+            if (res) return res.status(400).json({ success: false, message: 'Missing courseId' });
+            return null;
+        }
+
+        if (!GROQ_API_KEY) {
+            if (res) return res.status(500).json({ success: false, message: 'AI service is not configured.' });
+            return null;
+        }
+
+        const course = await courseModel.findById(courseId).populate({
+            path: 'section',
+            populate: {
+                path: 'subsection'
+            }
+        });
+
+        if (!course) {
+            if (res) return res.status(404).json({ success: false, message: 'Course not found' });
+            return null;
+        }
+
+        // Only generate review for published courses
+        if (course.status !== 'Published') {
+            if (res) return res.status(400).json({ success: false, message: 'AI Review can only be generated for published courses.' });
+            return null;
+        }
+
+        let courseContentSummary = '';
+
+        // Process videos
+        for (const section of course.section) {
+            courseContentSummary += `\nSection: ${section.sectionName}\n`;
+            for (const subsection of section.subsection) {
+                courseContentSummary += `  Lesson: ${subsection.topic}\n`;
+                if (subsection.description) {
+                    courseContentSummary += `  Description: ${subsection.description}\n`;
+                }
+
+                if (subsection.file && subsection.file.url) {
+                    try {
+                        const audioUrl = subsection.file.url
+                            .replace('/upload/', '/upload/f_mp3,ac_mp3,br_32k/')
+                            .replace(/\.[^/.]+$/, ".mp3");
+                        
+                        const audioRes = await fetch(audioUrl);
+                        if (audioRes.ok) {
+                            const audioBlob = await audioRes.blob();
+                            
+                            const formData = new FormData();
+                            formData.append('file', audioBlob, 'audio.mp3');
+                            formData.append('model', 'whisper-large-v3');
+
+                            const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${GROQ_API_KEY}`
+                                },
+                                body: formData
+                            });
+
+                            if (whisperRes.ok) {
+                                const transcriptData = await whisperRes.json();
+                                const transcript = transcriptData.text;
+                                
+                                if (transcript && transcript.trim()) {
+                                    // Summarize transcript
+                                    const summaryPrompt = `Summarize the following video transcript for a course lesson. Be concise and capture the key educational points.\n\nTranscript: ${transcript.substring(0, 30000)}`;
+                                    
+                                    const summaryRes = await fetch(GROQ_API_URL, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+                                        body: JSON.stringify({
+                                            model: "llama-3.3-70b-versatile",
+                                            messages: [{ role: "user", content: summaryPrompt }],
+                                            temperature: 0.5,
+                                            max_tokens: 500
+                                        })
+                                    });
+                                    
+                                    if (summaryRes.ok) {
+                                        const summaryData = await summaryRes.json();
+                                        courseContentSummary += `  Video Summary: ${summaryData.choices[0].message.content}\n`;
+                                    } else {
+                                        courseContentSummary += `  Video Transcript: ${transcript.substring(0, 500)}...\n`;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error transcribing video for subsection:', subsection._id, err);
+                    }
+                }
+            }
+        }
+
+        // Final evaluation
+        const systemPrompt = `You are an expert educational course evaluator. Evaluate the following course based on its structure, metadata, and the detailed video summaries provided. Provide a JSON response with the following format:
+{
+    "score": <number between 1 and 100>,
+    "summary": "<a compelling, 2-3 sentence overview of the course quality>",
+    "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
+    "weaknesses": ["<weakness 1>", "<weakness 2>"]
+}
+
+Course Title: ${course.title}
+Course Description: ${course.desc}
+What you will learn: ${course.whatyouwilllearn?.join(', ')}
+Course Content:
+${courseContentSummary}`;
+
+        const evalRes = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "system", content: systemPrompt }],
+                temperature: 0.7,
+                response_format: { type: "json_object" }
+            })
+        });
+
+        if (!evalRes.ok) {
+            throw new Error('Failed to generate final evaluation');
+        }
+
+        const evalData = await evalRes.json();
+        const aiReviewStr = evalData.choices[0].message.content;
+        const aiReview = JSON.parse(aiReviewStr);
+
+        course.aiReview = aiReview;
+        await course.save();
+
+        if (res) {
+            return res.status(200).json({ success: true, aiReview });
+        } else {
+            return aiReview;
+        }
+    } catch (error) {
+        console.error('Error generating course review:', error);
+        if (res) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+        return null;
+    }
+};

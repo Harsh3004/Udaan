@@ -263,6 +263,95 @@ const CourseDetails = () => {
                             ))}
                         </div>
 
+                        {/* AI Course Analysis Section */}
+                        {course.aiReview && course.aiReview.summary && (
+                            <div className='space-y-6 pt-8'>
+                                <h2 className='text-3xl font-bold text-rich-black-5 border-l-4 border-pictonBlue-500 pl-4 flex items-center gap-3'>
+                                    AI Course Analysis
+                                    <span className="bg-pictonBlue-500/10 text-pictonBlue-400 text-xs px-2.5 py-1 rounded-full border border-pictonBlue-500/20 flex items-center gap-1 font-semibold tracking-wide">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        BETA
+                                    </span>
+                                </h2>
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className='relative overflow-hidden bg-rich-black-800/40 backdrop-blur-md p-8 md:p-10 rounded-3xl border border-rich-black-700/50 shadow-2xl'
+                                >
+                                    {/* Glassmorphism gradient accents */}
+                                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-pictonBlue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-pastelGreen-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                                    <div className='relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start'>
+                                        {/* Score Circular Progress */}
+                                        <div className="shrink-0 flex flex-col items-center gap-4">
+                                            <div className="relative w-36 h-36 flex items-center justify-center">
+                                                <svg className="w-full h-full transform -rotate-90 drop-shadow-xl" viewBox="0 0 100 100">
+                                                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-rich-black-700/50" />
+                                                    <circle 
+                                                        cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" 
+                                                        strokeDasharray="283" 
+                                                        strokeDashoffset={283 - (283 * (course.aiReview.score || 0)) / 100}
+                                                        className={`${(course.aiReview.score || 0) >= 80 ? 'text-pastelGreen-400' : (course.aiReview.score || 0) >= 60 ? 'text-yellow-50' : 'text-pink-200'} transition-all duration-1000 ease-out`} 
+                                                        strokeLinecap="round" 
+                                                    />
+                                                </svg>
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                                    <span className="text-4xl font-extrabold text-rich-black-5">{course.aiReview.score || 0}</span>
+                                                    <span className="text-[10px] text-rich-black-400 font-semibold tracking-widest uppercase mt-1">Score</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 space-y-8">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-rich-black-5 mb-3">Evaluation Summary</h3>
+                                                <p className="text-rich-black-200 leading-relaxed text-sm md:text-base">
+                                                    {course.aiReview.summary}
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-rich-black-900/30 p-6 rounded-2xl border border-rich-black-700/30">
+                                                {course.aiReview.strengths?.length > 0 && (
+                                                    <div className="space-y-4">
+                                                        <h4 className="text-sm font-bold text-pastelGreen-400 uppercase tracking-wider flex items-center gap-2">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                            Key Strengths
+                                                        </h4>
+                                                        <ul className="space-y-3">
+                                                            {course.aiReview.strengths.map((strength, idx) => (
+                                                                <li key={idx} className="flex items-start gap-3 text-sm text-rich-black-200">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-pastelGreen-500 mt-2 shrink-0"></div>
+                                                                    <span className="leading-relaxed">{strength}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {course.aiReview.weaknesses?.length > 0 && (
+                                                    <div className="space-y-4">
+                                                        <h4 className="text-sm font-bold text-pink-200 uppercase tracking-wider flex items-center gap-2">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                            Areas for Improvement
+                                                        </h4>
+                                                        <ul className="space-y-3">
+                                                            {course.aiReview.weaknesses.map((weakness, idx) => (
+                                                                <li key={idx} className="flex items-start gap-3 text-sm text-rich-black-200">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-pink-200 mt-2 shrink-0"></div>
+                                                                    <span className="leading-relaxed">{weakness}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+
                         {/* Benefits & Requirements Sections */}
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
                             <div className='bg-rich-black-800 p-8 rounded-2xl border border-rich-black-700 space-y-4'>

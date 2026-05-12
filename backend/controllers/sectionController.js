@@ -42,6 +42,11 @@ exports.createSection = async (req,res) => {
 
         console.log(`Section created successfully`);
         
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        aiController.generateCourseReview({ courseId: courseId })
+            .catch((err) => console.error(`AI Review update failed for course ${courseId}:`, err));
+
         return res.status(200).json({
             success: true,
             message: `Section created successfully`,
@@ -103,6 +108,11 @@ exports.updateSection = async (req,res) => {
         }
 
         console.log(`Section updated successfully`);
+
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        aiController.generateCourseReview({ courseId: courseId })
+            .catch((err) => console.error(`AI Review update failed for course ${courseId}:`, err));
 
         return res.status(200).json({
             success: true,
@@ -166,6 +176,11 @@ exports.deleteSection = async (req,res) => {
         
         const deleteSection = await sectionModel.findByIdAndDelete(sectionId);
         console.log(`Section deleted Successfully`);
+
+        // Trigger AI Review update
+        const aiController = require('./aiController');
+        aiController.generateCourseReview({ courseId: courseId })
+            .catch((err) => console.error(`AI Review update failed for course ${courseId}:`, err));
 
         return res.status(200).json({
             success: true,

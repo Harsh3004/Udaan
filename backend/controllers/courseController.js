@@ -314,14 +314,24 @@ exports.updateCourse = async (req, res) => {
             }
         }
 
-        console.log(`Updating course`)
+        console.log(`Updating course`);
         const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updates, { new: true });
+
+        // Trigger AI Review update if course is published
+        if (updatedCourse.status === 'Published') {
+            console.log(`Course is published. Triggering background AI Review update...`);
+            const aiController = require('./aiController');
+            // Execute in background
+            aiController.generateCourseReview({ courseId: updatedCourse._id })
+                .then(() => console.log(`AI Review updated for course ${updatedCourse._id}`))
+                .catch((err) => console.error(`AI Review update failed for course ${updatedCourse._id}:`, err));
+        }
 
         console.log(`Course updated successfully`);
         return res.status(200).json({
             success: true,
             message: `Course updated successfully`
-        })
+        });
     } catch (err) {
         return res.status(500).json({
             success: false,
