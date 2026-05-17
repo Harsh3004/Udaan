@@ -3,9 +3,7 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 require('dotenv').config();
 
-// ---------------------------------------------------------------------------
 // Dhruv System Prompt — 7-phase course extraction agent
-// ---------------------------------------------------------------------------
 const buildSystemPrompt = (instructorName) => `
 You are Dhruv, a warm, expert AI course creation assistant on the Udaan e-learning platform.
 You are speaking with ${instructorName}, an instructor who wants to create a new course.
@@ -43,9 +41,7 @@ Fill in any fields you now know. Use empty strings/arrays for unknown fields. "p
 CRITICAL: This JSON block must ALWAYS be present at the end of every response. Never skip it.
 `.trim();
 
-// ---------------------------------------------------------------------------
 // POST /api/ai/dhruv — Streaming SSE chat endpoint for Dhruv
-// ---------------------------------------------------------------------------
 exports.dhruvChat = async (req, res) => {
     try {
         const { messages } = req.body;

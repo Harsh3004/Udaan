@@ -35,7 +35,7 @@ export const Home = () => {
 
       {/* ─── HERO ────────────────────────────────────────────────── */}
       <section className='relative'>
-        <div className='absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-05 opacity-[0.06] blur-[120px] pointer-events-none rounded-full' />
+        <div className='absolute top-0 left-1/2 -translate-x-1/2 w-[min(700px,100vw)] h-[400px] bg-gradient-05 opacity-[0.06] blur-[120px] pointer-events-none rounded-full' />
         <div className='relative flex flex-col items-center gap-8 w-11/12 max-w-4xl mx-auto pt-20 pb-10 text-center'>
           <FadeUp delay={0}>
             <Link to='/signup'>
@@ -106,7 +106,7 @@ export const Home = () => {
       {/* ─── FRAME CTA ───────────────────────────────────────────── */}
       <section>
         <div className='frame flex justify-center items-center'>
-          <div className='flex flex-row gap-7 z-10'>
+          <div className='flex flex-wrap gap-4 justify-center z-10'>
             <Link to='/browse'><motion.div whileHover={{ scale: 1.04 }}><Button active={1}>Explore All Courses <FaArrowRight /></Button></motion.div></Link>
             <motion.div whileHover={{ scale: 1.04 }}><Button active={0}>Learn More <FaArrowRight /></Button></motion.div>
           </div>

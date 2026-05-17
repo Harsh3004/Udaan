@@ -89,9 +89,9 @@ export const Login = () => {
   });
 
   return (
-    <div className='h-screen flex bg-rich-black-900 text-rich-black-5 z-50'>
-      <main className="w-9/12 max-w-7xl mx-auto py-5 z-40">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+    <div className='min-h-screen bg-rich-black-900 text-rich-black-5 z-50'>
+      <main className="w-11/12 max-w-7xl mx-auto py-5 z-40">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div className="max-w-md">
             <h1 className="text-3xl font-semibold mb-2">Welcome Back</h1>
             <p className="text-lg text-rich-black-100 mb-6">

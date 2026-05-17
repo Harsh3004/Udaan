@@ -91,19 +91,19 @@ export const MyCourses = () => {
   }, []);
 
   return (
-    <div className='flex w-9/12 mx-auto min-h-screen flex-col py-8 text-rich-black-900'>
-      <div className='flex items-center justify-between'>
-        <h1 className='text-3xl font-bold mb-6 text-rich-black-5'>
+    <div className='w-full max-w-6xl mx-auto min-h-screen flex-col py-8 px-4 sm:px-6 lg:px-8 text-rich-black-900'>
+      <div className='flex flex-wrap items-center justify-between gap-4 mb-6'>
+        <h1 className='text-2xl sm:text-3xl font-bold text-rich-black-5'>
           My Courses
         </h1>
 
         <button 
           type='submit'
-          className='flex items-center gap-2 font-medium bg-yellow-50 text-rich-black-900 border rounded-lg px-6 py-3 w-fit'
+          className='flex items-center gap-2 font-medium bg-yellow-50 text-rich-black-900 border rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 w-fit text-sm sm:text-base'
           onClick={() => navigate('/dashboard/add-course')}
         >
           <IoAddCircleOutline className='text-lg'/>
-          <span className='text-lg'>Add Course</span>
+          <span>Add Course</span>
         </button>
       </div>
       
@@ -112,6 +112,7 @@ export const MyCourses = () => {
           Loading your courses...
         </div>
       ) : courses.length > 0 ? (
+        <div className='overflow-x-auto rounded-lg'>
         <Table className='w-full border-separate border-spacing-y-4'>
           
           <Thead className='hidden md:table-header-group'>
@@ -127,17 +128,17 @@ export const MyCourses = () => {
             {courses.map((course) => (
               <Tr key={course._id} className="cursor-pointer" onClick={() => handleManageCourse(course._id)}>
                 
-                <Td className='p-4 bg-rich-black-800 shadow-md rounded-l-lg align-top'>
-                  <div className='flex items-start space-x-5'>
+                <Td className='p-3 sm:p-4 bg-rich-black-800 shadow-md rounded-l-lg align-top'>
+                  <div className='flex items-start space-x-3 sm:space-x-5'>
                     <img 
                       src={course.thumbnail.url} 
                       alt={`${course.title} thumbnail`}
-                      className='w-48 h-32 object-cover rounded-md' 
+                      className='w-24 h-16 sm:w-48 sm:h-32 object-cover rounded-md flex-shrink-0' 
                     />
-                    <div className='flex flex-col'>
-                      <h2 className='text-lg font-semibold text-rich-black-5'>{course.title}</h2>
-                      <p className='text-rich-black-50 text-sm mt-1'>{course.desc}</p>
-                      <span className={`mt-4 inline-flex items-center gap-x-2 px-3 py-1 rounded-full text-xs font-medium w-fit ${
+                    <div className='flex flex-col min-w-0'>
+                      <h2 className='text-sm sm:text-lg font-semibold text-rich-black-5 line-clamp-2'>{course.title}</h2>
+                      <p className='text-rich-black-50 text-xs sm:text-sm mt-1 line-clamp-2'>{course.desc}</p>
+                      <span className={`mt-2 sm:mt-4 inline-flex items-center gap-x-2 px-3 py-1 rounded-full text-xs font-medium w-fit ${
                         course.status === 'Draft' 
                         ? 'bg-pink-100 text-pink-700'
                         : 'bg-yellow-100 text-yellow-800'
@@ -196,6 +197,7 @@ export const MyCourses = () => {
             ))}
           </Tbody>
         </Table>
+        </div>
       ) : (
         <div className='text-center text-gray-500 text-lg mt-10'>
           You have not created any courses yet.

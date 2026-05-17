@@ -58,7 +58,7 @@ exports.askAI = async (req, res) => {
 
         // Construct the Groq (OpenAI-compatible) request body
         const requestBody = {
-            model: "llama-3.3-70b-versatile", // Fast and highly capable model
+            model: "llama-3.3-70b-versatile",
             messages: [
                 {
                     role: "system",

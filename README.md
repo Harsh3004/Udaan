@@ -11,14 +11,14 @@
 [![Groq](https://img.shields.io/badge/Groq_AI-FF6C37?style=for-the-badge&logo=meta&logoColor=white)](https://groq.com/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-02042B?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://udaan-tawny.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel)](https://udaan-tawny.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
 
 <h4>
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-features">Features</a> ·
   <a href="#-dhruv--ai-course-agent">Dhruv AI</a> ·
+  <a href="#-ai-course-review">AI Review</a> ·
   <a href="#-real-time-messaging">Messaging</a> ·
   <a href="#-api-reference">API Docs</a>
 </h4>
@@ -34,12 +34,11 @@
 | | |
 |---|---|
 | 🏗️ **Stack** | MERN + Socket.IO + Groq AI |
-| 🤖 **AI Model** | LLaMA 3.3 70B via Groq (streaming) |
-| 💳 **Payments** | Razorpay (live) |
-| ☁️ **Media** | Cloudinary (video + image) |
-| 🔐 **Auth** | JWT + Google OAuth + OTP |
-| 🚀 **Frontend** | Vercel |
-| ⚙️ **Backend** | Render |
+| 🤖 **AI Model** | LLaMA 3.3 70B + Whisper (via Groq) |
+| 💳 **Payments** | Razorpay (paid) + Free enrollment |
+| ☁️ **Media** | Cloudinary (video, image, files) |
+| 🔐 **Auth** | JWT + Google OAuth + Email OTP |
+| 🚀 **Deploy** | Vercel (FE) · Render (BE) · MongoDB Atlas |
 
 </div>
 
@@ -47,7 +46,7 @@
 
 ## 🎯 What is Udaan?
 
-**Udaan** *(उड़ान — "flight" in Hindi)* is a full-stack AI-enhanced e-learning platform built for the modern learner. Instructors create rich, structured courses through conversational AI. Students learn with real-time messaging, AI-generated quizzes, discussion forums, and downloadable resources — all in one place.
+**Udaan** *(उड़ान — "flight" in Hindi)* is a full-stack AI-enhanced e-learning platform. Instructors create rich courses through a conversational AI agent or a manual form — their choice. Students learn with real-time instructor messaging, AI quizzes, discussion forums, downloadable resources, personal notes, and now **AI-generated course quality reviews powered by video transcription**.
 
 > *"Every learner deserves a launchpad."*
 
@@ -60,113 +59,114 @@
 <td width="50%" valign="top">
 
 ### 🤖 Dhruv — AI Course Creator
-Conversational 7-phase agent that guides instructors through course creation via real-time SSE streaming.
+Conversational 7-phase agent guiding instructors via real-time SSE streaming.
+- **CoursePathModal** — choose Dhruv AI **or** Manual form at creation
 - Phase-aware quick-reply chips
-- Auto-extracts structured JSON from responses
-- Live sidebar showing draft progress
-- Powered by **LLaMA 3.3 70B**
+- Extracts structured JSON embedded in LLM responses
+- Live sidebar shows draft progress in real time
 
 </td>
 <td width="50%" valign="top">
 
-### 💬 Real-Time Messaging 
-Student ↔ Instructor direct messaging per course, powered by Socket.IO.
-- Typing indicators & optimistic UI updates
-- Read receipts (✓ / ✓✓)
-- Unread count badges
-- Delete messages & full conversations
-- Dedicated `/dashboard/messages` inbox
+### 🔍 AI Course Review 
+Automated quality scoring for published courses using video transcription.
+- **Groq Whisper** transcribes every lesson video (32k bitrate MP3)
+- **LLaMA 3.3 70B** summarises transcripts then evaluates the full course
+- Returns `score` (1–100) · `summary` · `strengths[]` · `weaknesses[]`
+- Result persisted in `course.aiReview` on MongoDB
 
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 
-### 🧪 AI Quiz Generator 
-Generate MCQ quizzes from any lesson topic instantly.
-- Powered by Groq enforced JSON output (`response_format: json_object`)
-- Validates 4-option structure server-side
-- Context-aware from lesson `aiContext` field
-- Configurable question count
+### 💬 Real-Time Messaging
+Student ↔ Instructor direct chat per course via Socket.IO.
+- JWT-authenticated socket rooms (`user:<id>`, `course:<id>`)
+- Typing indicators (`typing` / `user_typing` events)
+- Read receipts · optimistic UI updates
+- Unread badges · delete messages & conversations
+- Dedicated `/dashboard/messages` inbox page
 
 </td>
 <td width="50%" valign="top">
 
-### 📁 Course Resources 
-Instructors attach downloadable files to courses.
-- Upload any file type via Cloudinary
+### 🧪 AI Quiz Generator
+Instant MCQ quizzes from any lesson topic.
+- Groq `response_format: json_object` enforces valid JSON
+- Server-side validation of 4-option structure
+- Context from lesson `title`, `description`, `aiContext`
+- Configurable question count per request
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📁 Course Resources
+Instructors attach downloadable files to their courses.
+- Any file type via Cloudinary
 - Download counter tracked per resource
-- Students access from the lesson panel
+- Students access files from the lesson sidebar
 - Role-guarded: only instructors can upload/delete
 
 </td>
-</tr>
-<tr>
 <td width="50%" valign="top">
 
-### 💬 Discussion Forums 
+### 💬 Discussion Forums
 Per-course community discussion threads.
 - Create, edit, delete discussions
 - Auth-gated — enrolled students only
-- Displayed inside the course viewer
-
-</td>
-<td width="50%" valign="top">
-
-### ⭐ Ratings & Reviews 
-Animated star rating modal with review text.
-- Interactive hover tooltips (Poor → Excellent)
-- 500-char review with live counter
-- Unique per user per course (DB index enforced)
-- Framer Motion star burst animation
+- Rendered inside the immersive course viewer
 
 </td>
 </tr>
 <tr>
+<td width="50%" valign="top">
+
+###  Ratings & Reviews
+Animated star rating modal.
+- Hover tooltips (Poor → Excellent)
+- 500-char review with live counter
+- Unique per {user, course} enforced by DB index
+- Framer Motion star burst animation
+
+</td>
 <td width="50%" valign="top">
 
 ### 🧠 In-Lesson AI Assistant
 Ask questions mid-video with full lesson context.
-- Lesson title + description + instructor `aiContext`
-- Markdown-formatted answers
-- Timestamped personal notes per subsection
-- Persistent across sessions
-
-</td>
-<td width="50%" valign="top">
-
-### 💳 Payments & Enrollment
-Full Razorpay integration with signature verification.
-- Instant enrollment on success
-- Transactional email on purchase
-- Purchase history dashboard
-- Shopping cart with localStorage sync
+- Grounded in lesson `title` + `description` + instructor `aiContext`
+- Markdown-formatted streaming answers
+- Personal timestamped notes per subsection
+- Notes persist across sessions
 
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 
-### 🔐 Auth & Security
-Multi-strategy authentication with role guards.
-- Email + OTP (6-digit, 5-min TTL)
-- Google OAuth one-click login
-- HTTP-only cookie JWT (3-day expiry)
-- bcrypt password hashing (10 rounds)
-- Student / Instructor / Admin RBAC
+### 💳 Payments & Free Enrollment
+Full Razorpay + free-course flow.
+- Paid: Razorpay order → signature verify → enroll
+- Free: `POST /payment/enroll-free` — instant enrollment
+- Purchase history dashboard
+- Shopping cart with localStorage sync
 
 </td>
 <td width="50%" valign="top">
 
-### 📈 Progress & Course Management
-Full LMS content management.
-- Course → Section → Subsection hierarchy
-- Draft / Reviewing / Published workflow
-- Per-video completion tracking
-- Resume from last position
-- Instructor analytics dashboard
+### 🔐 Auth & Security
+Multi-strategy auth with full RBAC.
+- Email OTP (6-digit, 5-min TTL via MongoDB TTL index)
+- Google OAuth one-click (`@react-oauth/google`)
+- HTTP-only cookie JWT (3-day expiry)
+- bcrypt hashing (10 rounds)
+- Student / Instructor / Admin role guards
 
 </td>
+
+
 </tr>
 </table>
 
@@ -174,66 +174,106 @@ Full LMS content management.
 
 ## 🤖 Dhruv — AI Course Agent
 
-Dhruv is a **7-phase agentic AI** that holds a natural conversation with the instructor and extracts all data needed to build a complete course structure.
+Dhruv is a **7-phase agentic AI** that holds a natural conversation and extracts all data needed to build a complete course.
 
 ```
 Phase 1 → Warm greeting & course goal
 Phase 2 → Title · Description · Language · Difficulty · Audience
 Phase 3 → 3–5 learning outcomes
-Phase 4 → Module structure
+Phase 4 → Module & section structure
 Phase 5 → Pricing & prerequisites
 Phase 6 → Category & tags
-Phase 7 → Summary → "Click View Draft"
+Phase 7 → Summary confirmation → "Click View Draft"
 ```
 
-**Technical highlights:**
-- **Streaming SSE** — tokens arrive in real time via `text/event-stream`
-- **JSON embedding** — every response embeds `[COURSE_DATA]{...}[/COURSE_DATA]` parsed client-side
-- **React 18 StrictMode safe** — `hasGreeted` ref prevents double-fire
-- **Stale-closure free** — `messagesRef` pattern keeps history always current
+**How it works:**
+- **SSE Streaming** — tokens arrive via `text/event-stream`, rendered in real time
+- **JSON embedding** — responses wrap course data in `[COURSE_DATA]{...}[/COURSE_DATA]`
+- **CoursePathModal** — new gated entry: instructor picks *Dhruv AI* or *Manual Form*
+- **React 18 safe** — `hasGreeted` ref prevents StrictMode double-fire
+- **Stale-closure free** — `messagesRef` pattern keeps history current across renders
 
 ---
 
-## 💬 Real-Time Messaging
+## 🔍 AI Course Review
 
-Powered by **Socket.IO** with a course-scoped chat architecture:
+> Automatically evaluates a published course by **transcribing every video** and asking an LLM to score it.
 
 ```
-Student opens course → InstructorChat panel floats bottom-right
-Student sends message → Optimistic UI update → Backend persist → Socket broadcast
-Instructor opens /dashboard/messages → sees all conversations with unread badges
-Both sides get typing indicators, read receipts, message deletion
+POST /api/ai/review-course  { courseId }
+         │
+         ▼
+  For each Section → Subsection:
+    1. Convert video URL → MP3 (Cloudinary transform: f_mp3,ac_mp3,br_32k)
+    2. POST to Groq Whisper (whisper-large-v3) → transcript
+    3. Summarise transcript with LLaMA 3.3 70B (max 500 tokens)
+         │
+         ▼
+  Build full courseContentSummary string
+         │
+         ▼
+  LLaMA 3.3 70B evaluates course structure + summaries
+  Returns JSON: { score, summary, strengths[], weaknesses[] }
+         │
+         ▼
+  Saved to course.aiReview in MongoDB
 ```
+
+**Schema addition in `courseModel.js`:**
+```js
+aiReview: {
+  score:      Number,      // 1–100
+  summary:    String,
+  strengths:  [String],
+  weaknesses: [String]
+}
+```
+
+---
+
+## 💬 Real-Time Messaging (Socket.IO)
+
+**Architecture:** Each course has its own Socket.IO room (`course:<courseId>`). Users also join a personal room (`user:<userId>`) for targeted events.
 
 **Socket events:**
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| `new_message` | Server → Client | Delivers new message in real time |
-| `message_deleted` | Server → Client | Removes message from both screens |
-| `messages_read` | Server → Client | Marks conversation as read |
-| `typing` | Client → Server | Typing indicator broadcast |
+
+| Event (Client → Server) | Description |
+|--------------------------|-------------|
+| `authenticate` | Send JWT token to auth the socket connection |
+| `join_course_chat` | Join a course chat room |
+| `leave_course_chat` | Leave a course chat room |
+| `typing` | Broadcast typing status to others in room |
+
+| Event (Server → Client) | Description |
+|--------------------------|-------------|
+| `authenticated` | Confirms socket auth success |
+| `auth_error` | Auth failed, socket disconnected |
+| `new_message` | New message in course chat |
+| `message_deleted` | A message was deleted |
+| `messages_read` | Conversation marked as read |
+| `user_typing` | Another user is typing |
 
 ---
 
 ## 🏗️ Architecture
 
-
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND  (Vercel)                        │
-│   React 18 + Vite · Redux Toolkit · React Router v7             │
-│   Tailwind CSS · Motion · Socket.IO Client                       │
-└──────────────┬──────────────────────────────┬───────────────────┘
-               │ REST API                      │ WebSocket (Socket.IO)
-               ▼                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       BACKEND  (Render)                         │
-│   Express.js 5 · JWT Middleware · Role Guards                    │
-│   Controllers: Auth · Course · AI · Chat · Discussion · Resource │
-└──────┬──────────┬──────────┬──────────┬────────────┬────────────┘
-       │          │          │          │            │
-  MongoDB    Cloudinary  Razorpay   Groq API    Gmail OAuth2
-  (Atlas)   (Media)     (Payments) (LLM/AI)    (Email)
+┌─────────────────────────────────────────────────────────┐
+│                  FRONTEND  (Vercel)                      │
+│  React 18 + Vite · Redux Toolkit · React Router v7      │
+│  Tailwind CSS · Motion · Socket.IO Client               │
+└────────────┬──────────────────────────┬─────────────────┘
+             │ REST API                  │ WebSocket
+             ▼                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                  BACKEND  (Render)                      │
+│  Express.js 5 · JWT Middleware · RBAC Guards            │
+│  Auth · Course · AI · Chat · Discussion · Resource      │
+│  Section · Subsection · Payment · Profile               │
+└──────┬─────────┬────────┬──────────┬─────────┬──────────┘
+       │         │        │          │         │
+  MongoDB   Cloudinary  Razorpay  Groq API  Gmail OAuth2
+  Atlas      Media      Payments  LLM+STT   Email
 ```
 
 ---
@@ -244,36 +284,38 @@ Both sides get typing indicators, read receipts, message deletion
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=black) React | 18.3.1 | UI framework |
-| ![Vite](https://img.shields.io/badge/-Vite-646CFF?logo=vite&logoColor=white) Vite | 7.1.2 | Build tool |
-| ![Redux](https://img.shields.io/badge/-Redux_Toolkit-764ABC?logo=redux&logoColor=white) Redux Toolkit | 2.8.2 | State management |
-| ![Router](https://img.shields.io/badge/-React_Router-CA4245?logo=react-router&logoColor=white) React Router | 7.8.1 | Routing |
-| ![Tailwind](https://img.shields.io/badge/-Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white) Tailwind CSS | 3.4.17 | Styling |
-| ![Motion](https://img.shields.io/badge/-Motion-FF0055?logo=framer&logoColor=white) Motion | 12.23.12 | Animations |
-| ![Socket.IO](https://img.shields.io/badge/-Socket.IO_Client-010101?logo=socket.io&logoColor=white) Socket.IO Client | — | Real-time messaging |
-| ![Axios](https://img.shields.io/badge/-Axios-5A29E4?logo=axios&logoColor=white) Axios | 1.11.0 | HTTP client |
-| ![Google](https://img.shields.io/badge/-Google_OAuth-4285F4?logo=google&logoColor=white) @react-oauth/google | 0.13.5 | Google sign-in |
+| React | 18.3.1 | UI framework |
+| Vite | 7.1.2 | Build tool |
+| Redux Toolkit | 2.8.2 | State management |
+| React Router | 7.8.1 | Routing |
+| Tailwind CSS | 3.4.17 | Styling |
+| Motion (Framer) | 12.23.12 | Animations |
+| Socket.IO Client | — | Real-time chat |
+| Axios | 1.11.0 | HTTP client |
+| @react-oauth/google | 0.13.5 | Google sign-in |
+| react-hot-toast | — | Notifications |
 
 ### Backend
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| ![Express](https://img.shields.io/badge/-Express.js-000000?logo=express&logoColor=white) Express.js | 5.1.0 | Web framework |
-| ![Mongo](https://img.shields.io/badge/-Mongoose-880000?logo=mongodb&logoColor=white) Mongoose | 8.17.1 | MongoDB ODM |
-| ![Socket.IO](https://img.shields.io/badge/-Socket.IO-010101?logo=socket.io&logoColor=white) Socket.IO | — | WebSocket server |
-| ![JWT](https://img.shields.io/badge/-JWT-000000?logo=json-web-tokens&logoColor=white) jsonwebtoken | 9.0.2 | Auth tokens |
-| ![bcrypt](https://img.shields.io/badge/-bcrypt-003A70?logo=letsencrypt&logoColor=white) bcrypt | 6.0.0 | Password hashing |
-| ![Cloudinary](https://img.shields.io/badge/-Cloudinary-3448C5?logo=cloudinary&logoColor=white) Cloudinary | 2.7.0 | Media & file storage |
-| ![Razorpay](https://img.shields.io/badge/-Razorpay-02042B?logo=razorpay&logoColor=white) Razorpay | 2.9.6 | Payment gateway |
-| ![Nodemailer](https://img.shields.io/badge/-Gmail_API-EA4335?logo=gmail&logoColor=white) Nodemailer + Gmail | 7.0.5 | Transactional email |
+| Express.js | 5.1.0 | Web framework |
+| Mongoose | 8.17.1 | MongoDB ODM |
+| Socket.IO | — | WebSocket server |
+| jsonwebtoken | 9.0.2 | Auth tokens |
+| bcrypt | 6.0.0 | Password hashing |
+| Cloudinary | 2.7.0 | Media & file storage |
+| Razorpay | 2.9.6 | Payment gateway |
+| Nodemailer | 7.0.5 | Transactional email |
+| express-fileupload | — | Multipart file handling |
 
 ### AI & Intelligence
 
-<p align="center">
-<img src="https://img.shields.io/badge/Groq_API-LLaMA_3.3_70B-FF6C37?style=for-the-badge&logo=meta&logoColor=white" />
-<img src="https://img.shields.io/badge/SSE_Streaming-Real--time_tokens-4CAF50?style=for-the-badge" />
-<img src="https://img.shields.io/badge/JSON_Mode-Enforced_output-9C27B0?style=for-the-badge" />
-</p>
+| Service | Model | Purpose |
+|---------|-------|---------|
+| Groq API | `llama-3.3-70b-versatile` | Dhruv agent, Q&A, Quiz, Course Review |
+| Groq API | `whisper-large-v3` | Video transcription for AI Review |
+| Groq API | SSE streaming | Real-time token delivery |
 
 ---
 
@@ -282,42 +324,54 @@ Both sides get typing indicators, read receipts, message deletion
 ```
 Udaan/
 ├── backend/
-│   ├── config/           # DB, Cloudinary, Razorpay setup
+│   ├── config/
+│   │   ├── socket.js          ← Socket.IO init, room management, emitters
+│   │   ├── cloudinary.js
+│   │   ├── db.js
+│   │   └── razorpay.js
 │   ├── controllers/
-│   │   ├── authController.js
+│   │   ├── aiController.js    ← askAI · generateQuiz · saveNote · generateCourseReview 
+│   │   ├── authController.js  ← signUp · login · googleAuth · deleteAccount 
+│   │   ├── chatController.js  ← Socket-backed messaging
 │   │   ├── courseController.js
-│   │   ├── chatController.js       — Socket.IO messaging
-│   │   ├── discussionController.js — Forum threads
-│   │   ├── resourceController.js   — File uploads + downloads
-│   │   ├── aiController.js         — In Lesson AI + Notes + Quiz 
-│   │   ├── dhruvController.js      — 7-phase SSE agent
-│   │   ├── payment.js
+│   │   ├── discussionController.js
+│   │   ├── dhruvController.js ← 7-phase SSE agent
+│   │   ├── payment.js         ← Razorpay + enrollFreeCourse 
+│   │   ├── resourceController.js
 │   │   └── ...
-│   ├── routes/
-│   │   ├── chatRoutes.js           
-│   │   ├── discussionRoutes.js     
-│   │   ├── resourceRoutes.js       
-│   │   ├── aiRoutes.js             
+│   ├── models/
+│   │   ├── courseModel.js     ← aiReview field added 
+│   │   ├── additionalDetails.js ← bank account fields added 
+│   │   ├── chatModel.js
+│   │   ├── courseDiscussionModel.js
+│   │   ├── courseNoteModel.js
+│   │   ├── courseResourceModel.js
 │   │   └── ...
-│   ├── models/           # Mongoose schemas
-│   └── server.js
+│   └── routes/
+│       ├── aiRoutes.js · chatRoutes.js · discussionRoutes.js · resourceRoutes.js
+│       └── userRoutes.js · courseRoutes.js · paymentsRoutes.js · profileRoutes.js
 │
 └── frontend/src/
     ├── pages/
-    │   ├── Messages.jsx            — Full messaging inbox
-    │   ├── ViewCourse.jsx          — Enhanced with Resources, Discussion
-    │   └── ...
+    │   ├── Messages.jsx          ← Full messaging inbox
+    │   ├── ViewCourse.jsx        ← Discussion + Resources + AI sidebar
+    │   └── CourseDetails.jsx
     ├── components/
-    │   ├── InstructorChat.jsx      — Floating chat panel
-    │   ├── RatingModal.jsx         — Animated star rating
-    │   ├── ViewCourse/
-    │   │   ├── Discussion.jsx      
-    │   │   ├── Resources.jsx       
-    │   │   ├── AiSidebar.jsx
-    │   │   └── PersonalNotes.jsx
-    │   └── Dasboard/AddCourse/     — Dhruv AI wizard
+    │   ├── InstructorChat.jsx    ← Floating chat panel on course page
+    │   ├── RatingModal.jsx       ← Animated star rating
+    │   ├── Dasboard/
+    │   │   ├── Setting.jsx       ← Bank details section for Instructors 
+    │   │   ├── AddCourse/
+    │   │   │   ├── CoursePathModal.jsx  ← Dhruv vs Manual chooser 
+    │   │   │   ├── DhruvChat.jsx · DhruvSidebar.jsx · DhruvDraftReview.jsx
+    │   │   │   └── CourseBuilder.jsx · SubsectionModal.jsx
+    │   │   └── ...
+    │   └── ViewCourse/
+    │       ├── AiSidebar.jsx · PersonalNotes.jsx
+    │       ├── Discussion.jsx · Resources.jsx
     └── services/
-        └── socketService.js        — Socket.IO client
+        ├── api.js               ← All endpoint constants
+        └── socketService.js     ← Socket.IO client wrapper
 ```
 
 ---
@@ -327,38 +381,52 @@ Udaan/
 **Base URL:** `http://localhost:5000/api`
 
 ### Auth `/api/auth`
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
-| `POST` | `/sendOtp` | Send OTP | ❌ |
-| `POST` | `/signUp` | Register | ❌ |
-| `POST` | `/login` | Login | ❌ |
-| `POST` | `/google-auth` | Google OAuth | ❌ |
-| `PUT` | `/changePassword` | Change password | ✅ |
-| `PUT` | `/forgotPassword` | Reset link | ❌ |
+| Method | Endpoint | Description |
+|--------|----------|:-------------:|
+| `POST` | `/sendOtp` | Send 6-digit OTP |
+| `POST` | `/signUp` | Register with OTP |
+| `POST` | `/login` | Email + password login |
+| `POST` | `/google-auth` | Google OAuth login |
+| `GET` | `/logout` | Logout |
+| `PUT` | `/changePassword` | Change password |
+| `PUT` | `/forgotPassword` | Send reset link |
+| `PUT` | `/update-password` | Reset password |
+| `DELETE` | `/delete-account` | Delete account  |
 
 ### Courses `/api/course`
 | Method | Endpoint | Description | Role |
 |--------|----------|-------------|------|
 | `GET` | `/` | All courses | Public |
+| `GET` | `/top-rated` | Top rated courses | Public |
 | `POST` | `/create` | Create course | Instructor |
-| `PUT` | `/update/:courseId` | Update | Instructor |
-| `DELETE` | `/delete/:courseId` | Delete | Instructor |
-| `GET` | `/recommended/:courseId` | AI recs | Public |
-| `POST` | `/update-course-progress` | Mark complete | Student |
+| `PUT` | `/update/:courseId` | Update course | Instructor |
+| `DELETE` | `/delete/:courseId` | Delete course | Instructor |
+| `GET` | `/getInstructorCourses` | My courses | Instructor |
+| `GET` | `/getEnrolledCourses` | Enrolled courses | Student |
+| `POST` | `/update-course-progress` | Mark video done | Student |
+| `GET` | `/view/:courseId` | Full course details | ✅ |
 
-### AI `/api/ai` 
+### AI `/api/ai`
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
+|--------|----------|-------------|:----:|
 | `POST` | `/ask` | In-lesson Q&A | ✅ |
-| `POST` | `/generate-quiz` | AI quiz | ✅ |
+| `POST` | `/generate-quiz` | AI MCQ quiz | ✅ |
 | `POST` | `/dhruv` | Dhruv SSE stream | ✅ |
-| `POST` | `/notes` | Save note | ✅ |
+| `POST` | `/review-course` | **AI course review**  | Instructor |
+| `POST` | `/notes` | Save personal note | ✅ |
 | `GET` | `/notes/:subsectionId` | Get notes | ✅ |
 | `DELETE` | `/notes/:noteId` | Delete note | ✅ |
 
-### Messaging `/api/chat` 
+### Payments `/api/payment`
+| Method | Endpoint | Description | Role |
+|--------|----------|-------------|------|
+| `POST` | `/create-order` | Create Razorpay order | Student |
+| `POST` | `/verify` | Verify & enroll | Student |
+| `POST` | `/enroll-free` | Free course enrollment  | ✅ |
+
+### Messaging `/api/chat`
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
+|--------|----------|-------------|:----:|
 | `POST` | `/send` | Send message | ✅ |
 | `GET` | `/messages/:courseId` | Get messages | ✅ |
 | `GET` | `/conversations/student` | Student inbox | Student |
@@ -368,27 +436,27 @@ Udaan/
 | `DELETE` | `/message` | Delete message | ✅ |
 | `DELETE` | `/:courseId` | Delete conversation | ✅ |
 
-### Discussions `/api/discussion` 
+### Discussions `/api/discussion`
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
+|--------|----------|-------------|:----:|
 | `POST` | `/create` | Create thread | ✅ |
 | `GET` | `/:courseId` | Get threads | ✅ |
-| `PUT` | `/update/:discussionId` | Edit | ✅ |
-| `DELETE` | `/delete/:discussionId` | Delete | ✅ |
+| `PUT` | `/update/:discussionId` | Edit thread | ✅ |
+| `DELETE` | `/delete/:discussionId` | Delete thread | ✅ |
 
-### Resources `/api/resource` 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
+### Resources `/api/resource`
+| Method | Endpoint | Description | Role |
+|--------|----------|-------------|------|
 | `POST` | `/upload` | Upload file | Instructor |
 | `GET` | `/:courseId` | Get resources | ✅ |
-| `DELETE` | `/delete/:resourceId` | Delete | Instructor |
-| `PUT` | `/downloads/:resourceId` | Track download | ✅ |
+| `DELETE` | `/delete/:resourceId` | Delete resource | Instructor |
+| `PUT` | `/downloads/:resourceId` | Increment downloads | ✅ |
 
-### Payments `/api/payment`
+### Profile `/api/profile`
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|:---:|
-| `POST` | `/create-order` | Create order | Student |
-| `POST` | `/verify` | Verify signature | Student |
+|--------|----------|-------------|:----:|
+| `GET` | `/` | Get profile | ✅ |
+| `PUT` | `/update` | Update profile + bank details  | ✅ |
 
 ---
 
@@ -396,27 +464,9 @@ Udaan/
 
 | Role | Capabilities |
 |------|-------------|
-| **Student** | Browse, purchase, watch, track progress, message instructor, discuss, download resources, take AI quizzes, write notes & reviews |
-| **Instructor** | Dhruv AI course creation, manage content, upload resources, respond to messages, view analytics, publish |
+| **Student** | Browse, purchase / enroll free, watch, track progress, message instructor, discuss, download resources, AI Q&A, AI quiz, notes, rate & review |
+| **Instructor** | Dhruv AI or Manual course creation, manage content, upload resources, respond to messages, AI course review, bank account settings, analytics |
 | **Admin** | Manage categories, platform oversight |
-
----
-
-## 🔐 Auth Flow
-
-```
-Email + OTP          Email + Password       Google OAuth
-─────────────        ─────────────────      ────────────────
-Send OTP (5min TTL)  bcrypt.compare()       @react-oauth/google
-  ↓                    ↓                      ↓
-Verify OTP           Sign JWT               Verify token → googleapis
-  ↓                    ↓                      ↓
-Create User          HTTP-only Cookie       Auto-create / Login
-  ↓                    ↓                      ↓
-             ── Redirect to Dashboard ──
-                    Role-based routes
-            (isStudent / isInstructor / isAdmin)
-```
 
 ---
 
@@ -426,30 +476,17 @@ Create User          HTTP-only Cookie       Auto-create / Login
 |-------|----------|
 | Registration | Welcome + onboarding |
 | OTP | 6-digit code (5-min expiry) |
-| Password Reset | Secure UUID token link |
-| Course Purchase | Enrollment confirmation |
+| Password Reset | Secure token link |
+| Course Purchase / Free Enroll | Enrollment confirmation |
 | Course Published | Instructor notification |
 | Course Deleted | Enrolled student notification |
 
 ---
 
+
 ## 📄 License
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-
-This project is licensed under the **MIT License**.
-
----
-
-## 🙏 Acknowledgments
-
-<p align="center">
-<img src="https://img.shields.io/badge/Groq-Blazing_Fast_AI-FF6C37?style=for-the-badge&logo=meta&logoColor=white" />
-<img src="https://img.shields.io/badge/Socket.IO-Real--time_Infra-010101?style=for-the-badge&logo=socket.io&logoColor=white" />
-<img src="https://img.shields.io/badge/Cloudinary-Media_Cloud-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white" />
-<img src="https://img.shields.io/badge/Razorpay-Payments-02042B?style=for-the-badge&logo=razorpay&logoColor=white" />
-<img src="https://img.shields.io/badge/MongoDB_Atlas-Cloud_DB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
-</p>
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
 
 ---
 
@@ -457,7 +494,7 @@ This project is licensed under the **MIT License**.
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=120&section=footer" />
 
-### ⭐ If Udaan helped you, give it a star!
+###  If Udaan helped you, give it a star!
 
 **Udaan** — *उड़ान · Take flight with knowledge* 🚀
 
