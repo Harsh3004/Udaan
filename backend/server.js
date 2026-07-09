@@ -1,5 +1,8 @@
+require('dotenv').config();
+
 const express = require("express");
 const http = require('http');
+const helmet = require('helmet');
 const fileUpload = require('express-fileupload');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
@@ -13,29 +16,40 @@ const aiRoutes = require('./routes/aiRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const discussionRoutes = require('./routes/discussionRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
+const validateEnv = require('./config/validateEnv');
+
+// Validate required env vars before anything else — fail fast with a clear message
+validateEnv();
 
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
-require('dotenv').config();
+
+// Security headers — removes X-Powered-By, adds CSP, X-Frame-Options, etc.
+app.use(helmet());
 
 app.use(express.json());
 app.use(cookieParser());
 
+// FIX: filter out undefined entries — prevents fail-open when env vars are missing
 const allowedOrigins = [
   process.env.CLIENT_URL_DEV,
   process.env.CLIENT_URL_PROD
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
+    // Allow same-origin (Postman, server-to-server) if list is non-empty
+    // If allowedOrigins is empty, reject ALL cross-origin requests (fail-closed)
+    if (!origin && allowedOrigins.length > 0) {
+      return callback(null, true);
     }
+    if (origin && allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.error(`CORS blocked: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
@@ -62,12 +76,21 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/discussion', discussionRoutes);
 app.use('/api/resource', resourceRoutes);
 
-app.get('/',(req,res) => {
+app.get('/', (req, res) => {
     return res.json({
         success: true,
-        message: `Your server is running...`
-    })
-})
+        message: 'Udaan API is running.'
+    });
+});
+
+// Health check endpoint for Render / uptime monitors
+app.get('/health', (req, res) => {
+    return res.status(200).json({
+        success: true,
+        status: 'healthy',
+        timestamp: new Date().toISOString()
+    });
+});
 
 const PORT = process.env.PORT || 4000;
 

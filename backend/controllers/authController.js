@@ -12,97 +12,86 @@ const path = require('path');
 
 require('dotenv').config();
 
-exports.sendOtp = async (req,res) => {
-    try{
-        const data = req.body;
-        const email = data?.email;
+exports.sendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
 
-        if(!email){
-            return res.status(404).json({
+        if (!email) {
+            return res.status(400).json({
                 success: false,
-                message: `Invalid information`
-            })
+                message: 'Email is required'
+            });
         }
 
-        // generate otp
-        const otp = crypto.randomInt(100000,999999).toString();
-
+        const otp = crypto.randomInt(100000, 999999).toString();
         const otp_payload = new otpModel({ email, otp });
         await otp_payload.save();
 
         return res.status(200).json({
             success: true,
-            message: `Otp Send Successfully`
-        })
-    }catch(err){
-        return res.status(400).json({
+            message: 'OTP sent successfully'
+        });
+    } catch (err) {
+        return res.status(500).json({
             success: false,
-            message: `Issue while sending otp: ${err.message}`
-        })
+            message: `Error sending OTP: ${err.message}`
+        });
     }
 }
 
-exports.signUp = async (req,res) => {
-    try{
-        console.log(`Verifying status`);
-        const {fName,lName,email,password,confirmPassword,role,otp} = req.body;
+exports.signUp = async (req, res) => {
+    try {
+        const { fName, lName, email, password, confirmPassword, role, otp } = req.body;
 
-        console.log('fetched details');
-        if(!fName || !lName || !email || !password || !confirmPassword || !otp){
-            console.log(`Enter all details carefully.`);
+        if (!fName || !lName || !email || !password || !confirmPassword || !otp) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing Information'
-            })
+                message: 'All fields are required'
+            });
         }
 
-        if(password !== confirmPassword){
-            console.log(`password, confirm password does not match`);
+        if (password !== confirmPassword) {
             return res.status(400).json({
                 success: false,
-                message: `password and confirm password does not match`
-            })
+                message: 'Password and confirm password do not match'
+            });
         }
 
-        const existingUser = await userModel.findOne({email: email,role: role});
-        if(existingUser){
-            console.log(`Existing User`);
+        const existingUser = await userModel.findOne({ email, role });
+        if (existingUser) {
             return res.status(400).json({
                 success: false,
                 message: 'User already exists'
-            })
+            });
         }
 
-        try{
-            const recentOtp = await otpModel.find({email}).sort({createdAt: -1}).limit(1);
-            if(!recentOtp){
-                console.log(`Otp Expires`);
+        try {
+            const recentOtp = await otpModel.find({ email }).sort({ createdAt: -1 }).limit(1);
+            if (!recentOtp || recentOtp.length === 0) {
                 return res.status(404).json({
                     success: false,
-                    message: `Otp Expires, Try Again`
-                })
+                    message: 'OTP expired. Please request a new one.'
+                });
             }
 
-            if(recentOtp[0].otp !== otp){
-                console.log(`Otp Not matched`);
+            if (recentOtp[0].otp !== otp) {
                 return res.status(401).json({
                     success: false,
-                    message: `Invalid Otp`
-                })
+                    message: 'Invalid OTP'
+                });
             }
 
-            // Delete OTP after successful verification to prevent replay attacks
             await otpModel.deleteMany({ email });
-        }catch(err){
-            console.log(`Error while matching otp`);
-            return res.status(400).json({
+        } catch (err) {
+            return res.status(500).json({
                 success: false,
-                message: `Error in OTP verification: ${err.message}`
-            })
+                message: `OTP verification error: ${err.message}`
+            });
         }
 
         let hashPassword;
-        
+
+
         try{
             hashPassword = await bcrypt.hash(password,10);
         }catch(err){
@@ -272,71 +261,71 @@ exports.logout = async (req, res) => {
     }
 }
 
-exports.changePassword = async (req,res) => {
-    try{
-        const {password,newPassword} = req.body;
-        const userId = req.body.userId;
-        
-        if(!userId || !password || !newPassword){
+exports.changePassword = async (req, res) => {
+    try {
+        // FIX: userId sourced from verified JWT payload (req.user.id),
+        // not from req.body — prevents privilege escalation.
+        const userId = req.user.id;
+        const { password, newPassword } = req.body;
+
+        if (!password || !newPassword) {
             return res.status(400).json({
                 success: false,
-                message: `Enter details carefully`
-            })
+                message: 'Current password and new password are required'
+            });
         }
-        
+
         const user = await userModel.findById(userId);
-        if(!user){
-            return res.status(400).json({
+        if (!user) {
+            return res.status(404).json({
                 success: false,
-                message: `User not Found`
-            })
+                message: 'User not found'
+            });
         }
-        
-        if(!(await bcrypt.compare(password,user.password))){
+
+        if (!(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({
                 success: false,
-                message: `Invalid password`
-            })
+                message: 'Current password is incorrect'
+            });
         }
-        
-        if(password === newPassword){
+
+        if (password === newPassword) {
             return res.status(400).json({
                 success: false,
-                message: `New password should be different.`
-            })
+                message: 'New password must be different from the current password'
+            });
         }
-        
-        console.log(`Changing Password`);
+
         let hashPassword;
-        try{
-            hashPassword = await bcrypt.hash(newPassword,10);
-        }catch(err){
+        try {
+            hashPassword = await bcrypt.hash(newPassword, 10);
+        } catch (err) {
             return res.status(500).json({
                 success: false,
-                message: `error in hashing`
-            })
+                message: 'Error hashing password'
+            });
         }
-        
-        const response = await userModel.findByIdAndUpdate(
+
+        await userModel.findByIdAndUpdate(
             userId,
-            {password: hashPassword},
-            {new: true}
+            { password: hashPassword },
+            { new: true }
         );
 
-        console.log(user,response);
-        
-        sendMail(user.email,`Changed Password`,`Your password changed successfully`);
-        
+        sendMail(user.email, 'Password Changed', 'Your Udaan account password was changed successfully.');
+
         return res.status(200).json({
             success: true,
-            message: `Password updated successfully.`
-        })
+            message: 'Password updated successfully'
+        });
 
-    }catch(error){
-        return res.status(404).json({
+    } catch (error) {
+        console.error('changePassword error:', error);
+        return res.status(500).json({
             success: false,
-            message: `error while changing password: ${error.message}`
-        })
+            message: `Error changing password: ${error.message}`
+        });
     }
 }
 
@@ -425,7 +414,7 @@ exports.googleAuth = async (req, res) => {
         // 2. Check if the user already exists
         let userDetails = await userModel.findOne({ email }).populate('additionalDetails').exec();
 
-        // 3. Seamless Signup: If they don't exist, create their account
+        // 3. If they don't exist, create their account
         if (!userDetails) {
             console.log(`New Google User, creating account...`);
             
@@ -485,38 +474,33 @@ exports.googleAuth = async (req, res) => {
         }
 
         // 4. Log them in (Generate JWT)
-        console.log(`Generating JWT for Google User...`);
-        console.log(`SECRET_KEY exists: ${!!process.env.SECRET_KEY}`);
-        console.log(`userDetails exists: ${!!userDetails}`);
-        if (userDetails) {
-            console.log(`userDetails.email: ${userDetails.email}`);
-            console.log(`userDetails._id: ${userDetails._id}`);
-            console.log(`userDetails.role: ${userDetails.role}`);
-        }
-        
         try {
-            const payload = { 
-                email: userDetails.email, 
-                id: userDetails._id, 
-                role: userDetails.role 
+            const payload = {
+                email: userDetails.email,
+                id: userDetails._id,
+                role: userDetails.role
             };
-            
+
             const jwtToken = jwt.sign(
                 payload,
                 process.env.SECRET_KEY,
                 { expiresIn: '7d' }
             );
 
-            // Convert to plain object to safely manipulate
             const userObj = userDetails.toObject();
-            userObj.token = jwtToken;
             delete userObj.password;
 
-            console.log("Sending simplified response...");
-            return res.status(200).json({
+            const cookieOptions = {
+                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true
+            };
+
+            return res.cookie('token', jwtToken, cookieOptions).status(200).json({
                 success: true,
-                message: `Google Login Successfully`,
-                token: jwtToken,
+                message: 'Google login successful',
+                token: jwtToken, 
                 user: {
                     id: userObj._id,
                     email: userObj.email,
@@ -527,18 +511,17 @@ exports.googleAuth = async (req, res) => {
                 }
             });
         } catch (jwtError) {
-            console.error(`JWT Error: ${jwtError.message}`);
-            console.error(`JWT Error stack: ${jwtError.stack}`);
+            console.error(`Google auth JWT error: ${jwtError.message}`);
             return res.status(500).json({
                 success: false,
-                message: `JWT Error: ${jwtError.message}`
+                message: `Authentication error: ${jwtError.message}`
             });
         }
     } catch (error) {
-        console.log(`Error during Google Auth: ${error.message}`);
+        console.error(`Google auth error: ${error.message}`);
         return res.status(500).json({
             success: false,
-            message: `While google login: ${error.message}`
+            message: `Google login failed: ${error.message}`
         });
     }
 }
